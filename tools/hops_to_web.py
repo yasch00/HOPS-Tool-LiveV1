@@ -177,7 +177,9 @@ def convert(results: Path, out: Path, label: str, bau_label: str, plants_xlsx, a
                                       "ng_cost": rr["ng_cost"], "carbon_price": rr["carbon_price"], "ets_cost": rr.get("ets_cost"),
                                       "lcoa_base": rr.get("lcoa_base"), "irr": rr.get("irr"), "row": rr}
         return o
-    bau["base"] = bau_rows(results / f"BAU_AllPlants_{PATHWAY}_CCSNo_{bau_label}.csv")
+    bf = results / f"BAU_AllPlants_{PATHWAY}_CCSNo_{bau_label}.csv"
+    bau["base"] = bau_rows(bf) if bf.exists() else {}
+    if not bf.exists(): print(f"  note: no {bf.name} in {results} — BAU reference missing for these plants")
     for pol in POLICIES:
         fp = results / f"BAU_AllPlants_{PATHWAY}_CCSNo_{bau_label}_{pol}.csv"
         if fp.exists(): bau[pol] = bau_rows(fp)
@@ -217,11 +219,33 @@ def convert(results: Path, out: Path, label: str, bau_label: str, plants_xlsx, a
             f"{k}:{sum(1 for x in v if x['file'])}/{len(v)}" for k, v in man.items() if isinstance(v, list)) + f"  BAU:{'y' if man['BAU'] else '-'}")
 
     out.mkdir(parents=True, exist_ok=True)
-    (out / "plants.json").write_text(json.dumps(sorted(plants.values(), key=lambda p: p["idx"]), indent=0))
+    # merge with what is already published: plants in this results folder replace their old entries, everything else stays
+    mine = set(plants)
+    def load(name, default):
+        f = out / name
+        try: return json.loads(f.read_text()) if f.exists() else default
+        except Exception: return default
+    old_plants = [p for p in load("plants.json", []) if p["idx"] not in mine]
+    old_scn = [s for s in load("scenarios.json", []) if s["plant"] not in mine]
+    old_bau = load("bau.json", {})
+    for pol, d in old_bau.items():
+        bau.setdefault(pol, {}); bau[pol] = {**{k: v for k, v in d.items() if int(k) not in mine}, **bau[pol]}
+    old_sum = []
+    sf = out / "summary.json"; sgz = out / "summary.json.gz"
+    try:
+        if sf.exists(): old_sum = json.loads(sf.read_text())
+        elif sgz.exists(): old_sum = json.loads(gzip.open(sgz, "rt").read())
+    except Exception: old_sum = []
+    old_sum = [r for r in old_sum if r.get("plant") not in mine]
+    old_man = load("manifest.json", {})
+    man_plants = {k: v for k, v in (old_man.get("plants") or {}).items() if int(k) not in mine}; man_plants.update(manifest["plants"]); manifest["plants"] = man_plants
+    if old_man.get("label") and old_man["label"] != label: manifest["label"] = old_man["label"]; manifest["version"] = old_man.get("version", manifest["version"]); manifest["extra_labels"] = sorted(set((old_man.get("extra_labels") or []) + [label]))
+    plants_all = sorted(old_plants + list(plants.values()), key=lambda p: p["idx"]); scenarios = old_scn + scenarios; summary = old_sum + summary
+    (out / "plants.json").write_text(json.dumps(plants_all, indent=0))
     (out / "scenarios.json").write_text(json.dumps(scenarios, separators=(",", ":")))
     (out / "bau.json").write_text(json.dumps(bau, separators=(",", ":")))
     (out / "summary.json").write_text(json.dumps(summary, separators=(",", ":")))
-    manifest["n_scenarios"] = len(scenarios); manifest["n_runs"] = len(summary)
+    manifest["n_scenarios"] = len(scenarios); manifest["n_runs"] = len(summary); manifest["n_plants"] = len(plants_all)
     (out / "manifest.json").write_text(json.dumps(manifest, indent=1))
     kb = lambda f: f"{(out / f).stat().st_size / 1024:,.0f} KB"
     print(f"\n{len(scenarios)} scenarios, {len(summary)} runs")

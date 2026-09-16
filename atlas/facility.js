@@ -195,3 +195,21 @@ function clipToPlot(gj){
   }
   return { type: 'FeatureCollection', features: out };
 }
+
+/* ---- a requested site that is still being solved: the construction site instead of the plant (facility/construction.js) */
+let __conMod = null;
+function loadConstructionModule(){ return __conMod || (__conMod = import('./facility/construction.js')); }
+async function showConstruction(site, progress){
+  const M = await ensureFacilityLayers(), CM = await loadConstructionModule();
+  FAC_OFFSET = facOffsetFor(site.idx);
+  FAC.plant = site; FAC.row = null; FAC.scn = null; FAC.on = true; FAC.rec = null; FAC.sel = null; FAC.construction = true; facilityPause();
+  FAC.hour = ((170 * 24 + 12 - Math.round(site.lon / 15)) % 8760 + 8760) % 8760;      // local noon, 20 June
+  const P = CM.buildConstruction(progress || 0); FAC.P = P;
+  facilityLayer.setPlant(site, P);
+  if (map.getSource('fac-labels')) map.getSource('fac-labels').setData({ type: 'FeatureCollection', features: [] });
+  map.once('idle', () => { if (FAC.on && FAC.P === P) facilityLayer.setPlant(site, P); });
+  return P;
+}
+function setConstructionProgress(p){ if (FAC.on && FAC.construction && FAC.P && FAC.P.setProgress) { FAC.P.setProgress(p); map.triggerRepaint(); } }
+const __hideFacilityBase = hideFacility;
+hideFacility = function(){ FAC.construction = false; __hideFacilityBase(); };

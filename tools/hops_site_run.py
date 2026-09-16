@@ -99,13 +99,13 @@ OVERRIDES = {
     "eu_ets":                  ("attr", ["EU_ETS"]),                          # "Yes"/"No"
 }
 
-def apply_env(spec: dict) -> dict:
+def apply_env(spec: dict, bau: bool = False) -> dict:
     """Set the run-level environment. Returns the attribute overrides to apply after import."""
     os.environ.setdefault("HOPS_DATA_DIR", str(HOPS_DATA))
     os.environ.setdefault("GRB_LICENSE_FILE", str(Path.home() / "gurobi.lic"))
-    os.environ["HOPS_RUN_MODE"] = "CI"
+    os.environ["HOPS_RUN_MODE"] = "BAU" if bau else "CI"
     os.environ["HOPS_PATHWAY"] = spec.get("pathway_code", "SMR_INT_ASU")
-    os.environ["HOPS_OBJECTIVE"] = spec.get("objective", "IRR")
+    os.environ["HOPS_OBJECTIVE"] = "LCOA" if bau else spec.get("objective", "IRR")   # BAU must be solved on LCOA (README_SHERLOCK)
     os.environ["HOPS_CCS"] = "Yes" if spec.get("ccs") else "No"
     attrs = {}
     for k, v in (spec.get("overrides") or {}).items():
@@ -168,6 +168,31 @@ def run_site(spec: dict, out: Path, label: str, site_id: int, ci_targets):
     reg.write_text(json.dumps(sites, indent=1))
     return rows
 
+def run_bau(spec: dict, out: Path, bau_label: str, site_id: int):
+    """The BAU reference for a custom site: one unconstrained cost-minimising solve, CCS off (CCS is irrelevant to it)."""
+    import numpy as np, pandas as pd
+    from shapely.geometry import Point
+    spec = {**spec, "ccs": False}
+    attrs = apply_env(spec, bau=True); hc = import_site_core(attrs)
+    from weather_loading_2025_atlite import load_cf_timeseries
+    lat, lon, tpd = float(spec["lat"]), float(spec["lon"]), float(spec["tNH3_day"])
+    region = hc.get_region(Point(lon, lat), hc.countries, hc.us_states, sovereignt_override=spec.get("country"))
+    solar, wind = load_cf_timeseries(lat, lon, T=8760, region=region)
+    out.mkdir(parents=True, exist_ok=True); (out / "hourly").mkdir(exist_ok=True); P = os.environ["HOPS_PATHWAY"]
+    t0 = time.time(); dd, dfop = hc.run_optimization_for_point(lat, lon, solar, wind, tpd, NH3_intensity_target=None, ci_series_override=None)
+    if dd is None: sys.exit("BAU returned no optimal solution")
+    tags = dict(plant_idx=site_id, lat=lat, lon=lon, country=spec.get("country", ""), RUN_MODE="BAU", PATHWAY=P, OBJECTIVE="LCOA", CCS="No", LABEL=bau_label, site_name=spec.get("name", ""))
+    dd.update(tags)
+    fp = out / f"BAU_AllPlants_{P}_CCSNo_{bau_label}.csv"
+    old = pd.read_csv(fp) if fp.exists() else pd.DataFrame()
+    if len(old) and "plant_idx" in old: old = old[old["plant_idx"] != site_id]
+    pd.concat([old, pd.DataFrame([dd])], ignore_index=True).to_csv(fp, index=False)
+    if dfop is not None and not dfop.empty:
+        df = dfop.copy(); df.attrs = {}
+        for k, v in tags.items(): df[k] = v
+        df.to_parquet(out / "hourly" / f"hourly_BAU_{P}_plant{site_id}_CCSNo_{bau_label}.parquet", index=False)
+    print(f"BAU done {time.time()-t0:.0f}s  z_cost={dd.get('z_cost $/ton NH3'):.1f} $/t → {fp.name}")
+
 # ----------------------------------------------------------------- 4. validation against a published Sherlock point
 COMPARE = ["z_cost $/ton NH3", "LCOA_ammonia_only_LCOE", "LCOA_ammonia_only_EXPORT", "P_PV MW", "P_WT MW", "P_EL MW", "P_B MW",
            "P_SMR tons H2/day", "P_HB MW", "Carbon Intensity tCO2/tNH3 with CCS", "Project IRR %", "CAPEX overnight $"]
@@ -200,6 +225,9 @@ def main():
     ap.add_argument("--validate", type=int, metavar="PLANT", help="reproduce a v7 point for this plant and diff it")
     ap.add_argument("--ccs", default="No"); ap.add_argument("--results", default=str(Path.home() / "Documents/Stanford/PhD/HOPS/results/sherlock_v7"))
     ap.add_argument("--ref-label", default="IRR_v7")
+    ap.add_argument("--only-ccs", choices=["Yes", "No"], help="solve only this CCS state (cloud matrix jobs)")
+    ap.add_argument("--bau", action="store_true", help="solve the BAU reference for the spec's site instead of the CI sweep")
+    ap.add_argument("--bau-label", default=None, help="label for the BAU file (default: same as --label)")
     a = ap.parse_args()
     if a.validate is not None:
         validate(a.validate, a.ccs, float(a.ci or 0.5), Path(a.results), a.ref_label); return
@@ -217,7 +245,10 @@ def main():
         runs.append((spec, None))
     out = Path(a.out); reg = out / "sites.json"; sites = json.loads(reg.read_text()) if reg.exists() else {}
     site_id = a.site_id or (max([int(k) for k in sites] + [999]) + 1)
+    if a.bau:
+        run_bau(runs[0][0], out, a.bau_label or a.label, site_id); return
     for sp, cis_spec in runs:
+        if a.only_ccs and (('Yes' if sp['ccs'] else 'No') != a.only_ccs): continue
         cis = [float(x) for x in a.ci.split(",")] if a.ci else (cis_spec or [i * 0.25 for i in range(8)])
         print(f"\n===== site {site_id} · CCS={'Yes' if sp['ccs'] else 'No'} · {len(cis)} CI targets =====")
         run_site(sp, out, a.label, site_id, cis)

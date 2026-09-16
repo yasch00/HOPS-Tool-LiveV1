@@ -1,0 +1,42 @@
+name: remove requested site
+# A "Remove request: site <id>" issue opened by the repository OWNER removes that requested site from the atlas
+# (tools/remove_site.py: plants/scenarios/bau/summary/manifest + runs/ + siting/), commits, and closes the issue.
+# Anyone else opening such an issue gets a polite comment and nothing happens. Modelled plants (idx < 1000) are refused.
+on:
+  issues:
+    types: [opened]
+permissions:
+  contents: write
+  issues: write
+jobs:
+  remove:
+    if: ${{ startsWith(github.event.issue.title, 'Remove request') }}
+    runs-on: ubuntu-latest
+    concurrency:
+      group: publish-data
+      cancel-in-progress: false
+    steps:
+      - id: p
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const issue = context.payload.issue, m = (issue.title || '').match(/site\s+(\d+)/i), idx = m ? Number(m[1]) : NaN;
+            const owner = issue.author_association === 'OWNER';
+            if (!owner) { await github.rest.issues.createComment({ ...context.repo, issue_number: issue.number, body: 'Only the repository owner can remove a site. Left open for the owner.' }); core.setOutput('go', 'no'); return; }
+            if (!(idx >= 1000)) { await github.rest.issues.createComment({ ...context.repo, issue_number: issue.number, body: `Refused: ${isNaN(idx) ? 'no site id in the title' : 'site ' + idx + ' is a modelled plant, not a requested site'}.` }); await github.rest.issues.update({ ...context.repo, issue_number: issue.number, state: 'closed' }); core.setOutput('go', 'no'); return; }
+            core.setOutput('go', 'yes'); core.setOutput('idx', idx);
+      - if: steps.p.outputs.go == 'yes'
+        uses: actions/checkout@v4
+        with:
+          ref: main
+      - if: steps.p.outputs.go == 'yes'
+        run: |
+          python3 tools/remove_site.py ${{ steps.p.outputs.idx }}
+          git config user.name hops-cloud; git config user.email hops-cloud@users.noreply.github.com
+          git add -A data && (git commit -m "remove requested site ${{ steps.p.outputs.idx }} (#${{ github.event.issue.number }})" && git push || echo "nothing to remove")
+      - if: steps.p.outputs.go == 'yes'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            await github.rest.issues.createComment({ ...context.repo, issue_number: context.payload.issue.number, body: `Site ${{ steps.p.outputs.idx }} removed from the atlas (data, runs, siting layers). The globe updates a minute or two after this comment.` });
+            await github.rest.issues.update({ ...context.repo, issue_number: context.payload.issue.number, state: 'closed' });

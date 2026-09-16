@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0"><dict>
+  <key>Label</key><string>com.hops.runworker</string>
+  <key>ProgramArguments</key><array>
+    <string>/usr/bin/caffeinate</string><string>-i</string>
+    <string>/Library/Frameworks/Python.framework/Versions/3.14/bin/python3</string>
+    <string>/Users/yaschue/Documents/Stanford/PhD/hops-site-tools/run_worker.py</string><string>--loop</string><string>600</string>
+  </array>
+  <key>EnvironmentVariables</key><dict><key>GITHUB_TOKEN</key><string>PASTE_YOUR_TOKEN_HERE</string><key>PATH</key><string>/usr/local/bin:/usr/bin:/bin</string></dict>
+  <key>RunAtLoad</key><true/><key>KeepAlive</key><true/>
+  <key>StandardOutPath</key><string>/Users/yaschue/Documents/Stanford/PhD/HOPS/results/site_runs/worker.out</string>
+  <key>StandardErrorPath</key><string>/Users/yaschue/Documents/Stanford/PhD/HOPS/results/site_runs/worker.err</string>
+</dict></plist>

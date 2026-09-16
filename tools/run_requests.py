@@ -36,8 +36,10 @@ def main():
     ap.add_argument("--publish", action="store_true"); ap.add_argument("--label", default="site_v1")
     a = ap.parse_args()
     if a.list or a.run is None:
-        issues = api("/issues?labels=run-request&state=open&per_page=50")
-        if not issues: print("no open run requests (label run-request) on", REPO); return
+        # GitHub only applies the run-request label if it exists in the repo, so match on the title too
+        issues = [it for it in api("/issues?state=open&per_page=100") if "pull_request" not in it and
+                  (any(l["name"] == "run-request" for l in it.get("labels", [])) or str(it["title"]).lower().startswith("run request"))]
+        if not issues: print("no open run requests on", REPO); return
         for it in issues:
             sp = None
             try: sp = spec_from_issue(it)

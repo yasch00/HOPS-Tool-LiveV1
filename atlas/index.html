@@ -248,6 +248,8 @@ svg.chart{width:100%;display:block;overflow:visible}
         <div class="fp-h">Ammonia plants</div>
         <div class="legend-row"><span class="dot amm"></span> <span id="legendModeled">Modelled plants</span></div>
         <div class="legend-row"><span class="dot" style="background:#D55E00"></span> Global fleet (383 plants)</div>
+        <div class="legend-row"><span class="dot" style="background:#CC79A7"></span> <span id="legendCustom">Requested sites (solved)</span></div>
+        <div class="legend-row"><span class="dot" style="background:#F0E442;border:1px solid #15181B"></span> <span id="legendPending">Under construction</span></div>
         <button class="btn sm" style="margin-top:10px;width:100%" onclick="enterBuild()">Build a plant →</button>
       </div>
       <div class="fp-section">
@@ -315,7 +317,9 @@ async function loadData(){
   DATA={...st,scenarios:scn,bau,plants,manifest:man,hourlyByCI:{}};
   SCN=scn; AMM=st.ammonia; BAU=bau; GEO=st.geo; PLANTS=plants; MANIFEST=man; PLANT={}; plants.forEach(p=>PLANT[p.idx]=p);
   postProcessRows();
-  const lg=document.getElementById('legendModeled'); if(lg) lg.textContent=`Modelled (${plants.length} plants · US + EU)`;
+  const nC=plants.filter(p=>p.custom).length, lg=document.getElementById('legendModeled'); if(lg) lg.textContent=`Modelled (${plants.length-nC} plants · US + EU)`;
+  const lc=document.getElementById('legendCustom'); if(lc) lc.textContent=`Requested sites, solved (${nC})`;
+  if(mapLoaded && map.getSource('hops')) map.getSource('hops').setData(plantsGeo(PLANTS, p => ({ idx: p.idx, name: p.name, admin: p.admin || '', country: p.country, ktpa: p.ktpa || 0, region: p.region, custom: !!p.custom })));
   const ds=document.getElementById('dataStamp'); if(ds) ds.textContent=`data ${man.version}`;
 }
 function plantLabel(idx){ const p=PLANT[idx]; return p?`${p.name} · ${p.admin?p.admin+', ':''}${p.country}`:'—'; }
@@ -383,10 +387,10 @@ function buildLayerList(){
   });
 }
 </script>
-<script src="map.js?v=20260916145737"></script>
-<script src="finance.js?v=20260916145737"></script>
-<script src="build.js?v=20260916145737"></script>
-<script src="facility.js?v=20260916145737"></script>
+<script src="map.js?v=20260916154631"></script>
+<script src="finance.js?v=20260916154631"></script>
+<script src="build.js?v=20260916154631"></script>
+<script src="facility.js?v=20260916154631"></script>
 <script>
 /* ============ NAVIGATION ============ */
 let curScn=null, curPlantIdx=null, curCItarget=null;
@@ -1085,6 +1089,7 @@ function syncURL(){
   const p=new URLSearchParams(), onMap=document.getElementById('globeView').classList.contains('active');
   if(onMap && BUILD.on){ p.set('view','build'); if(BUILD.lat!=null){ p.set('lat',BUILD.lat); p.set('lon',BUILD.lon); p.set('tpd',BUILD.tpd); } }
   else if(onMap && siteIdx!=null){ p.set('plant',siteIdx); p.set('view','site'); }
+  else if(onMap && typeof PENDING!=='undefined' && PENDING.open){ p.set('issue',PENDING.open.issue); p.set('view','pending'); }
   else if(!onMap && curScn){ p.set('plant',curPlantIdx); p.set('ccs',curScn.ccs?1:0); if(curScn.policy) p.set('policy',curScn.policy); if(curCItarget!=null) p.set('ci',curCItarget); p.set('tab',activeTab); }
   else { history.replaceState(null,'',location.pathname+location.search); return; }
   history.replaceState(null,'','#'+p.toString());
@@ -1094,6 +1099,8 @@ function applyURLState(){
   const fid=q.get('facility'), dash=q.get('dash');
   if(dash && fid && PLANT[parseInt(fid,10)]){ openDashboard(parseInt(fid,10)); return; }
   if(h.get('view')==='site' && PLANT[parseInt(h.get('plant'),10)]){ openSite(parseInt(h.get('plant'),10), true); return; }
+  if(h.get('view')==='pending' && h.get('issue')){ openPending(parseInt(h.get('issue'),10)); return; }
+  if(h.get('view')==='site' && +h.get('plant')>=1000){ openPending(+h.get('plant')-1000); return; }   // a requested site that is not published yet: its construction view
   if(h.get('view')==='build'){ const go=()=>{ enterBuild(); if(h.get('lat')){ if(h.get('tpd')) BUILD.tpd=+h.get('tpd'); setBuildSite(+h.get('lat'),+h.get('lon'),''); } }; if(mapLoaded) go(); else map.once('load',()=>setTimeout(go,50)); return; }
   if(h.get('plant')!=null && PLANT[parseInt(h.get('plant'),10)]){
     openDashboard(parseInt(h.get('plant'),10));

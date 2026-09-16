@@ -111,16 +111,51 @@ $V tools/hops_site_run.py --spec request.json --out ~/Documents/Stanford/PhD/HOP
 python3 tools/hops_to_web.py --results ~/Documents/Stanford/PhD/HOPS/results/site_runs --label site_v1 --bau-label BAU_v7 --names tools/plant_names.json -o data
 ```
 
-**The request loop.** A visitor's "Request the run" opens a prefilled GitHub issue labelled `run-request` (site, capacity,
-both pathways, full CI sweep, every optimizer input resolved). Then, on this Mac:
+**The request loop.** A visitor's "Request the run" opens a prefilled GitHub issue titled `Run request: …` (site, capacity,
+both pathways, full CI sweep, every optimizer input resolved). From that moment the site is on the globe as a yellow
+"under construction" marker (read live from the public issues API); its site view shows a construction scene — cranes,
+trucks, an excavator, foundations poured as CI points get solved — with the solver's progress. Three ways to solve it:
+
+**Level 2 — in the cloud (recommended, hands-off).** `.github/workflows/solve.yml` runs on every new issue: it solves each CI
+point of both pathways as its own parallel job on Gurobi WLS (17 jobs incl. BAU, `SOLVE_PARALLEL` repository variable caps
+the concurrency, default 6), merges them, runs the policy re-pricings (`ets_policy_cases.py` / `us_credit_cases.py` for the
+site's region), converts into `data/` (merged with the fleet), commits, comments the link and closes the issue, and then
+computes the siting layers (`export_siting.py --lat --lon`, OpenStreetMap via Overpass) in a follow-up job. The visitor's
+construction view reloads into the finished site automatically. One-time setup:
+
+1. Private repo `yasch00/HOPS-model` with the contents of `~/Documents/Stanford/PhD/HOPS/cloud/model/` (hops_core.py, the
+   loaders, the policy scripts, hops_site_run.py, export_siting.py, hops_land_siting.py — built by `tools/pack_model.sh`),
+   plus a release tagged `data-v1` with the assets `hops_data.tar.part-aa`, `hops_data.tar.part-ab` from
+   `~/Documents/Stanford/PhD/HOPS/cloud/` (2 GB of weather/price inputs; cached on the runner after the first job).
+2. Repository secrets on `HOPS-Tool-LiveV1`: `MODEL_REPO_TOKEN` (fine-grained token, HOPS-model only, Contents read),
+   `GRB_WLSACCESSID`, `GRB_WLSSECRET`, `GRB_LICENSEID` (from your `gurobi.lic` WLS file). Never paste these anywhere else.
+3. Optional repository variable `SOLVE_PARALLEL` (how many WLS sessions may run at once; the licence's session limit).
+4. Push; then a `Run request` issue — or *Actions → solve run request → Run workflow* with an existing issue number.
+
+**Level 1 — on this Mac.** `tools/run_worker.py` polls the issues, solves the oldest pending request (CI sweep, BAU, policy
+cases), converts, computes the siting layers, commits `data/`, pushes, and closes the issue with the site link. Run it once
+(`--once`) or as a background job: copy `tools/com.hops.runworker.plist` to `~/Library/LaunchAgents/`, paste a fine-grained
+GitHub token (this repo only, Contents + Issues read/write) into it, then `launchctl load ~/Library/LaunchAgents/com.hops.runworker.plist`.
+Log: `~/Documents/Stanford/PhD/HOPS/results/site_runs/worker.log`. Don't run both levels on the same issue.
+
+**Level 0 — by hand.**
 
 ```bash
 python3 tools/run_requests.py --list            # what is waiting
 python3 tools/run_requests.py --run 12 --publish  # solve issue #12 (both pathways, 8 CI points each, ~1–2 h) and convert into data/
 ```
 
-then commit + push in GitHub Desktop; the new site appears in the atlas as `#plant=<id>&view=site` (ids ≥ 1000). With a
-`GITHUB_TOKEN` in the environment the script also comments the link on the issue and closes it; otherwise close it by hand.
+then commit + push in GitHub Desktop; the new site appears in the atlas as `#plant=<id>&view=site` (ids ≥ 1000; the cloud
+uses 1000 + issue number). Requested sites are drawn in a distinct colour on the globe (Okabe-Ito purple; modelled fleet
+green; under construction yellow) and their site panel says "requested site" with the changed assumptions.
+
+**Removing a requested site.** `python3 tools/remove_site.py 1002` then commit + push — or click "Remove this site" in its
+panel, which opens a `Remove request: site 1002` issue; `.github/workflows/remove.yml` executes it when the issue author is
+the repository owner (anyone else gets a comment and nothing happens). Fleet plants (idx < 1000) are refused.
+
+**Why no partial results before the sweep is done?** Every CI point is its own job, so the whole sweep takes about as long as
+the slowest single solve (typically 15–40 min); the BAU reference and policy cases need all points anyway, and the finance
+tab needs BAU. The construction view shows which points are already solved instead.
 
 Technical overrides accepted in the spec (`technical: {...}`, keys as on the Build page): `el_capex_usd_per_kw`,
 `pv_capex_mult`, `wt_capex_mult`, `battery_capex_usd_per_mwh`, `smr_capex_mult`, `ccs_capex_mult`, `ccs_capture_process`,

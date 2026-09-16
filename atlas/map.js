@@ -38,6 +38,9 @@ function initGlobe(){
     map.on('mousemove', 'amm-pts', e => showTip(e, false));
     map.on('mouseleave', 'hops-pts', hideTip); map.on('mouseleave', 'amm-pts', hideTip);
     map.on('click', 'hops-pts', e => { const f = e.features[0]; if (f) openSite(+f.properties.idx); });
+    map.on('mousemove', 'pending-pts', e => showTip(e, 'pending')); map.on('mouseleave', 'pending-pts', hideTip);
+    map.on('click', 'pending-pts', e => { const f = e.features[0]; if (f) openPending(+f.properties.issue); });
+    loadPending();
     if (__sitePending != null) { const i = __sitePending; __sitePending = null; openSite(i, true); }
   });
   map.on('error', e => { if (e && e.error && !/tile/i.test(String(e.error.message))) console.warn('map', e.error.message); });
@@ -45,15 +48,20 @@ function initGlobe(){
 function plantsGeo(list, keyfn){ return { type: 'FeatureCollection', features: list.map(p => ({ type: 'Feature', geometry: { type: 'Point', coordinates: [p.lon, p.lat] }, properties: keyfn(p) })) }; }
 function addPlantLayers(){
   map.addSource('amm', { type: 'geojson', data: plantsGeo(AMM, p => ({ idx: p.idx, country: p.country, ktpa: p.ktpa || 0 })) });
-  map.addSource('hops', { type: 'geojson', data: plantsGeo(PLANTS, p => ({ idx: p.idx, name: p.name, admin: p.admin || '', country: p.country, ktpa: p.ktpa || 0, region: p.region })) });
+  map.addSource('hops', { type: 'geojson', data: plantsGeo(PLANTS, p => ({ idx: p.idx, name: p.name, admin: p.admin || '', country: p.country, ktpa: p.ktpa || 0, region: p.region, custom: !!p.custom })) });
+  map.addSource('pending', { type: 'geojson', data: { type: 'FeatureCollection', features: [] } });
   map.addLayer({ id: 'amm-pts', type: 'circle', source: 'amm', paint: {
     'circle-radius': ['interpolate', ['linear'], ['zoom'], 1, 2.2, 6, 5], 'circle-color': '#D55E00', 'circle-opacity': .8,
     'circle-stroke-color': '#FBFAF8', 'circle-stroke-width': .6 } });
   map.addLayer({ id: 'hops-halo', type: 'circle', source: 'hops', paint: {
-    'circle-radius': ['interpolate', ['linear'], ['zoom'], 1, 7, 6, 14], 'circle-color': '#009E73', 'circle-opacity': .25, 'circle-blur': .6 } });
+    'circle-radius': ['interpolate', ['linear'], ['zoom'], 1, 7, 6, 14], 'circle-color': ['case', ['get', 'custom'], CUSTOM_COLOR, '#009E73'], 'circle-opacity': .25, 'circle-blur': .6 } });
+  map.addLayer({ id: 'pending-halo', type: 'circle', source: 'pending', paint: { 'circle-radius': ['interpolate', ['linear'], ['zoom'], 1, 8, 6, 16], 'circle-color': PENDING_COLOR, 'circle-opacity': .3, 'circle-blur': .7 } });
   map.addLayer({ id: 'hops-pts', type: 'circle', source: 'hops', paint: {
-    'circle-radius': ['interpolate', ['linear'], ['zoom'], 1, 3.6, 6, 7], 'circle-color': '#009E73',
+    'circle-radius': ['interpolate', ['linear'], ['zoom'], 1, 3.6, 6, 7], 'circle-color': ['case', ['get', 'custom'], CUSTOM_COLOR, '#009E73'],
     'circle-stroke-color': '#FBFAF8', 'circle-stroke-width': 1.2 } });
+  map.addLayer({ id: 'pending-pts', type: 'circle', source: 'pending', paint: { 'circle-radius': ['interpolate', ['linear'], ['zoom'], 1, 4, 6, 7.5], 'circle-color': PENDING_COLOR, 'circle-stroke-color': '#15181B', 'circle-stroke-width': 1.4 } });
+  map.addLayer({ id: 'pending-lbl', type: 'symbol', source: 'pending', minzoom: 3.5, layout: { 'text-field': ['concat', ['get', 'name'], ' · solving'], 'text-font': ['Noto Sans Regular'], 'text-size': 11, 'text-offset': [0, 1.1], 'text-anchor': 'top', 'text-optional': true },
+    paint: { 'text-color': PENDING_COLOR, 'text-halo-color': 'rgba(21,24,27,.85)', 'text-halo-width': 1.2 } });
   map.addLayer({ id: 'hops-lbl', type: 'symbol', source: 'hops', minzoom: 4.5, layout: {
     'text-field': ['get', 'name'], 'text-font': ['Noto Sans Regular'], 'text-size': 11.5, 'text-offset': [0, 1.1], 'text-anchor': 'top', 'text-optional': true },
     paint: { 'text-color': '#FBFAF8', 'text-halo-color': 'rgba(21,24,27,.85)', 'text-halo-width': 1.2 } });
@@ -62,8 +70,10 @@ function showTip(e, modelled){
   const p = e.features[0].properties, tip = document.getElementById('tip');
   map.getCanvas().style.cursor = modelled ? 'pointer' : 'default';
   tip.style.opacity = 1; tip.style.left = (e.originalEvent.clientX + 14) + 'px'; tip.style.top = (e.originalEvent.clientY + 14) + 'px';
-  tip.innerHTML = modelled
-    ? `<div class="t-n">${p.name}${p.admin ? ' · ' + p.admin : ''}, ${p.country}</div><div class="t-m">${fmt(p.ktpa)} ktpa · modelled</div><div class="t-cta">click to open the site →</div>`
+  tip.innerHTML = modelled === 'pending'
+    ? `<div class="t-n">${p.name}</div><div class="t-m">${fmt(p.tpd)} t/d · requested #${p.issue} · HOPS is solving it</div><div class="t-cta">click to watch the site →</div>`
+    : modelled
+    ? `<div class="t-n">${p.name}${p.admin ? ' · ' + p.admin : ''}, ${p.country}</div><div class="t-m">${fmt(p.ktpa)} ktpa · ${p.custom ? 'requested site · solved' : 'modelled'}</div><div class="t-cta">click to open the site →</div>`
     : `<div class="t-n">Ammonia plant</div><div class="t-m">${p.country} · ${fmt(p.ktpa)} ktpa</div>`;
 }
 function hideTip(){ document.getElementById('tip').style.opacity = 0; map.getCanvas().style.cursor = ''; }
@@ -195,7 +205,7 @@ function renderSitePanel(p, l, state){
   const s = siteScn(p.idx, siteRun.path, siteRun.policy), rows = s ? cappedRows(s) : [], r = rows.find(x => Math.abs(x.target - siteRun.ci) < 1e-6) || rows[0];
   const bau = s ? bauFor(s) : null, base = s && s.policy ? siteScn(p.idx, siteRun.path, null) : null;
   const baseRow = base ? cappedRows(base).find(x => Math.abs(x.target - siteRun.ci) < 1e-6) : null;
-  let h = `<div class="sp-head" style="display:flex;justify-content:space-between;gap:10px;align-items:flex-start"><div><div class="fp-h" style="margin-bottom:4px">Site</div><h2>${p.name}</h2><div class="sub">${p.admin ? p.admin + ', ' : ''}${p.country} · ${fmt(p.ktpa)} ktpa NH₃ · ${p.lat.toFixed(3)}°, ${p.lon.toFixed(3)}°</div></div><span style="display:flex;gap:4px;flex-wrap:wrap;justify-content:flex-end;max-width:52%"><button class="btn ghost sm" title="25 km catchment: developable land, turbines, PV" onclick="map.flyTo({center:[PLANT[siteIdx].lon,PLANT[siteIdx].lat],zoom:siteZoomFor(PLANT[siteIdx].lat)-3.9,pitch:55,bearing:-18,duration:1800})">Catchment</button><button class="btn ghost sm" title="Back to the plant" onclick="const p=PLANT[siteIdx],m=111320*Math.cos(p.lat*Math.PI/180),fo=facOffsetFor(p.idx);map.flyTo({center:[p.lon+fo.x*0.6/m,p.lat-fo.z*0.6/110574],zoom:siteZoomFor(p.lat),pitch:60,bearing:-25,duration:1800})">Plant</button><button class="btn ghost sm" onclick="leaveSite()">← Globe</button></span></div>`;
+  let h = `<div class="sp-head" style="display:flex;justify-content:space-between;gap:10px;align-items:flex-start"><div><div class="fp-h" style="margin-bottom:4px">Site</div><h2>${p.name}</h2><div class="sub">${p.custom ? '<span class="badge" style="background:' + CUSTOM_COLOR + ';color:#15181B">requested site</span> · ' : ''}${p.admin ? p.admin + ', ' : ''}${p.country} · ${fmt(p.ktpa)} ktpa NH₃ · ${p.lat.toFixed(3)}°, ${p.lon.toFixed(3)}°</div></div><span style="display:flex;gap:4px;flex-wrap:wrap;justify-content:flex-end;max-width:52%"><button class="btn ghost sm" title="25 km catchment: developable land, turbines, PV" onclick="map.flyTo({center:[PLANT[siteIdx].lon,PLANT[siteIdx].lat],zoom:siteZoomFor(PLANT[siteIdx].lat)-3.9,pitch:55,bearing:-18,duration:1800})">Catchment</button><button class="btn ghost sm" title="Back to the plant" onclick="const p=PLANT[siteIdx],m=111320*Math.cos(p.lat*Math.PI/180),fo=facOffsetFor(p.idx);map.flyTo({center:[p.lon+fo.x*0.6/m,p.lat-fo.z*0.6/110574],zoom:siteZoomFor(p.lat),pitch:60,bearing:-25,duration:1800})">Plant</button><button class="btn ghost sm" onclick="leaveSite()">← Globe</button></span></div>`;
   if (state === 'loading') { h += `<p class="sub" style="margin-top:12px">Loading …</p>`; host.innerHTML = h; return; }
   // the run: pathway × policy × CI
   h += `<div class="fin-group" style="margin-top:12px"><div class="fp-h">Run</div>
@@ -226,11 +236,13 @@ function renderSitePanel(p, l, state){
         .map(([id, n, c, on]) => `<label class="legend-row" style="cursor:pointer"><input type="checkbox" ${(map.getLayer(id) && map.getLayoutProperty(id, 'visibility') !== 'none') ? 'checked' : ''} onchange="toggleSiteLayer('${id}',this.checked);if('${id}'==='turbine-dots')turbineLayer.visible=this.checked;map.triggerRepaint()"><span class="dot" style="background:${c}"></span>${n}</label>`).join('')}
       <div class="sub" style="margin-top:6px">Exclusions: <span style="color:#D55E00">■</span> structures · <span style="color:#8A8F94">■</span> roads · <span style="color:#4C5B6E">■</span> rail · <span style="color:#0072B2">■</span> water · <span style="color:#009E73">■</span> forest/land use · <span style="color:#CC79A7">■</span> Natura 2000 — each buffered by the wind setback.</div></div>`;
   h += `<div class="sp-actions"><button class="btn" onclick="openDashboard(${p.idx})">Technical results →</button><button class="btn ghost" onclick="FAC.on?hideFacility():selectRun(siteRun.path,siteRun.policy,siteRun.ci)">${(typeof FAC !== 'undefined' && FAC.on) ? 'Hide plant' : 'Show plant'}</button>${state !== 'none' ? `<button class="btn ghost" onclick="siteRenewables(${!renewOn})">${renewOn ? 'Hide renewables' : 'Show renewables'}</button>` : ''}</div>`;
+  if (p.custom) h += `<div class="sub" style="margin-top:8px">Solved from a run request${p.spec && p.spec.requested ? ' of ' + p.spec.requested : ''}${p.spec && p.spec.technical_changed && Object.keys(p.spec.technical_changed).length ? ' · changed assumptions: ' + Object.entries(p.spec.technical_changed).map(([k, v]) => k + '=' + v).join(', ') : ' · model default assumptions'}. <a href="${removeIssueURL(p)}" target="_blank" rel="noopener">Remove this site</a> (owner only: the request is executed automatically).</div>`;
   h += `<div class="sub" style="margin-top:10px;font-size:11px">Imagery Esri World Imagery · terrain Mapzen/AWS · buildings OpenStreetMap via OpenFreeMap · siting: HOPS land model (OSM + Natura 2000 exclusions)</div>`;
   host.innerHTML = h;
 }
 function leaveSite(){
   if (typeof hideFacility === 'function') hideFacility();
+  if (PENDING.open) closePending(false);
   siteIdx = null; siteInfo = null; document.getElementById('sitePanel').hidden = true; document.body.classList.remove('site-mode');
   if (turbineLayer) turbineLayer.setTurbines([], null);
   ['dev', 'excl', 'layout', 'catchment', 'site-plant'].forEach(s => map.getSource(s) && map.getSource(s).setData({ type: 'FeatureCollection', features: [] }));
@@ -289,4 +301,110 @@ function makeTurbineLayer(){
     }
   };
   return L;
+}
+
+/* ---------------------------------------------------------------- requested sites: open "Run request" issues = plants under construction
+   Read from the public GitHub API (no token: 60 requests/h per visitor, which the 60 s polling stays well under). A request appears on the
+   globe the moment its issue exists, its site view shows the construction scene, and the progress comes from the Actions run that the
+   cloud solver links in its first comment (per-job status = which CI points are already solved). When the run is published the
+   site is reloaded and it opens as a normal (requested, solved) plant. */
+const CUSTOM_COLOR = '#CC79A7', PENDING_COLOR = '#F0E442', GH_API = 'https://api.github.com/repos/yasch00/HOPS-Tool-LiveV1';
+const PENDING = { list: [], open: null, timer: null, run: null };
+async function gh(path){ const r = await fetch(GH_API + path, { headers: { Accept: 'application/vnd.github+json' } }); if (!r.ok) throw new Error('GitHub ' + r.status); return r.json(); }
+function parseRequest(it){
+  const m = (it.body || '').match(/```json\s*(\{[\s\S]*?\})\s*```/); if (!m) return null;
+  try { const spec = JSON.parse(m[1]); if (!spec.site || !isFinite(spec.site.lat)) return null;
+    return { issue: it.number, idx: 1000 + it.number, name: spec.site.name || `Site ${1000 + it.number}`, lat: +spec.site.lat, lon: +spec.site.lon, country: spec.site.country || '', tpd: +spec.plant.tNH3_day || 0, ktpa: (+spec.plant.tNH3_day || 0) * 365 / 1000, spec, opened: it.created_at, url: it.html_url, custom: true, pending: true };
+  } catch (e) { return null; }
+}
+async function loadPending(){
+  try {
+    const items = await gh('/issues?state=open&per_page=50');
+    PENDING.list = items.filter(it => !it.pull_request && /^run request/i.test(it.title || '')).map(parseRequest).filter(Boolean).filter(r => !PLANT[r.idx]);   // already published → shown as a plant
+  } catch (e) { PENDING.list = []; }
+  if (map.getSource('pending')) map.getSource('pending').setData(plantsGeo(PENDING.list, r => ({ issue: r.issue, name: r.name, tpd: r.tpd })));
+  const el = document.getElementById('legendPending'); if (el) el.textContent = `Under construction (${PENDING.list.length} request${PENDING.list.length === 1 ? '' : 's'})`;
+  return PENDING.list;
+}
+async function openPending(issue){
+  if (!mapLoaded) { map.once('load', () => setTimeout(() => openPending(issue), 50)); return; }
+  let r = PENDING.list.find(x => x.issue === issue); if (!r) { await loadPending(); r = PENDING.list.find(x => x.issue === issue); } if (!r) return;
+  if (siteIdx != null || PENDING.open) leaveSiteQuiet();
+  if (typeof BUILD !== 'undefined' && BUILD.on) leaveBuild();
+  PENDING.open = r; PENDING.run = null; document.body.classList.add('site-mode'); show('globeView'); map.resize();
+  ensureSiteBase();
+  map.getSource('catchment').setData({ type: 'FeatureCollection', features: [circlePolygon(r.lon, r.lat, 25)] });
+  map.getSource('site-plant').setData({ type: 'FeatureCollection', features: [{ type: 'Feature', geometry: { type: 'Point', coordinates: [r.lon, r.lat] }, properties: {} }] });
+  ['dev', 'excl', 'layout'].forEach(s => map.getSource(s).setData({ type: 'FeatureCollection', features: [] }));
+  const mLon = 111320 * Math.cos(r.lat * Math.PI / 180), fo = (typeof facOffsetFor === 'function') ? facOffsetFor(r.idx) : { x: 650, z: 120 };
+  map.flyTo({ center: [r.lon + (fo.x * 0.6) / mLon, r.lat - (fo.z * 0.6) / 110574], zoom: siteZoomFor(r.lat), pitch: 60, bearing: -25, duration: 3200, essential: true });
+  renderPendingPanel(r, null);
+  if (typeof showConstruction === 'function') showConstruction(r, 0.02);
+  await refreshPendingProgress();
+  clearInterval(PENDING.timer); PENDING.timer = setInterval(refreshPendingProgress, 60000);
+  if (typeof syncURL === 'function') syncURL();
+}
+function leaveSiteQuiet(){ const f = map.flyTo; map.flyTo = () => {}; try { if (PENDING.open) closePending(false); else leaveSite(); } finally { map.flyTo = f; } }
+function closePending(fly = true){
+  clearInterval(PENDING.timer); PENDING.timer = null; PENDING.open = null; PENDING.run = null;
+  if (typeof hideFacility === 'function') hideFacility();
+  document.getElementById('sitePanel').hidden = true; document.body.classList.remove('site-mode');
+  ['catchment', 'site-plant'].forEach(s => map.getSource(s) && map.getSource(s).setData({ type: 'FeatureCollection', features: [] }));
+  if (fly) { map.flyTo({ zoom: GLOBE_ZOOM, pitch: 0, bearing: 0, duration: 2200 }); if (typeof syncURL === 'function') syncURL(); }
+}
+/* progress of the cloud run: the solver's first comment links actions/runs/<id>; its jobs tell which CI points are done */
+async function refreshPendingProgress(){
+  const r = PENDING.open; if (!r) return;
+  let run = null;
+  try {
+    const comments = await gh(`/issues/${r.issue}/comments?per_page=50`);
+    const link = comments.map(c => (c.body || '').match(/actions\/runs\/(\d+)/)).filter(Boolean).pop();
+    const published = comments.some(c => /Solved and published/.test(c.body || ''));
+    if (published) { run = { state: 'published' }; }
+    else if (link) {
+      const [meta, jobs] = await Promise.all([gh(`/actions/runs/${link[1]}`), gh(`/actions/runs/${link[1]}/jobs?per_page=100`)]);
+      const J = jobs.jobs.map(j => ({ name: j.name, status: j.status, conclusion: j.conclusion }));
+      const solves = J.filter(j => /^solve/.test(j.name)), done = solves.filter(j => j.status === 'completed' && j.conclusion === 'success').length;
+      const failed = J.filter(j => j.conclusion === 'failure').length;
+      const stage = J.find(j => /^siting/.test(j.name) && j.status !== 'queued') ? 'siting' : J.find(j => /^publish/.test(j.name) && j.status !== 'queued') ? 'publish' : solves.some(j => j.status !== 'queued') ? 'solve' : 'queued';
+      run = { state: meta.status === 'completed' ? (meta.conclusion === 'success' ? 'done' : 'failed') : 'running', id: link[1], url: meta.html_url, started: meta.run_started_at, done, total: solves.length || 17, failed, jobs: solves, stage,
+              progress: Math.min(0.97, 0.03 + 0.85 * (solves.length ? done / solves.length : 0) + (stage === 'publish' ? 0.05 : stage === 'siting' ? 0.09 : 0)) };
+    } else run = { state: 'waiting' };
+  } catch (e) { run = { state: 'unknown', error: String(e.message || e) }; }
+  if (PENDING.open !== r) return;
+  PENDING.run = run; renderPendingPanel(r, run);
+  if (typeof setConstructionProgress === 'function') setConstructionProgress(run.progress != null ? run.progress : 0.02);
+  if (run.state === 'published' || run.state === 'done') {                       // the data is on the site: reload and open it as a solved plant
+    clearInterval(PENDING.timer); PENDING.timer = null;
+    setTimeout(async () => { try { await loadData(); } catch (e) {} if (PLANT[r.idx]) { closePending(false); await loadPending(); openSite(r.idx, true); } }, 4000);
+  }
+}
+function ciOf(j){ const m = j.name.match(/\(([^,]+),\s*([^)]+)\)/); return m ? { ccs: m[1].trim(), ci: m[2].trim() } : null; }
+function renderPendingPanel(r, run){
+  const host = document.getElementById('sitePanel'); if (!host) return; host.hidden = false;
+  const T = r.spec.technical_changed || {}, nT = Object.keys(T).length;
+  let h = `<div class="sp-head" style="display:flex;justify-content:space-between;gap:10px;align-items:flex-start"><div><div class="fp-h" style="margin-bottom:4px">Site · under construction</div><h2>${r.name}</h2>
+    <div class="sub"><span class="badge" style="background:${PENDING_COLOR};color:#15181B">solving</span> · ${r.country || '—'} · ${fmt(r.ktpa)} ktpa NH₃ (${fmt(r.tpd)} t/d) · ${r.lat.toFixed(3)}°, ${r.lon.toFixed(3)}°</div></div>
+    <span style="display:flex;gap:4px"><button class="btn ghost sm" onclick="closePending()">← Globe</button></span></div>`;
+  h += `<div class="fin-group" style="margin-top:12px"><div class="fp-h">Request</div><div class="sub">Opened ${r.opened.slice(0, 10)} as <a href="${r.url}" target="_blank" rel="noopener">#${r.issue}</a> · will publish as site ${r.idx} · both pathways, CI 0 – 1.75, BAU reference, policy cases, then the siting layers.<br>${nT ? 'Changed assumptions: ' + Object.entries(T).map(([k, v]) => k + '=' + v).join(', ') : 'Model default assumptions'}${r.spec.proxy ? ' · proxy estimate from ' + r.spec.proxy.name + ': ' + fmt(r.spec.proxy.lcoa) + ' $/t at CI ' + (+r.spec.proxy.ci).toFixed(2) : ''}</div></div>`;
+  if (!run) h += `<div class="fin-group"><div class="fp-h">Progress</div><p class="sub">Checking the solver …</p></div>`;
+  else if (run.state === 'waiting') h += `<div class="fin-group"><div class="fp-h">Progress</div><p class="sub">Queued — the cloud solver has not picked the request up yet (it starts within a minute of the request if the workflow is enabled; otherwise the local worker or a manual run publishes it).</p></div>`;
+  else if (run.state === 'published' || run.state === 'done') h += `<div class="fin-group"><div class="fp-h">Progress</div><p class="sub">Published — loading the results …</p></div>`;
+  else if (run.state === 'unknown') h += `<div class="fin-group"><div class="fp-h">Progress</div><p class="sub">Could not read the progress (${run.error}). The GitHub API allows 60 anonymous requests per hour; try again in a while.</p></div>`;
+  else {
+    const pct = Math.round((run.progress || 0) * 100), el = run.started ? Math.round((Date.now() - new Date(run.started)) / 60000) : null;
+    h += `<div class="fin-group"><div class="fp-h">Progress · ${pct}%</div>
+      <div style="height:8px;border-radius:4px;background:rgba(255,255,255,.12);overflow:hidden;margin:6px 0"><div style="height:100%;width:${pct}%;background:${PENDING_COLOR};transition:width .8s"></div></div>
+      <div class="sub">${run.state === 'failed' ? '<b style="color:var(--rust)">A step failed</b> — ' : ''}${run.done}/${run.total} CI points solved${run.failed ? ' · ' + run.failed + ' failed' : ''} · stage: ${({ queued: 'waiting for a runner', solve: 'solving the CI sweep (all points in parallel)', publish: 'BAU + policy cases → publishing', siting: 'renewable siting layers' })[run.stage] || run.stage}${el != null ? ' · running ' + el + ' min' : ''} · <a href="${run.url}" target="_blank" rel="noopener">log</a></div>
+      <div class="ci-bar" style="margin:8px 0 0;flex-wrap:wrap"><span class="lbl">Points</span>${run.jobs.map(j => { const c = ciOf(j), ok = j.status === 'completed' && j.conclusion === 'success', bad = j.conclusion === 'failure', on = j.status === 'in_progress';
+        return `<span class="ci-pill sm" style="cursor:default;${ok ? 'background:' + PENDING_COLOR + ';color:#15181B;border-color:' + PENDING_COLOR : bad ? 'border-color:var(--rust);color:var(--rust)' : on ? 'border-color:' + PENDING_COLOR : 'opacity:.55'}" title="${j.name} · ${j.status}${j.conclusion ? ' · ' + j.conclusion : ''}">${c ? (c.ci === 'BAU' ? 'BAU' : c.ci + (c.ccs === 'Yes' ? ' +CCS' : '')) : j.name}</span>`; }).join('')}</div>
+      <div class="sub" style="margin-top:6px">Every CI point is its own parallel job, so the whole sweep finishes in about the time of one solve; the results are published together once BAU and the policy cases are done.</div></div>`;
+  }
+  h += `<div class="sp-actions"><button class="btn ghost" onclick="refreshPendingProgress()">Refresh</button><button class="btn ghost" onclick="map.easeTo({pitch:0,bearing:0,duration:900})">Top</button><button class="btn ghost" onclick="map.easeTo({pitch:60,bearing:map.getBearing()+45,duration:900})">↻</button></div>
+    <div class="sub" style="margin-top:10px;font-size:11px">The construction scene stands where the plant will: foundations are poured as CI points are solved; cranes, trucks and the excavator keep working while the solver runs.</div>`;
+  host.innerHTML = h;
+}
+function removeIssueURL(p){
+  const title = `Remove request: site ${p.idx}`, body = `Remove requested site **${p.idx}** (${p.name}, ${p.lat}, ${p.lon}) from the atlas — data, runs and siting layers.\n\n_Executed by .github/workflows/remove.yml when opened by the repository owner._`;
+  return `https://github.com/yasch00/HOPS-Tool-LiveV1/issues/new?title=${encodeURIComponent(title)}&body=${encodeURIComponent(body)}`;
 }

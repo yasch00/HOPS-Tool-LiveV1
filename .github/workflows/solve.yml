@@ -1,0 +1,215 @@
+name: solve run request
+# A "Run request" issue opens → HOPS solves it here on Gurobi WLS: every CI point of both pathways as its own parallel job,
+# plus the BAU reference → the policy re-pricings (EU ETS law/proposal or US 45V/45Q) → converted into data/ (merged with
+# the fleet), committed, the issue gets the live link and is closed → then the siting layers for the new coordinates.
+# Secrets: MODEL_REPO_TOKEN (read access to the private model repo), GRB_WLSACCESSID, GRB_WLSSECRET, GRB_LICENSEID.
+# Repository variable SOLVE_PARALLEL (default 6) caps concurrent solves — set it to what your WLS licence allows.
+on:
+  issues:
+    types: [opened, reopened]
+  workflow_dispatch:
+    inputs:
+      issue:
+        description: 'Issue number of the run request'
+        required: true
+permissions:
+  contents: write
+  issues: write
+concurrency:
+  group: solve-${{ github.event.issue.number || inputs.issue }}
+  cancel-in-progress: false
+env:
+  MODEL_REPO: yasch00/HOPS-model
+  DATA_TAG: data-v1
+  LABEL: site_v1
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    if: ${{ github.event_name == 'workflow_dispatch' || startsWith(github.event.issue.title, 'Run request') }}
+    outputs:
+      issue: ${{ steps.p.outputs.issue }}
+      site: ${{ steps.p.outputs.site }}
+      spec: ${{ steps.p.outputs.spec }}
+      lat: ${{ steps.p.outputs.lat }}
+      lon: ${{ steps.p.outputs.lon }}
+      name: ${{ steps.p.outputs.name }}
+      country: ${{ steps.p.outputs.country }}
+    steps:
+      - id: p
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const n = Number(context.payload.issue ? context.payload.issue.number : '${{ inputs.issue }}');
+            const { data: issue } = await github.rest.issues.get({ ...context.repo, issue_number: n });
+            const m = (issue.body || '').match(/```json\s*(\{[\s\S]*?\})\s*```/);
+            if (!m) { core.setFailed(`issue #${n} has no JSON spec block`); return; }
+            const spec = JSON.parse(m[1]), site = 1000 + n;                 // deterministic site id: 1000 + issue number
+            core.setOutput('issue', n); core.setOutput('site', site); core.setOutput('spec', Buffer.from(m[1]).toString('base64'));
+            core.setOutput('lat', spec.site.lat); core.setOutput('lon', spec.site.lon); core.setOutput('name', spec.site.name || `Site ${site}`); core.setOutput('country', spec.site.country || '');
+            await github.rest.issues.createComment({ ...context.repo, issue_number: n, body: `<!-- hops-cloud --> Picked up by the HOPS cloud solver as site **${site}**: every CI point of both pathways in parallel, then BAU, policy cases, publication and the siting layers. Usually 30–60 minutes. Progress: ${context.serverUrl}/${context.repo.owner}/${context.repo.repo}/actions/runs/${context.runId}` });
+  solve:
+    needs: check
+    runs-on: ubuntu-latest
+    timeout-minutes: 120
+    strategy:
+      fail-fast: false
+      max-parallel: ${{ fromJSON(vars.SOLVE_PARALLEL || '6') }}
+      matrix:
+        ccs: ['No', 'Yes']
+        ci: ['0', '0.25', '0.5', '0.75', '1.0', '1.25', '1.5', '1.75']
+        include:
+          - ccs: 'No'
+            ci: 'BAU'
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          repository: ${{ env.MODEL_REPO }}
+          token: ${{ secrets.MODEL_REPO_TOKEN }}
+          path: model
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Python packages
+        run: pip install -q numpy pandas geopandas rasterio shapely pyproj matplotlib openpyxl pyarrow scipy gurobipy
+      - name: Restore the input data (cache)
+        id: cache
+        uses: actions/cache@v4
+        with:
+          path: hops_data
+          key: hops-data-${{ env.DATA_TAG }}
+      - name: Download the input data (release assets of the model repo)
+        if: steps.cache.outputs.cache-hit != 'true'
+        env:
+          GH_TOKEN: ${{ secrets.MODEL_REPO_TOKEN }}
+        run: |
+          set -e
+          rel=$(curl -sS -H "Authorization: Bearer $GH_TOKEN" "https://api.github.com/repos/$MODEL_REPO/releases/tags/$DATA_TAG")
+          echo "$rel" | python3 -c "import sys,json; [print(a['id'], a['name']) for a in json.load(sys.stdin)['assets']]" | sort -k2 | while read id name; do
+            echo "  $name"; curl -sSL -H "Authorization: Bearer $GH_TOKEN" -H "Accept: application/octet-stream" -o "$name" "https://api.github.com/repos/$MODEL_REPO/releases/assets/$id"; done
+          cat hops_data.tar.part-* | tar -xf - && mv data hops_data && rm -f hops_data.tar.part-*
+      - name: Gurobi WLS licence
+        run: printf 'WLSACCESSID=%s\nWLSSECRET=%s\nLICENSEID=%s\n' "${{ secrets.GRB_WLSACCESSID }}" "${{ secrets.GRB_WLSSECRET }}" "${{ secrets.GRB_LICENSEID }}" > "$HOME/gurobi.lic"
+      - name: Solve CCS=${{ matrix.ccs }} CI=${{ matrix.ci }}
+        env:
+          HOPS_CODE_DIR: ${{ github.workspace }}/model
+          HOPS_DATA_DIR: ${{ github.workspace }}/hops_data
+        run: |
+          echo '${{ needs.check.outputs.spec }}' | base64 -d > spec.json
+          export GRB_LICENSE_FILE="$HOME/gurobi.lic"
+          if [ "${{ matrix.ci }}" = "BAU" ]; then
+            python3 model/hops_site_run.py --spec spec.json --out site_runs --label $LABEL --site-id ${{ needs.check.outputs.site }} --bau --bau-label $LABEL
+          else
+            python3 model/hops_site_run.py --spec spec.json --out site_runs --label $LABEL --site-id ${{ needs.check.outputs.site }} --only-ccs ${{ matrix.ccs }} --ci ${{ matrix.ci }}
+          fi
+      - uses: actions/upload-artifact@v4
+        with:
+          name: site-${{ needs.check.outputs.site }}-ccs${{ matrix.ccs }}-ci${{ matrix.ci }}
+          path: site_runs
+          retention-days: 30
+  publish:
+    needs: [check, solve]
+    runs-on: ubuntu-latest
+    concurrency:
+      group: publish-data
+      cancel-in-progress: false
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+      - uses: actions/checkout@v4
+        with:
+          repository: ${{ env.MODEL_REPO }}
+          token: ${{ secrets.MODEL_REPO_TOKEN }}
+          path: model
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: pip install -q numpy pandas pyarrow openpyxl
+      - uses: actions/download-artifact@v4
+        with:
+          pattern: site-${{ needs.check.outputs.site }}-*
+          path: parts
+      - name: Merge the per-point results into one folder (one CSV per CCS state, all CI rows)
+        run: |
+          python3 - <<'EOF'
+          import glob, json, os, shutil, pandas as pd
+          site = "${{ needs.check.outputs.site }}"; L = "${{ env.LABEL }}"; os.makedirs("site_runs/hourly", exist_ok=True)
+          rows = {"No": [], "Yes": []}; bau = None; sites = {}
+          for d in sorted(glob.glob("parts/*/")):
+              for f in glob.glob(d + "CI_Range_*.csv"): rows["Yes" if "_CCSYes_" in f else "No"].append(pd.read_csv(f))
+              for f in glob.glob(d + "BAU_AllPlants_*.csv"): bau = pd.read_csv(f)
+              for f in glob.glob(d + "hourly/*.parquet"): shutil.copy(f, "site_runs/hourly/")
+              if os.path.exists(d + "sites.json"): sites.update(json.load(open(d + "sites.json")))
+          for ccs, lst in rows.items():
+              if lst: pd.concat(lst, ignore_index=True).sort_values("Target_NH3_CO2_intensity_kgCO2_per_kgNH3").to_csv(f"site_runs/CI_Range_SMR_INT_ASU_plant{site}_CCS{ccs}_{L}.csv", index=False)
+          if bau is not None: bau.to_csv(f"site_runs/BAU_AllPlants_SMR_INT_ASU_CCSNo_{L}.csv", index=False)
+          json.dump(sites, open("site_runs/sites.json", "w"), indent=1)
+          print(os.listdir("site_runs"), {k: sum(len(x) for x in v) for k, v in rows.items()}, "BAU:", bau is not None)
+          EOF
+      - name: Policy re-pricings (EU ETS law/proposal, US 45V/45Q — whichever applies to the region)
+        env:
+          HOPS_DATA_DIR: ${{ github.workspace }}/hops_data_unused
+        run: |
+          cd model
+          python3 ets_policy_cases.py --results-dir ../site_runs --label $LABEL --bau-label $LABEL --ccs both || echo "ETS re-pricing skipped/failed (not an EU site?)"
+          python3 us_credit_cases.py  --results-dir ../site_runs --label $LABEL --bau-label $LABEL --ccs both || echo "US credit re-pricing skipped/failed (not a US site?)"
+          ls ../site_runs
+      - name: Convert into data/ (merged with the fleet)
+        run: |
+          git pull --rebase
+          python3 tools/hops_to_web.py --results site_runs --label $LABEL --bau-label $LABEL --names tools/plant_names.json -o data
+          gzip -kf6 data/summary.json && rm -f data/summary.json
+      - name: Commit and push
+        run: |
+          git config user.name hops-cloud; git config user.email hops-cloud@users.noreply.github.com
+          git add data && git commit -m "site ${{ needs.check.outputs.site }}: run request #${{ needs.check.outputs.issue }}" && git push
+      - name: Close the issue with the link
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const n = Number('${{ needs.check.outputs.issue }}'), site = '${{ needs.check.outputs.site }}';
+            const url = `https://yasch00.github.io/HOPS-Tool-LiveV1/atlas/#plant=${site}&view=site`;
+            await github.rest.issues.createComment({ ...context.repo, issue_number: n, body: `<!-- hops-cloud --> Solved and published as site **${site}**: ${url}\n\nBoth pathways, CI 0 – 1.75, BAU reference and the policy cases for its region. The page updates a minute or two after this comment; the renewable siting layers follow in a separate step (~20–40 min).` });
+            await github.rest.issues.update({ ...context.repo, issue_number: n, state: 'closed' });
+  siting:
+    needs: [check, publish]
+    runs-on: ubuntu-latest
+    timeout-minutes: 180
+    concurrency:
+      group: publish-data
+      cancel-in-progress: false
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+      - uses: actions/checkout@v4
+        with:
+          repository: ${{ env.MODEL_REPO }}
+          token: ${{ secrets.MODEL_REPO_TOKEN }}
+          path: model
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: pip install -q osmnx geopandas shapely pyproj pandas numpy openpyxl matplotlib requests
+      - name: Siting layers for the new coordinates (OpenStreetMap + Natura 2000 exclusions, HOPS land model)
+        run: |
+          git pull --rebase
+          cd model && MPLBACKEND=Agg python3 export_siting.py --plant ${{ needs.check.outputs.site }} --lat ${{ needs.check.outputs.lat }} --lon ${{ needs.check.outputs.lon }} --name "${{ needs.check.outputs.name }}" --country "${{ needs.check.outputs.country }}" --tol 12 --scenarios ../data/scenarios.json -o ../data/siting
+          cd .. && python3 tools/siting_index.py
+      - name: Commit and push
+        run: |
+          git config user.name hops-cloud; git config user.email hops-cloud@users.noreply.github.com
+          git add data/siting && git commit -m "site ${{ needs.check.outputs.site }}: siting layers" && git push
+      - uses: actions/github-script@v7
+        with:
+          script: |
+            await github.rest.issues.createComment({ ...context.repo, issue_number: Number('${{ needs.check.outputs.issue }}'), body: `<!-- hops-cloud --> Siting layers published for site **${{ needs.check.outputs.site }}** — the renewable footprint now shows on its site view.` });
+  failed:
+    needs: [check, solve, publish, siting]
+    if: ${{ failure() && needs.check.outputs.issue }}
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/github-script@v7
+        with:
+          script: |
+            await github.rest.issues.createComment({ ...context.repo, issue_number: Number('${{ needs.check.outputs.issue }}'), body: `<!-- hops-cloud --> A step of the cloud solve failed — see ${context.serverUrl}/${context.repo.owner}/${context.repo.repo}/actions/runs/${context.runId}. Left open for a manual look.` });

@@ -1,9 +1,9 @@
 {
  "version": "IRR_v7-2026-09-15",
  "label": "IRR_v7",
- "bau_label": "BAU_v7",
+ "bau_label": "site_v1",
  "pathway": "SMR_INT_ASU",
- "generated": "2026-09-15",
+ "generated": "2026-09-16",
  "policies": {
   "ETSlaw": "EU ETS (current law)",
   "ETSprop": "EU ETS (proposed)",
@@ -4854,6 +4854,10 @@
    "BAU": "runs/plant82/BAU/bau.json.gz"
   }
  },
+ "extra_labels": [
+  "site_v1"
+ ],
  "n_scenarios": 350,
- "n_runs": 2768
+ "n_runs": 2768,
+ "n_plants": 69
 }
