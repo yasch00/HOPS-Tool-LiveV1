@@ -43,6 +43,43 @@ Plant numbering is the HOPS index from `Plants_US_and_Europe.xlsx` (Brunsbüttel
 Brazoria County TX = 22). `plants.json` carries `amm_idx` to cross-reference the global fleet list drawn on the globe.
 Town names come from `tools/plant_names.json` (OpenStreetMap reverse geocoding) — edit that file to rename a plant.
 
+## The map (atlas/map.js)
+
+One MapLibre map from globe to site, no API keys: Esri World Imagery, Mapzen/AWS terrain tiles, OpenStreetMap buildings
+(extruded, via OpenFreeMap vector tiles), and — per plant — the siting model's layers from `data/siting/plant{idx}/`.
+Turbines are three.js meshes at the siting model's hub height and rotor diameter; PV blocks are 3 m extrusions.
+
+To add a plant's siting layers (needs Python 3.12 + osmnx; the venv is `~/Documents/Stanford/PhD/hops-site-tools/.venv-siting`):
+
+```bash
+cd ~/Documents/Stanford/PhD/HOPS        # so the OSM layer cache in ./land_siting_out is reused
+~/Documents/Stanford/PhD/hops-site-tools/.venv-siting/bin/python tools/export_siting.py --plant 61 --tol 12 \
+    --scenarios <repo>/data/scenarios.json -o <repo>/data/siting
+```
+
+First run for a plant downloads 25 km of OpenStreetMap through Overpass (minutes to tens of minutes); the layers are cached.
+The site view shows the catchment, terrain and buildings for every plant, and the buildout only where this has run.
+
+## The Watch page (watch/)
+
+`watch/watch.py` runs daily in GitHub Actions (`.github/workflows/watch.yml`): it collects new items from the sources in
+`watch/sources.yaml` (OpenAlex, Crossref, arXiv, the Federal Register, and journal / agency RSS), drops what has been seen,
+prefilters by keyword, and asks Claude to classify and summarise the survivors — from the given text only — into
+`data/watch.json`, which `watch.html` renders. One-time setup:
+
+1. GitHub → repo *Settings → Secrets and variables → Actions → New repository secret*: `ANTHROPIC_API_KEY`.
+2. Optional repository *variable* `WATCH_MODEL` (default `claude-opus-5`; `claude-haiku-4-5` is ~5× cheaper).
+3. *Actions → watch → Run workflow* once to seed the feed; afterwards it runs at 06:20 UTC daily and commits its own output.
+
+Cost: ~150 items/day in batches of 20 ≈ 8 model calls ≈ well under $1/day at Opus rates. `python3 watch/watch.py --dry-run`
+shows what would be screened without calling the model.
+
+## The Finance tab (atlas/finance.js)
+
+A port of `ProjectFinance/build_finance_model.py`: the run's per-tonne cost lines are de-annualised with its CRF and pushed
+through construction + 30 years of operations (IDC, annuity debt, straight-line depreciation, tax, DSCR, IRR, NPV, banking
+haircut on merchant power). All assumptions are editable in the panel; the plant design is not re-optimised.
+
 ## Updating the tool's code
 
 `atlas/index.html` is the tool. Edit it directly. `tools/patch_atlas.py` documents how it was derived from the
@@ -60,7 +97,7 @@ then open http://localhost:8765/ (site) or http://localhost:8765/atlas/ (tool). 
 
 ## Known gaps
 
-- `atlas/pages/hops-hybrid-ammonia-plant-live-sim.html` (the 3D facility view) is still the original bundle with
-  its own baked-in numbers for three plants; it opens for every plant but shows the default facility.
+- `atlas/pages/hops-hybrid-ammonia-plant-live-sim.html` ("Process schematic") is still the original bundle with
+  its own baked-in numbers for three plants; the real-world site view has replaced it as the default.
 - Team/About/Results pages contain `[PLACEHOLDER]` tokens from the Design export — fill by hand.
 - The atlas preview on the home page is a placeholder awaiting a screenshot.

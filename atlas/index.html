@@ -7,8 +7,11 @@
 <title>HOPS Global Atlas — Hybrid Ammonia Plant Optimizer</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="">
+<link rel="icon" href="data:,">
 <link href="https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,300;0,6..72,400;0,6..72,500;1,6..72,400&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
 <script src="assets/d477d7f7.js"></script>
+<link href="https://cdn.jsdelivr.net/npm/maplibre-gl@5.24.0/dist/maplibre-gl.css" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/maplibre-gl@5.24.0/dist/maplibre-gl.js"></script>
 
 <style>
 :root{
@@ -31,7 +34,43 @@ button{font-family:inherit;cursor:pointer;border:none;background:none;color:inhe
 
 /* ---------- GLOBE ---------- */
 #globeView{background:radial-gradient(circle at 50% 40%,#F4F1EB 0%,#EDE9E1 60%,#E3DFD8 100%)}
-#globeCanvas{position:absolute;inset:0}
+#map{position:absolute;inset:0}
+.hud-left{display:flex;flex-direction:column;gap:14px;max-height:calc(100vh - 52px)}
+body.site-mode .brand h1,body.site-mode .brand .sub,body.site-mode .globe-foot{display:none}
+body.site-mode .brand .kicker{margin-bottom:0}
+.site-panel{width:372px;padding:18px 18px 14px;overflow-y:auto;max-height:calc(100vh - 230px)}
+.site-panel h2{font-family:'Newsreader',serif;font-size:24px;font-weight:600;line-height:1.05;letter-spacing:-.01em}
+.site-panel .sub{font-size:12px;color:var(--mut);margin-top:5px;line-height:1.45}
+.site-kpis{display:grid;grid-template-columns:1fr 1fr;gap:9px;margin:12px 0 14px}
+.site-kpis>div{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:10px 12px}
+.site-kpis .l{font-size:10px;letter-spacing:.13em;text-transform:uppercase;color:var(--mut);font-weight:600}
+.site-kpis .v{font-family:'Newsreader',serif;font-size:22px;font-weight:600;margin-top:4px;line-height:1;letter-spacing:-.02em}
+.site-kpis .v small{font-size:12px;color:var(--mut);font-weight:500;font-family:'IBM Plex Sans'}
+.site-kpis .d{font-size:11px;color:var(--faint);margin-top:5px;line-height:1.35}
+.sp-actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}
+.bsteps{display:flex;gap:4px;margin:12px 0 4px;flex-wrap:wrap}
+.bstep{display:flex;align-items:center;gap:5px;font-size:10.5px;letter-spacing:.06em;text-transform:uppercase;color:var(--faint);font-weight:600}
+.bstep .bnum{width:18px;height:18px;border-radius:50%;border:1px solid var(--line);display:inline-flex;align-items:center;justify-content:center;font-family:'IBM Plex Mono',monospace;font-size:10px}
+.bstep.done{color:var(--accent)}.bstep.done .bnum{background:var(--accent);color:#FBFAF8;border-color:var(--accent)}
+.bstep+.bstep::before{content:'';width:10px;height:1px;background:var(--line);margin-right:2px}
+.badge.est{font-size:10px;padding:1px 6px;border-radius:4px;background:var(--paper2);color:var(--mut);border:1px solid var(--line);font-family:'IBM Plex Mono',monospace}
+body.build-mode .brand h1,body.build-mode .brand .sub,body.build-mode .globe-foot{display:none}
+/* finance tab */
+.fin-grid{display:grid;grid-template-columns:300px minmax(0,1fr);gap:18px;align-items:start}
+.fin-side{position:sticky;top:80px;max-height:calc(100vh - 100px);overflow-y:auto}
+.fin-group{margin:10px 0 4px}
+.fin-f{display:grid;grid-template-columns:1fr 64px;gap:4px 8px;align-items:center;margin:6px 0 9px}
+.fin-f .fin-l{grid-column:1/3;font-size:11.5px;color:var(--ink2);display:flex;justify-content:space-between}
+.fin-f .fin-l small{color:var(--faint);font-family:'IBM Plex Mono',monospace;font-size:10.5px}
+.fin-f input[type=range]{width:100%;accent-color:var(--accent);margin:0}
+.fin-n{font-family:'IBM Plex Mono',monospace;font-size:11.5px;padding:3px 5px;border:1px solid var(--line);border-radius:6px;background:var(--card);color:var(--ink);width:64px;text-align:right}
+.fin-main .kpi-grid{margin:14px 0 10px}
+@media(max-width:1000px){.fin-grid{grid-template-columns:1fr}.fin-side{position:static;max-height:none}}
+.site-panel .ci-bar{box-shadow:none;background:transparent;border:0;padding:0}
+.site-panel .legend-row input{accent-color:var(--accent);margin:0}
+.maplibregl-ctrl-bottom-right{bottom:6px}
+.maplibregl-ctrl-attrib{font-family:'IBM Plex Sans',sans-serif;font-size:10.5px;background:rgba(251,250,245,.8)!important}
+.maplibregl-ctrl-scale{font-family:'IBM Plex Mono',monospace;font-size:10.5px;background:rgba(251,250,245,.8);border-color:var(--ink2)}
 .globe-hud{position:absolute;top:0;left:0;right:0;padding:26px 34px;
   display:flex;justify-content:space-between;align-items:flex-start;pointer-events:none;z-index:5}
 .brand{pointer-events:auto}
@@ -173,18 +212,23 @@ svg.chart{width:100%;display:block;overflow:visible}
 
 <!-- ===== GLOBE VIEW ===== -->
 <section id="globeView" class="view active">
-  <canvas id="globeCanvas"></canvas>
+  <div id="map"></div>
   <div class="globe-hud">
+    <div class="hud-left">
     <div class="brand">
       <div class="kicker"><a href="../" style="color:inherit;text-decoration:none">← HOPS</a> · Global Atlas</div>
       <h1>Hybrid Ammonia Plant Optimizer</h1>
-      <div class="sub">Techno-economic MILP optimization of green / conventional ammonia across a carbon-intensity sweep. Click a highlighted plant to open its 3D facility model and technical results.</div>
+      <div class="sub">Techno-economic MILP optimization of green / conventional ammonia across a carbon-intensity sweep. Click a highlighted plant to open its site — real terrain and buildings with the optimizer’s renewable buildout — and its technical results.</div>
+    </div>
+    <div id="sitePanel" class="panel site-panel" hidden></div>
+    <div id="buildPanel" class="panel site-panel" hidden></div>
     </div>
     <div class="panel filter-panel">
       <div class="fp-section">
         <div class="fp-h">Ammonia plants</div>
         <div class="legend-row"><span class="dot amm"></span> <span id="legendModeled">Modelled plants</span></div>
         <div class="legend-row"><span class="dot" style="background:#D55E00"></span> Global fleet (383 plants)</div>
+        <button class="btn sm" style="margin-top:10px;width:100%" onclick="enterBuild()">Build a plant →</button>
       </div>
       <div class="fp-section">
         <div class="fp-h">Industry layers</div>
@@ -201,13 +245,15 @@ svg.chart{width:100%;display:block;overflow:visible}
     <div class="inner">
       <a class="btn ghost" href="../">HOPS</a>
       <button class="btn ghost" onclick="goGlobe()">← Globe</button>
-      <button class="btn ghost" onclick="goModel()">3D facility model</button>
+      <button class="btn ghost" onclick="goModel()">Site map</button>
+      <button class="btn ghost" onclick="goSchematic()">Process schematic</button>
       <div class="crumb"><span class="loc" id="dashLoc">—</span></div>
       <div class="tabs ml-auto" id="tabs">
         <button class="tab active" data-tab="overview">Overview</button>
         <button class="tab" data-tab="hourly">Hourly ops</button>
         <button class="tab" data-tab="util">Utilization</button>
         <button class="tab" data-tab="detail">Results table</button>
+        <button class="tab" data-tab="finance">Finance</button>
         <button class="tab" data-tab="assump">Assumptions</button>
       </div>
     </div>
@@ -219,6 +265,7 @@ svg.chart{width:100%;display:block;overflow:visible}
     <div class="tabpane" id="tab-hourly"></div>
     <div class="tabpane" id="tab-util"></div>
     <div class="tabpane" id="tab-detail"></div>
+    <div class="tabpane" id="tab-finance"></div>
     <div class="tabpane" id="tab-assump"></div>
   </div>
 </section>
@@ -293,7 +340,7 @@ function hourlyKey(s){
   return k;
 }
 
-/* ============ GLOBE ============ */
+/* ============ MAP (see map.js) ============ */
 const LAYER_META = {
   coal:{c:'#8A8F94',n:'Coal power'}, oilgas:{c:'#8C6D1F',n:'Oil & gas power'},
   wind:{c:'#3f8fb0',n:'Wind'}, solar:{c:'#E69F00',n:'Solar'},
@@ -303,118 +350,6 @@ const LAYER_META = {
   co2pipe:{c:'#1a1a1a',n:'CO₂ pipelines',line:true}
 };
 const CO2_PIPES = [[[40.099,-108.882],[40.158,-108.988],[40.208,-109.085],[40.271,-109.134],[40.277,-109.185],[40.336,-109.265],[40.417,-109.332],[40.48,-109.363],[40.569,-109.332],[40.642,-109.269],[40.682,-109.203],[40.743,-109.197],[40.805,-109.132],[40.884,-109.138],[40.952,-109.16],[40.99,-109.212],[41.048,-109.22],[41.086,-109.205],[41.15,-109.166],[41.228,-109.169],[41.294,-109.228],[41.357,-109.265],[41.439,-109.3],[41.5,-109.296],[41.549,-109.4],[41.571,-109.509],[41.578,-109.609],[41.649,-109.693],[41.73,-109.758],[41.808,-109.808],[41.825,-109.832],[41.834,-109.926],[41.87,-110.002],[41.892,-110.078]],[[41.598,-109.756],[41.624,-109.691],[41.683,-109.677],[41.706,-109.619],[41.725,-109.531],[41.785,-109.441],[41.845,-109.31],[41.899,-109.195],[41.931,-109.136],[41.933,-109.027],[41.933,-108.927],[41.97,-108.802],[41.971,-108.71],[41.988,-108.648],[42.065,-108.509],[42.137,-108.339],[42.207,-108.144],[42.251,-107.991],[42.299,-107.901],[42.325,-107.837],[42.382,-107.776],[42.423,-107.685],[42.441,-107.616],[42.444,-107.536],[42.485,-107.466],[42.562,-107.362],[42.659,-107.198],[42.716,-107.085],[42.791,-107.028],[42.88,-107.014],[42.977,-106.975],[43.028,-106.936],[43.027,-106.938]],[[43.284,-107.601],[43.275,-107.503],[43.26,-107.407],[43.217,-107.331],[43.142,-107.235],[43.087,-107.159],[43.046,-107.075],[43.034,-107.003],[43.028,-106.936],[43.032,-106.881],[43.052,-106.801],[43.149,-106.678],[43.208,-106.585],[43.315,-106.528],[43.409,-106.469],[43.479,-106.409],[43.537,-106.389],[43.583,-106.348],[43.599,-106.299],[43.672,-106.213],[43.793,-106.172],[43.897,-106.149],[43.973,-106.145],[44.041,-106.11],[44.154,-105.94],[44.219,-105.838],[44.27,-105.84],[44.286,-105.776],[44.333,-105.713],[44.371,-105.676],[44.464,-105.668],[44.507,-105.625],[44.542,-105.578],[44.547,-105.506],[44.618,-105.477],[44.73,-105.389],[44.803,-105.301],[44.89,-105.254],[44.98,-105.184],[45.069,-105.127],[45.105,-105.088],[45.102,-104.91],[45.188,-104.914],[45.298,-104.799],[45.392,-104.719],[45.554,-104.539],[45.617,-104.486],[45.704,-104.398],[45.794,-104.301],[45.892,-104.265],[46.028,-104.248],[46.201,-104.25],[46.254,-104.246],[46.315,-104.164],[46.311,-104.107],[46.268,-103.98],[46.233,-103.935],[46.21,-103.929]],[[43.485,-106.406],[43.427,-106.3]],[[42.742,-107.062],[42.738,-106.998]],[[42.845,-108.316],[42.835,-108.274],[42.788,-108.216],[42.706,-108.148],[42.629,-108.063],[42.576,-108.016],[42.554,-107.976],[42.534,-107.938],[42.507,-107.912],[42.474,-107.913],[42.443,-107.877],[42.422,-107.856],[42.381,-107.845],[42.344,-107.834],[42.314,-107.798],[42.277,-107.752],[42.24,-107.712],[42.232,-107.623],[42.228,-107.506]],[[41.971,-108.719],[41.934,-108.716],[41.905,-108.702],[41.876,-108.637],[41.853,-108.599],[41.819,-108.583],[41.782,-108.578],[41.731,-108.574],[41.697,-108.562],[41.632,-108.559],[41.588,-108.541],[41.552,-108.521]],[[37.261,-109.207],[37.331,-109.136],[37.381,-109.101],[37.453,-108.99],[37.489,-108.962],[37.494,-108.892],[37.526,-108.855],[37.546,-108.831],[37.575,-108.828]],[[37.576,-108.912],[37.575,-108.791],[37.571,-108.761],[37.542,-108.729],[37.52,-108.705],[37.423,-108.698]],[[37.708,-108.773],[37.571,-108.773]],[[37.471,-108.795],[37.472,-108.775],[37.521,-108.771],[37.529,-108.739],[37.535,-108.723]],[[37.397,-108.87],[37.396,-108.823],[37.409,-108.771],[37.422,-108.74],[37.423,-108.661],[37.424,-108.521],[37.421,-108.437],[37.399,-108.395],[37.384,-108.338],[37.37,-108.282],[37.352,-108.23],[37.325,-108.195],[37.271,-108.179],[37.231,-108.181],[37.166,-108.177],[37.08,-108.177],[37.018,-108.187],[36.978,-108.179],[36.978,-108.075],[36.949,-108.03],[36.908,-107.991],[36.873,-107.956],[36.864,-107.927],[36.837,-107.915],[36.798,-107.911],[36.769,-107.886],[36.731,-107.866],[36.711,-107.823],[36.698,-107.788],[36.68,-107.751],[36.654,-107.731],[36.588,-107.735],[36.502,-107.735],[36.464,-107.761],[36.428,-107.741],[36.38,-107.726],[36.319,-107.731],[36.271,-107.737],[36.242,-107.739],[36.214,-107.745],[36.169,-107.712],[36.091,-107.647],[36.051,-107.612],[36.008,-107.571],[35.983,-107.515],[35.97,-107.421],[35.965,-107.354],[35.949,-107.306],[35.906,-107.292],[35.816,-107.2],[35.779,-107.161],[35.723,-107.122],[35.665,-107.073],[35.61,-106.985],[35.561,-106.893],[35.536,-106.854],[35.538,-106.796],[35.496,-106.745],[35.465,-106.671],[35.408,-106.628],[35.354,-106.524],[35.336,-106.477],[35.328,-106.409],[35.304,-106.364],[35.268,-106.311],[35.227,-106.262],[35.179,-106.256],[35.12,-106.211],[35.075,-106.168],[35.04,-106.11],[35.015,-106.039],[34.983,-105.993],[34.924,-105.903],[34.813,-105.752],[34.737,-105.651],[34.662,-105.545],[34.594,-105.447],[34.525,-105.375],[34.491,-105.311],[34.432,-105.233],[34.378,-105.152],[34.32,-105.057],[34.243,-104.936],[34.18,-104.863],[34.114,-104.766],[34.039,-104.672],[33.956,-104.57],[33.905,-104.496],[33.854,-104.422],[33.805,-104.344],[33.75,-104.275],[33.711,-104.238],[33.673,-104.168],[33.619,-104.097],[33.566,-104.023],[33.515,-103.959],[33.46,-103.884],[33.44,-103.836],[33.4,-103.724],[33.344,-103.607],[33.274,-103.412],[33.209,-103.275],[33.131,-103.111],[33.078,-102.997],[33.023,-102.851]],[[33.407,-103.761],[33.335,-103.796],[33.26,-103.8],[33.183,-103.8],[33.162,-103.771]],[[33.231,-103.331],[33.171,-103.365],[33.13,-103.39],[33.064,-103.392],[32.984,-103.39],[32.946,-103.404],[32.848,-103.402],[32.798,-103.4],[32.8,-103.671],[32.803,-103.771]],[[37.538,-105.098],[37.53,-105.06],[37.539,-105.023],[37.597,-105.014],[37.621,-105.001],[37.656,-105.002],[37.677,-105.005]],[[37.703,-105.178],[37.678,-105.143],[37.68,-105.072],[37.679,-104.996],[37.685,-104.959],[37.708,-104.915],[37.729,-104.891],[37.713,-104.853],[37.699,-104.814],[37.685,-104.77],[37.649,-104.739],[37.608,-104.684],[37.554,-104.633],[37.503,-104.567],[37.451,-104.485],[37.411,-104.42],[37.373,-104.37],[37.337,-104.326],[37.305,-104.284],[37.262,-104.238],[37.215,-104.241],[37.172,-104.229],[37.129,-104.228],[37.088,-104.214],[37.049,-104.196],[37.023,-104.178],[36.997,-104.178],[36.976,-104.2],[36.949,-104.203],[36.919,-104.192],[36.882,-104.134],[36.854,-104.089],[36.828,-104.047],[36.789,-104.018],[36.758,-104.005],[36.746,-104.003]],[[36.693,-104.006],[36.66,-104.009],[36.624,-104.041],[36.594,-104.045],[36.56,-104.021],[36.522,-104.002],[36.487,-103.99],[36.428,-103.949],[36.359,-103.904],[36.308,-103.869],[36.273,-103.818],[36.222,-103.777],[36.164,-103.75],[36.098,-103.724],[36.04,-103.705],[35.977,-103.666],[35.915,-103.632],[35.861,-103.599],[35.791,-103.556],[35.719,-103.511],[35.648,-103.464],[35.59,-103.437],[35.531,-103.412],[35.486,-103.392],[35.446,-103.365],[35.408,-103.333],[35.328,-103.326],[35.278,-103.326],[35.224,-103.324],[35.179,-103.296],[35.12,-103.265],[35.06,-103.238],[34.993,-103.22],[34.924,-103.208],[34.857,-103.177],[34.82,-103.163],[34.744,-103.154],[34.697,-103.16],[34.626,-103.148],[34.574,-103.142],[34.525,-103.14],[34.491,-103.111],[34.425,-103.109],[34.334,-103.107],[34.249,-103.107],[34.158,-103.117],[34.09,-103.117],[34.026,-103.115],[33.976,-103.101],[33.898,-103.081],[33.822,-103.06],[33.764,-103.046],[33.697,-103.027],[33.622,-103.001],[33.539,-102.988],[33.455,-102.96],[33.397,-102.941],[33.344,-102.919],[33.296,-102.894],[33.236,-102.88],[33.202,-102.872],[33.152,-102.849],[33.097,-102.833],[33.046,-102.825],[33.021,-102.841]],[[35.888,-103.71],[35.89,-103.619],[35.896,-103.589],[35.893,-103.537],[35.863,-103.505],[35.845,-103.451],[35.85,-103.361],[35.852,-103.295]],[[35.813,-103.77],[35.83,-103.731],[35.835,-103.68],[35.837,-103.622],[35.834,-103.548],[35.838,-103.509],[35.847,-103.486]],[[35.847,-103.486],[35.852,-103.469]],[[37.107,-100.792],[37.087,-100.776],[37.033,-100.776],[36.985,-100.763],[36.933,-100.75],[36.882,-100.731],[36.831,-100.667],[36.772,-100.6],[36.718,-100.533],[36.675,-100.478],[36.628,-100.44],[36.585,-100.465],[36.489,-100.59],[36.376,-100.696],[36.283,-100.805],[36.19,-100.923]],[[36.278,-101.061],[36.247,-101.006],[36.239,-100.952],[36.208,-100.904]],[[36.497,-100.574],[36.469,-100.545]],[[36.519,-100.892],[36.482,-100.894],[36.443,-100.942],[36.418,-101],[36.385,-101.047],[36.34,-101.089],[36.303,-101.111],[36.261,-101.157],[36.232,-101.221],[36.224,-101.267],[36.181,-101.3],[36.123,-101.339],[36.069,-101.383],[36.038,-101.41],[35.953,-101.409],[35.889,-101.413],[35.834,-101.412],[35.774,-101.415],[35.75,-101.426],[35.7,-101.425],[35.652,-101.425]],[[36.748,-101.101],[36.749,-101.215],[36.789,-101.271],[36.839,-101.329],[36.888,-101.384],[36.896,-101.515],[36.897,-101.613],[36.864,-101.661],[36.81,-101.745],[36.755,-101.833],[36.708,-101.911],[36.663,-101.989],[36.52,-102.239],[36.453,-102.344],[36.412,-102.437],[36.376,-102.469],[36.361,-102.517],[36.312,-102.629],[36.245,-102.77],[36.193,-102.888],[36.136,-103.007],[36.082,-103.074],[36.03,-103.103],[35.991,-103.149],[35.944,-103.2],[35.912,-103.233],[35.878,-103.274],[35.859,-103.293],[35.851,-103.295],[35.839,-103.282],[35.819,-103.241],[35.808,-103.194],[35.802,-103.166],[35.785,-103.141],[35.76,-103.13],[35.727,-103.13],[35.684,-103.129],[35.675,-103.119],[35.629,-103.121],[35.6,-103.12],[35.584,-103.128],[35.526,-103.127],[35.5,-103.128],[35.478,-103.111],[35.454,-103.125],[35.425,-103.144],[35.401,-103.174],[35.377,-103.178],[35.346,-103.176],[35.286,-103.162],[35.25,-103.147],[35.212,-103.136],[35.168,-103.124],[35.111,-103.107],[35.048,-103.093],[34.973,-103.074],[34.909,-103.07],[34.837,-103.074],[34.732,-103.07],[34.635,-103.068],[34.565,-103.066],[34.512,-103.062],[34.457,-103.027],[34.412,-102.999],[34.372,-102.964],[34.304,-102.918],[34.261,-102.891],[34.205,-102.852],[34.151,-102.811],[34.101,-102.777],[34.059,-102.744],[33.985,-102.698],[33.915,-102.659],[33.862,-102.637],[33.821,-102.614],[33.777,-102.586],[33.727,-102.583],[33.673,-102.585],[33.592,-102.581],[33.531,-102.585],[33.471,-102.584],[33.433,-102.584],[33.373,-102.62],[33.322,-102.637],[33.267,-102.646],[33.217,-102.662],[33.161,-102.664],[33.091,-102.679],[33.05,-102.693],[33.048,-102.752],[33.05,-102.796],[33.008,-102.815]],[[33.037,-102.362],[33.035,-102.631],[33.034,-102.785]],[[33.498,-102.644],[33.472,-102.636],[33.465,-102.556],[33.438,-102.525],[33.4,-102.464]],[[33.474,-102.466],[33.501,-102.519],[33.535,-102.489],[33.592,-102.429],[33.643,-102.421],[33.655,-102.36],[33.755,-102.206],[33.784,-102.173],[33.791,-102.118],[33.837,-102.048]],[[33.513,-102.511],[33.557,-102.517],[33.59,-102.487],[33.592,-102.435]],[[32,-103.989],[31.981,-103.998],[31.959,-103.984],[31.936,-103.985],[31.918,-104.009],[31.923,-104.028]],[[32,-103.517],[32.029,-103.442],[32.05,-103.368],[32.072,-103.281],[32.085,-103.201],[32.086,-103.113]],[[31.932,-103.226],[32,-103.189],[32.053,-103.136],[32.086,-103.113],[32.128,-103.065],[32.154,-103.031],[32.167,-102.968],[32.186,-102.871],[32.2,-102.8],[32.215,-102.716],[32.215,-102.679]],[[32.145,-103.065],[32.18,-103.065],[32.212,-103.087],[32.262,-103.086],[32.303,-103.087],[32.341,-103.086],[32.363,-103.065],[32.377,-103.048],[32.398,-103.052],[32.416,-103.07],[32.43,-103.087],[32.452,-103.089],[32.526,-103.088],[32.577,-103.08],[32.638,-103.087],[32.73,-103.045],[32.808,-103.006],[32.835,-102.996],[32.881,-102.919],[32.936,-102.892],[33.006,-102.841]],[[37.043,-95.591],[36.999,-95.591],[36.984,-95.693],[36.981,-95.761],[36.972,-95.806],[36.969,-95.937],[36.96,-95.994],[36.95,-96.019],[36.926,-96.045],[36.896,-96.098],[36.882,-96.16],[36.862,-96.289],[36.837,-96.393],[36.811,-96.584],[36.785,-96.683]],[[36.376,-97.749],[36.297,-97.787],[36.203,-97.791],[36.037,-97.789],[35.861,-97.789],[35.652,-97.791],[35.527,-97.794],[35.382,-97.789],[35.334,-97.774],[35.279,-97.787],[35.193,-97.789],[35.116,-97.791],[35.028,-97.783],[34.981,-97.767],[34.933,-97.76],[34.886,-97.735],[34.842,-97.692],[34.771,-97.618],[34.698,-97.62],[34.604,-97.625],[34.509,-97.621],[34.43,-97.621]],[[34.493,-97.721],[34.476,-97.666],[34.476,-97.621]],[[33.008,-102.815],[32.948,-102.791],[32.901,-102.796],[32.85,-102.794],[32.784,-102.785],[32.746,-102.781],[32.689,-102.786],[32.621,-102.789],[32.554,-102.783],[32.515,-102.779],[32.455,-102.76],[32.395,-102.732],[32.322,-102.715],[32.267,-102.694],[32.215,-102.679],[32.142,-102.669],[32.108,-102.652],[32.068,-102.644],[32.022,-102.619],[31.975,-102.611],[31.909,-102.617],[31.868,-102.615],[31.823,-102.6],[31.742,-102.572],[31.67,-102.548],[31.592,-102.517],[31.512,-102.497],[31.442,-102.48],[31.385,-102.464],[31.334,-102.427],[31.301,-102.404],[31.243,-102.379],[31.19,-102.351],[31.133,-102.297],[31.077,-102.244],[31.038,-102.191],[30.987,-102.12],[30.984,-102.072],[30.983,-102.021],[30.932,-101.957]],[[30.634,-102.935],[30.613,-102.896],[30.582,-102.864],[30.564,-102.826],[30.561,-102.767],[30.554,-102.702],[30.562,-102.638],[30.578,-102.596],[30.588,-102.516],[30.585,-102.468],[30.56,-102.437],[30.547,-102.3],[30.523,-102.229],[30.487,-102.128],[30.455,-102.005],[30.419,-101.873],[30.375,-101.843]],[[30.578,-102.596],[30.65,-102.526],[30.671,-102.49]],[[30.585,-102.468],[30.627,-102.479],[30.671,-102.49],[30.74,-102.488],[30.798,-102.463],[30.878,-102.382],[30.979,-102.323],[31.068,-102.295],[31.119,-102.283],[31.211,-102.232],[31.281,-102.186],[31.342,-102.134],[31.46,-102.039],[31.54,-101.961],[31.622,-101.887],[31.742,-101.785],[31.88,-101.669],[32.029,-101.535],[32.12,-101.435],[32.22,-101.36],[32.267,-101.325],[32.308,-101.32],[32.418,-101.244],[32.523,-101.145],[32.705,-101.003],[32.766,-100.956]],[[32.571,-101.271],[32.554,-101.181],[32.537,-101.134]],[[32.656,-101.153],[32.645,-101.096],[32.633,-101.059]],[[32.915,-100.904],[32.862,-100.932]],[[31.309,-102.591],[31.361,-102.508],[31.385,-102.464]],[[31.406,-102.47],[31.422,-102.373],[31.444,-102.3],[31.405,-102.276],[31.33,-102.234],[31.281,-102.186]],[[31.718,-102.564],[31.734,-102.493],[31.763,-102.387]],[[31.526,-102.977],[31.526,-102.889],[31.557,-102.822],[31.603,-102.712],[31.64,-102.612],[31.661,-102.544]],[[31.988,-102.668],[31.991,-102.614],[32.002,-102.565],[32.023,-102.475],[32.084,-102.4],[32.15,-102.329],[32.201,-102.251],[32.211,-102.226],[32.191,-102.19],[32.155,-102.169],[32.137,-102.167],[32.137,-102.142]],[[32.015,-102.507],[31.976,-102.478]],[[32.781,-102.886],[32.784,-102.785]],[[32.948,-102.791],[32.898,-102.758],[32.859,-102.731],[32.813,-102.715],[32.784,-102.692],[32.67,-102.663],[32.602,-102.646],[32.526,-102.621],[32.474,-102.602],[32.433,-102.543]],[[32.948,-102.791],[32.936,-102.677],[32.927,-102.622],[32.889,-102.549],[32.881,-102.508],[32.887,-102.402],[32.882,-102.222],[32.885,-102.136],[32.908,-102.057],[32.934,-101.98],[33.008,-101.896],[33.102,-101.738],[33.157,-101.617],[33.235,-101.457],[33.241,-101.344],[33.236,-101.141],[33.233,-100.877]],[[32.761,-102.686],[32.8,-102.602],[32.837,-102.534],[32.886,-102.536]],[[32.948,-102.791],[32.961,-102.744],[32.962,-102.64],[32.958,-102.553],[32.942,-102.513],[32.942,-102.437],[32.932,-102.376],[32.927,-102.336],[32.921,-102.257],[32.915,-102.202],[32.903,-102.163],[32.87,-102.112],[32.835,-102.022],[32.807,-101.968],[32.778,-101.913],[32.725,-101.783],[32.676,-101.706],[32.702,-101.559],[32.747,-101.385],[32.773,-101.246],[32.77,-101.053],[32.766,-100.956],[32.757,-100.879],[32.738,-100.817],[32.757,-100.686],[32.767,-100.57],[32.799,-100.489],[32.874,-100.351],[32.894,-100.264],[32.917,-100.222],[32.961,-100.183],[33.058,-100.171],[33.135,-100.153],[33.197,-100.072],[33.203,-99.995],[33.371,-99.99],[33.472,-100.062]],[[28.792,-96.612],[28.899,-96.506],[29.015,-96.363],[29.02,-96.24],[29.122,-96.123],[29.131,-96.033],[29.261,-95.895],[29.456,-95.672]],[[29.564,-95.181],[29.529,-95.13],[29.481,-95.126],[29.428,-95.125]],[[29.528,-94.764],[29.7,-94.512],[29.888,-94.206],[30.033,-94.04],[30.136,-93.815],[30.186,-93.638],[30.253,-93.462],[30.338,-93.343],[30.391,-93.139],[30.426,-92.982],[30.467,-92.785],[30.479,-92.503],[30.503,-92.336],[30.517,-92.228],[30.491,-92.098],[30.526,-91.976],[30.549,-91.779],[30.549,-91.507],[30.526,-91.367],[30.435,-91.316],[30.312,-91.293],[30.236,-91.279],[30.165,-91.191],[30.098,-91.112],[30.059,-90.966]],[[30.098,-91.112],[30.244,-91.066],[30.327,-90.935],[30.422,-90.837],[30.509,-90.824],[30.63,-90.82],[30.806,-90.754],[30.999,-90.707],[31.142,-90.574],[31.287,-90.496],[31.33,-90.428],[31.501,-90.422],[31.673,-90.328],[31.928,-90.165],[32.179,-90.013],[32.293,-89.902],[32.464,-89.919]],[[31.556,-91.183],[31.575,-90.844],[31.593,-90.502],[31.618,-90.358]],[[31.593,-90.502],[31.501,-90.422]],[[32.464,-91.588],[32.455,-91.455],[32.453,-91.211],[32.425,-91.124],[32.414,-91.037],[32.458,-91.031],[32.47,-90.852],[32.565,-90.68],[32.591,-90.578],[32.66,-90.491],[32.7,-90.393],[32.655,-90.256],[32.569,-90.106],[32.504,-89.984],[32.464,-89.919],[32.418,-89.852],[32.37,-89.828],[32.282,-89.819],[32.203,-89.801],[32.142,-89.771],[32.061,-89.708],[31.987,-89.61],[31.928,-89.493],[31.865,-89.392],[31.804,-89.297],[31.786,-89.125],[31.791,-88.973],[31.732,-88.759]],[[29.863,-93.986],[29.998,-94.079]],[[29.916,-90.367],[29.843,-90.461]],[[29.491,-95.291],[29.459,-95.23],[29.428,-95.125],[29.429,-95.025],[29.455,-94.969]],[[49.469,-103.353],[49.462,-103.549],[49.442,-103.666],[49.39,-103.704],[49.327,-103.661],[49.234,-103.528],[49.119,-103.326],[48.999,-103.216],[48.896,-103.119],[48.851,-103.013],[48.833,-102.939],[48.735,-102.939],[48.669,-102.885],[48.535,-102.88],[48.065,-102.891],[47.791,-102.885],[47.713,-102.88],[47.652,-102.822],[47.602,-102.854],[47.516,-102.832],[47.437,-102.753],[47.404,-102.476],[47.412,-102.067],[47.358,-101.823]],[[49.102,-103.04],[49.1,-103.308]]];
-let scene,cam,renderer,globe,raycaster,mouse,ammPts,ammMeta=[],hl=[],layerClouds={};
-let rot={x:0.15,y:-1.5},target={x:0.15,y:-1.5},drag=false,lastX,lastY,zoom=3.5,velY=0;
-const R=1.6;
-
-function ll2v(lat,lon,r){
-  const phi=(90-lat)*Math.PI/180, th=(lon+180)*Math.PI/180;
-  return new THREE.Vector3(-r*Math.sin(phi)*Math.cos(th), r*Math.cos(phi), r*Math.sin(phi)*Math.sin(th));
-}
-
-/* Build an equirectangular land texture from coastline polygons.
-   Single texture wrapped on the sphere → land+ocean always perfectly aligned. */
-function makeEarthTexture(){
-  const W=4096,H=2048;
-  const cv=document.createElement('canvas'); cv.width=W; cv.height=H;
-  const ctx=cv.getContext('2d');
-  // ocean
-  ctx.fillStyle='#7eb0d4'; ctx.fillRect(0,0,W,H);
-  // subtle lat bands for depth
-  const og=ctx.createLinearGradient(0,0,0,H);
-  og.addColorStop(0,'#5d97c4'); og.addColorStop(.5,'#86b8d8'); og.addColorStop(1,'#5d97c4');
-  ctx.fillStyle=og; ctx.fillRect(0,0,W,H);
-  const px=lon=>(lon+180)/360*W, py=lat=>(90-lat)/180*H;
-  // fill land
-  ctx.fillStyle='#e2d6b0';
-  ctx.strokeStyle='#7d6f48'; ctx.lineWidth=1.6;
-  GEO.coast.forEach(ring=>{
-    if(ring.length<3) return;
-    ctx.beginPath();
-    ring.forEach((p,i)=>{ const x=px(p[1]),y=py(p[0]); i?ctx.lineTo(x,y):ctx.moveTo(x,y); });
-    ctx.closePath(); ctx.fill(); ctx.stroke();
-  });
-  // borders
-  ctx.strokeStyle='#6e5f3a'; ctx.lineWidth=1.7;
-  GEO.border.forEach(ring=>{
-    if(ring.length<2) return;
-    ctx.beginPath();
-    ring.forEach((p,i)=>{ const x=px(p[1]),y=py(p[0]); i?ctx.lineTo(x,y):ctx.moveTo(x,y); });
-    ctx.stroke();
-  });
-  // graticule
-  ctx.strokeStyle='rgba(40,80,110,.18)'; ctx.lineWidth=1;
-  for(let lat=-60;lat<=60;lat+=30){ ctx.beginPath(); ctx.moveTo(0,py(lat)); ctx.lineTo(W,py(lat)); ctx.stroke(); }
-  for(let lon=-150;lon<180;lon+=30){ ctx.beginPath(); ctx.moveTo(px(lon),0); ctx.lineTo(px(lon),H); ctx.stroke(); }
-  const tex=new THREE.CanvasTexture(cv);
-  tex.anisotropy=8;
-  return tex;
-}
-
-function initGlobe(){
-  const cv=document.getElementById('globeCanvas');
-  scene=new THREE.Scene();
-  cam=new THREE.PerspectiveCamera(40,innerWidth/innerHeight,0.1,100); cam.position.z=zoom;
-  renderer=new THREE.WebGLRenderer({canvas:cv,antialias:true,alpha:true});
-  renderer.setSize(innerWidth,innerHeight); renderer.setPixelRatio(Math.min(devicePixelRatio,2));
-
-  scene.add(new THREE.AmbientLight(0xffffff,.95));
-  const dl=new THREE.DirectionalLight(0xffffff,.45); dl.position.set(3,2,5); scene.add(dl);
-
-  globe=new THREE.Group(); scene.add(globe);
-  const sph=new THREE.Mesh(new THREE.SphereGeometry(R,96,96),
-    new THREE.MeshPhongMaterial({map:makeEarthTexture(),shininess:8,specular:0x335577}));
-  globe.add(sph);
-  // faint atmosphere
-  const atm=new THREE.Mesh(new THREE.SphereGeometry(R*1.03,48,48),
-    new THREE.MeshBasicMaterial({color:0x7fb0d8,transparent:true,opacity:.10,side:THREE.BackSide}));
-  globe.add(atm);
-
-  buildAmmonia();
-  buildLayerList();
-
-  raycaster=new THREE.Raycaster(); raycaster.params.Points.threshold=0.03; mouse=new THREE.Vector2();
-  bindGlobe(cv);
-  animateGlobe();
-}
-function buildAmmonia(){
-  const pos=[],col=[],siz=[]; ammMeta=[];
-  const modeled={}; PLANTS.forEach(p=>{ if(p.amm_idx!=null) modeled[p.amm_idx]=p.idx; });   // globe idx → HOPS plant idx
-  const capMax=Math.max(...AMM.map(p=>p.ktpa||0),1);
-  AMM.forEach(p=>{
-    const v=ll2v(p.lat,p.lon,R*1.01); pos.push(v.x,v.y,v.z);
-    if(p.idx in modeled){col.push(0,.62,.45);} else {col.push(.84,.37,0);}
-    // dot size by capacity (sqrt scale so area ~ capacity); unknown cap → small
-    const c=p.ktpa||0;
-    siz.push(0.05 + Math.sqrt(c/capMax)*0.30 + ((p.idx in modeled)?0.03:0));
-    ammMeta.push({...p,modeled:(p.idx in modeled),hops:modeled[p.idx]});
-  });
-  const g=new THREE.BufferGeometry();
-  g.setAttribute('position',new THREE.Float32BufferAttribute(pos,3));
-  g.setAttribute('color',new THREE.Float32BufferAttribute(col,3));
-  g.setAttribute('psize',new THREE.Float32BufferAttribute(siz,1));
-  ammPts=new THREE.Points(g,new THREE.ShaderMaterial({
-    transparent:true,
-    vertexShader:`attribute float psize; varying vec3 vC;
-      void main(){ vC=color; vec4 mv=modelViewMatrix*vec4(position,1.0);
-        gl_PointSize = psize * (320.0 / -mv.z);
-        gl_Position = projectionMatrix*mv; }`,
-    fragmentShader:`varying vec3 vC;
-      void main(){ vec2 d=gl_PointCoord-vec2(0.5);
-        float r=length(d); if(r>0.5) discard;
-        float a=smoothstep(0.5,0.38,r);
-        gl_FragColor=vec4(vC,a*0.92); }`,
-    vertexColors:true
-  }));
-  globe.add(ammPts);
-  AMM.filter(p=>p.idx in modeled).forEach(p=>{
-    const v=ll2v(p.lat,p.lon,R*1.01);
-    const rg=new THREE.RingGeometry(.028,.042,24);
-    const rm=new THREE.Mesh(rg,new THREE.MeshBasicMaterial({color:0x009E73,transparent:true,opacity:.7,side:THREE.DoubleSide}));
-    rm.position.copy(v); rm.lookAt(v.clone().multiplyScalar(2)); rm.userData={t:Math.random()*6};
-    hl.push(rm); globe.add(rm);
-  });
-}
 function buildLayerList(){
   const host=document.getElementById('layerList');
   Object.entries(LAYER_META).forEach(([k,m])=>{
@@ -427,89 +362,24 @@ function buildLayerList(){
     host.appendChild(row);
   });
 }
-function loadLayers(){ return window.__layersP||(window.__layersP=fetch('assets/layers.json').then(r=>r.json()).then(j=>{window.LAYERS=j;}).catch(()=>{window.LAYERS={};})); }
-function toggleLayer(k,on){
-  if(on && !layerClouds[k] && !LAYER_META[k].line && !window.LAYERS){ loadLayers().then(()=>toggleLayer(k,on)); return; }
-  if(on){
-    if(!layerClouds[k] && LAYER_META[k].line){
-      const pos=[];
-      CO2_PIPES.forEach(line=>{ for(let i=0;i<line.length-1;i++){ const a=ll2v(line[i][0],line[i][1],R*1.012), b=ll2v(line[i+1][0],line[i+1][1],R*1.012); pos.push(a.x,a.y,a.z,b.x,b.y,b.z); } });
-      const g=new THREE.BufferGeometry(); g.setAttribute('position',new THREE.Float32BufferAttribute(pos,3));
-      layerClouds[k]=new THREE.LineSegments(g,new THREE.LineBasicMaterial({color:0x1a1a1a,transparent:true,opacity:.9}));
-    }
-    if(!layerClouds[k]){
-      const pts=(window.LAYERS&&window.LAYERS[k])||DATA.layers[k], pos=[];
-      pts.forEach(p=>{ const v=ll2v(p[0],p[1],R*1.008); pos.push(v.x,v.y,v.z); }); // p=[lat,lon]
-      const g=new THREE.BufferGeometry(); g.setAttribute('position',new THREE.Float32BufferAttribute(pos,3));
-      layerClouds[k]=new THREE.Points(g,new THREE.PointsMaterial({size:.022,color:new THREE.Color(LAYER_META[k].c),sizeAttenuation:true,transparent:true,opacity:.85}));
-    }
-    globe.add(layerClouds[k]);
-  } else if(layerClouds[k]) globe.remove(layerClouds[k]);
-}
-function bindGlobe(cv){
-  cv.addEventListener('mousedown',e=>{drag=true;lastX=e.clientX;lastY=e.clientY;velY=0;});
-  addEventListener('mouseup',()=>drag=false);
-  addEventListener('mousemove',e=>{
-    if(drag){ const dx=(e.clientX-lastX)*.005,dy=(e.clientY-lastY)*.005;
-      target.y+=dx; target.x=Math.max(-1.2,Math.min(1.2,target.x+dy)); velY=dx; lastX=e.clientX;lastY=e.clientY; }
-    else hoverGlobe(e);
-  });
-  // gentler zoom: smaller factor + clamp; supports trackpad & wheel
-  cv.addEventListener('wheel',e=>{e.preventDefault();
-    const step=e.deltaMode===1? e.deltaY*0.04 : e.deltaY*0.0009;
-    zoom=Math.max(2.0,Math.min(7.5,zoom*Math.exp(step))); cam.position.z=zoom;
-  },{passive:false});
-  cv.addEventListener('click',clickGlobe);
-  // touch
-  let pinch=0;
-  cv.addEventListener('touchstart',e=>{ if(e.touches.length===1){drag=true;lastX=e.touches[0].clientX;lastY=e.touches[0].clientY;} else if(e.touches.length===2){pinch=Math.hypot(e.touches[0].clientX-e.touches[1].clientX,e.touches[0].clientY-e.touches[1].clientY);}},{passive:true});
-  cv.addEventListener('touchmove',e=>{ if(e.touches.length===1&&drag){const dx=(e.touches[0].clientX-lastX)*.005,dy=(e.touches[0].clientY-lastY)*.005;target.y+=dx;target.x=Math.max(-1.2,Math.min(1.2,target.x+dy));lastX=e.touches[0].clientX;lastY=e.touches[0].clientY;} else if(e.touches.length===2){const d=Math.hypot(e.touches[0].clientX-e.touches[1].clientX,e.touches[0].clientY-e.touches[1].clientY);if(pinch)zoom=Math.max(2.0,Math.min(7.5,zoom*(pinch/d)));pinch=d;cam.position.z=zoom;}},{passive:true});
-  cv.addEventListener('touchend',()=>{drag=false;pinch=0;});
-  addEventListener('resize',()=>{ if(!renderer)return; cam.aspect=innerWidth/innerHeight;cam.updateProjectionMatrix();renderer.setSize(innerWidth,innerHeight); });
-}
-function hoverGlobe(e){
-  if(!ammPts)return;
-  mouse.x=(e.clientX/innerWidth)*2-1; mouse.y=-(e.clientY/innerHeight)*2+1;
-  raycaster.setFromCamera(mouse,cam);
-  const hit=raycaster.intersectObject(ammPts);
-  const tip=document.getElementById('tip');
-  if(hit.length){ const i=hit[0].index, p=ammMeta[i];
-    tip.style.opacity=1; tip.style.left=(e.clientX+14)+'px'; tip.style.top=(e.clientY+14)+'px';
-    tip.innerHTML=`<div class="t-n">${p.modeled?plantLabel(p.hops):'Ammonia plant'}</div>
-      <div class="t-m">${p.country} · ${p.ktpa} ktpa</div>${p.modeled?'<div class="t-cta">click to open model →</div>':''}`;
-    document.body.style.cursor=p.modeled?'pointer':'default';
-  } else { tip.style.opacity=0; document.body.style.cursor='default'; }
-}
-function clickGlobe(e){
-  if(!ammPts)return;
-  mouse.x=(e.clientX/innerWidth)*2-1; mouse.y=-(e.clientY/innerHeight)*2+1;
-  raycaster.setFromCamera(mouse,cam);
-  const hit=raycaster.intersectObject(ammPts);
-  if(hit.length){ const p=ammMeta[hit[0].index]; if(p.modeled) openPlant(p.hops); }
-}
-function animateGlobe(){
-  requestAnimationFrame(animateGlobe);
-  if(!drag){ target.y+=velY; velY*=.94; if(Math.abs(velY)<1e-5)velY=0; }
-  rot.x+=(target.x-rot.x)*.12; rot.y+=(target.y-rot.y)*.12;
-  globe.rotation.x=rot.x; globe.rotation.y=rot.y;
-  const tt=performance.now()*.001;
-  hl.forEach(r=>{ const s=1+Math.sin(tt*1.8+r.userData.t)*.2; r.scale.set(s,s,s); r.material.opacity=.45+Math.sin(tt*1.8+r.userData.t)*.25; });
-  renderer.render(scene,cam);
-}
 </script>
+<script src="map.js"></script>
+<script src="finance.js"></script>
+<script src="build.js"></script>
 <script>
 /* ============ NAVIGATION ============ */
 let curScn=null, curPlantIdx=null, curCItarget=null;
 function show(id){ document.querySelectorAll('.view').forEach(v=>v.classList.remove('active')); document.getElementById(id).classList.add('active'); }
-function goGlobe(){ location.href=location.pathname; }
-function goModel(){ if(__facilityEmbedded()){ openFacilityOverlay('facility='+curPlantIdx); } else { location.href='Hybrid Ammonia Plant.html?facility='+curPlantIdx; } }
+function goGlobe(){ show('globeView'); if(map){ map.resize(); if(siteIdx==null) map.flyTo({zoom:GLOBE_ZOOM,pitch:0,bearing:0,duration:1200}); } syncURL(); }
+function goModel(){ openSite(curPlantIdx); }
+function goSchematic(){ if(__facilityEmbedded()){ openFacilityOverlay('facility='+curPlantIdx); } else { location.href='Hybrid Ammonia Plant.html?facility='+curPlantIdx; } }
 function goDash(){ show('dashView'); }
 
 /* scenarios for a given plant location */
 function scnsForPlant(idx){ return SCN.filter(s=>s.plant===idx && s.hb); }
 
 /* clicking a modeled plant on the globe opens the 3D facility page */
-function openPlant(idx){ if(__facilityEmbedded()){ openFacilityOverlay('facility='+idx); } else { location.href='Hybrid Ammonia Plant.html?facility='+idx; } }
+function openPlant(idx){ openSite(idx); }
 
 /* ---- embedded 3D facility (standalone bundle only) ---- */
 function __facilityEmbedded(){ return !!(window.__resources && window.__resources.facilityHtml); }
@@ -1159,6 +1029,7 @@ function renderActiveTab(){
   else if(activeTab==='hourly') buildHourly();
   else if(activeTab==='util') buildUtil();
   else if(activeTab==='detail') buildDetail();
+  else if(activeTab==='finance') buildFinance();
   else if(activeTab==='assump') buildAssump();
 }
 function initDash(){
@@ -1188,15 +1059,19 @@ function postProcessRows(){ SCN.forEach(s=>s.rows.forEach(r=>{
 
 /* boot */
 function syncURL(){
-  if(!curScn) return;
-  const p=new URLSearchParams(); p.set('plant',curPlantIdx); p.set('ccs',curScn.ccs?1:0); if(curScn.policy) p.set('policy',curScn.policy);
-  if(curCItarget!=null) p.set('ci',curCItarget); p.set('tab',activeTab);
+  const p=new URLSearchParams(), onMap=document.getElementById('globeView').classList.contains('active');
+  if(onMap && BUILD.on){ p.set('view','build'); if(BUILD.lat!=null){ p.set('lat',BUILD.lat); p.set('lon',BUILD.lon); p.set('tpd',BUILD.tpd); } }
+  else if(onMap && siteIdx!=null){ p.set('plant',siteIdx); p.set('view','site'); }
+  else if(!onMap && curScn){ p.set('plant',curPlantIdx); p.set('ccs',curScn.ccs?1:0); if(curScn.policy) p.set('policy',curScn.policy); if(curCItarget!=null) p.set('ci',curCItarget); p.set('tab',activeTab); }
+  else { history.replaceState(null,'',location.pathname+location.search); return; }
   history.replaceState(null,'','#'+p.toString());
 }
 function applyURLState(){
   const q=new URLSearchParams(location.search), h=new URLSearchParams(location.hash.replace(/^#/,''));
   const fid=q.get('facility'), dash=q.get('dash');
   if(dash && fid && PLANT[parseInt(fid,10)]){ openDashboard(parseInt(fid,10)); return; }
+  if(h.get('view')==='site' && PLANT[parseInt(h.get('plant'),10)]){ openSite(parseInt(h.get('plant'),10), true); return; }
+  if(h.get('view')==='build'){ const go=()=>{ enterBuild(); if(h.get('lat')){ if(h.get('tpd')) BUILD.tpd=+h.get('tpd'); setBuildSite(+h.get('lat'),+h.get('lon'),''); } }; if(mapLoaded) go(); else map.once('load',()=>setTimeout(go,50)); return; }
   if(h.get('plant')!=null && PLANT[parseInt(h.get('plant'),10)]){
     openDashboard(parseInt(h.get('plant'),10));
     const want=SCN.find(s=>s.plant===curPlantIdx && s.hb && (s.ccs?1:0)===+(h.get('ccs')||0) && (s.policy||'')===(h.get('policy')||''));

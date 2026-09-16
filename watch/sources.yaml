@@ -1,0 +1,64 @@
+# One entry per source. Adding a source never means editing code.
+#   type: openalex | crossref | arxiv | federalregister | rss
+#   category_hint / region_hint: defaults the classifier may override
+#   Only sources verified to respond (2026-09-15) are listed. Google Scholar has no API and is deliberately absent.
+- id: openalex
+  name: OpenAlex
+  type: openalex
+  query: 'ammonia AND (electrolysis OR "steam methane" OR "carbon capture" OR decarbonization OR decarbonisation OR "green ammonia" OR "blue ammonia" OR "low-carbon ammonia" OR "Haber-Bosch")'
+  category_hint: publication
+  region_hint: Global
+- id: crossref
+  name: Crossref
+  type: crossref
+  query: 'low-carbon ammonia production electrolysis steam methane reforming carbon capture cost'
+  category_hint: publication
+  region_hint: Global
+- id: arxiv
+  name: arXiv
+  type: arxiv
+  query: 'all:ammonia AND (all:electrolysis OR all:"green hydrogen" OR all:"carbon capture" OR all:decarbonization)'
+  category_hint: publication
+  region_hint: Global
+- id: federalregister
+  name: US Federal Register
+  type: federalregister
+  terms: ['"clean hydrogen"', 'ammonia', '"45V"', '"45Q"', '"carbon capture" hydrogen']
+  category_hint: policy
+  region_hint: United States
+- id: ec_presscorner
+  name: European Commission press corner
+  type: rss
+  url: https://ec.europa.eu/commission/presscorner/api/rss?language=en&keywords=hydrogen
+  category_hint: policy
+  region_hint: Europe
+- id: doe_news
+  name: US Department of Energy
+  type: rss
+  url: https://www.energy.gov/rss/news
+  category_hint: policy
+  region_hint: United States
+- id: ammonia_energy
+  name: Ammonia Energy Association
+  type: rss
+  url: https://ammoniaenergy.org/feed/
+  category_hint: project
+  region_hint: Global
+- id: nature_energy
+  name: Nature Energy
+  type: rss
+  url: https://www.nature.com/nenergy.rss
+  category_hint: publication
+  region_hint: Global
+- id: joule
+  name: Joule
+  type: rss
+  url: https://www.cell.com/joule/inpress.rss
+  category_hint: publication
+  region_hint: Global
+- id: ijhe
+  name: Int. J. Hydrogen Energy
+  type: rss
+  url: https://rss.sciencedirect.com/publication/science/03603199
+  category_hint: publication
+  region_hint: Global

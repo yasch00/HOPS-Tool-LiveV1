@@ -1,0 +1,30 @@
+name: watch
+on:
+  schedule:
+    - cron: '20 6 * * *'        # daily 06:20 UTC (GitHub may delay scheduled runs under load)
+  workflow_dispatch:
+permissions:
+  contents: write
+concurrency: watch
+jobs:
+  screen:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+          cache: pip
+          cache-dependency-path: watch/requirements.txt
+      - run: pip install -r watch/requirements.txt
+      - name: Collect and screen
+        run: python watch/watch.py
+        env:
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+          WATCH_MODEL: ${{ vars.WATCH_MODEL || 'claude-opus-5' }}
+      - name: Commit the feed
+        run: |
+          git config user.name "hops-watch"
+          git config user.email "hops-watch@users.noreply.github.com"
+          git add data/watch.json data/watch
+          git diff --cached --quiet || (git commit -m "watch: $(date -u +%F)" && git push)

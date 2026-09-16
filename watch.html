@@ -32,7 +32,7 @@
 </div>
 <div id="wstatus" style="margin-top:var(--s5)"></div>
 <div id="wfeed" style="margin-top:var(--s5)"></div>
-<p class="small mono" style="color:var(--ink-3);margin-top:var(--s7)">Feed generated [YYYY-MM-DD HH:MM] UTC · <a href="data/watch.json">download JSON</a></p>
+<p class="small mono" style="color:var(--ink-3);margin-top:var(--s7)">Feed generated <span id="watchStamp" data-build="">not yet — the daily screen has not run</span><a href="data/watch.json">download JSON</a></p>
 </div>
 </main><footer class="site"><div class="wrap">
 <div class="foot-grid">
@@ -64,6 +64,7 @@ out+='<div class="group-head"><h2>'+(CAT[c]||c)+'</h2><span>'+g.length+'</span><
 return out},
 render:card
 });
+fetch('data/watch/status.json').then(function(r){return r.ok?r.json():null}).then(function(st){var e=document.getElementById('watchStamp');if(e&&st&&st.generated)e.textContent=st.generated.replace('T',' ').slice(0,16)+' UTC · '+st.feed_items+' items · '+st.model}).catch(function(){});
 </script>
 </body>
 </html>

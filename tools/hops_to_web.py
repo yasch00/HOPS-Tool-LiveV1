@@ -77,6 +77,11 @@ ROW_MAP = {
     "irr": "Project IRR %", "npv": "Project NPV $", "capex_overnight": "CAPEX overnight $", "net_cf": "Annual net CF $",
     "nh3_price": "NH3 price $/t", "lcoe_ren": "LCOE Renewables $/MWh", "elec_price": "Realized_Elec_Price_Total $/MWh",
     "crf": "CRF", "interest": "interest_rate", "lifetime": "lifetime_yr",
+    # needed by the in-browser project-finance model (see atlas finance tab)
+    "iso_unit": "ISO_trans_unit", "iso_trans": "OPEX_ISO_TRANSMISSION $/tNH3", "iso_anc": "OPEX_ISO_ANCILLARY $/tNH3",
+    "eu_net": "OPEX_EU_NETWORK_VOL $/tNH3", "grid_purchase_opex": "OPEX_GRID_PURCHASE $", "rev_grid": "Revenue_Grid_Sales $",
+    "nh3_revenue": "NH3 revenue $/yr", "ren_cost": "Renewables_annual_cost $", "e_selfcons": "Renewable_MWh_self_consumed",
+    "export_price": "Renewable_avg_export_price $/MWh",
     # policy re-pricing extras (present only in the policy CSVs)
     "ets_credit": "ETS_levelised_credit_$/tNH3", "us_credit": "US_credit_$/tNH3",
     "lcoa_lcoe_nopolicy": ("LCOA_ammonia_only_LCOE_noETS", "LCOA_ammonia_only_LCOE_noCredit"),
