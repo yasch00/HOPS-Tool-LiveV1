@@ -78,6 +78,7 @@ export function prepSeries(rec){
   const SER = {};
   for (const k of FLOW_KEYS) { const a = derived[k] || rec[k]; if (!a || !a.length) continue; const nz = [...a].filter(v => v > 0).sort((x, y) => x - y); SER[k] = { arr: a, cap: (nz.length ? nz[Math.floor(nz.length * 0.98)] : 0) || 1, live: nz.length > 0 }; }
   SER.__N = N; SER.__pvCap = Math.max(...rec.pv, 1); SER.__wtCap = rec.wt ? Math.max(...rec.wt, 1) : 1; SER.__rec = rec;
+  SER.__cloud = computeCloud(rec);
   return SER;
 }
 const at = (arr, h) => { const i = Math.floor(h) % arr.length, f = h - Math.floor(h); return arr[i] + (arr[(i + 1) % arr.length] - arr[i]) * f; };
@@ -203,4 +204,87 @@ export function assemblePlant(C){
     }
   };
   return P;
+}
+
+/* ================================================================== weather + day/night (port of the live-sim module §2–§7)
+   Solar geometry at the site, cloudiness from the PV output against its clear-sky envelope, drifting cloud clusters, rain
+   fronts with hysteresis and lightning, sun/moon/stars, and the lighting that follows all of it. Everything lives in scene
+   units inside the plant root so it scales with the plant; the map's imagery and sky are driven from facility.js. */
+export function sunAngles(lat, lon, hourOfYear){
+  const LAT = lat * Math.PI / 180, local = hourOfYear + lon / 15;              // data index is UTC → local solar time
+  const doy = ((Math.floor(local / 24) % 365) + 365) % 365 + 1, decl = 23.44 * Math.PI / 180 * Math.sin(2 * Math.PI * (284 + doy) / 365);
+  const hod = ((local % 24) + 24) % 24, ha = (hod - 12) * 15 * Math.PI / 180;
+  const elev = Math.asin(Math.sin(LAT) * Math.sin(decl) + Math.cos(LAT) * Math.cos(decl) * Math.cos(ha));
+  const az = Math.atan2(Math.sin(ha), Math.cos(ha) * Math.sin(LAT) - Math.tan(decl) * Math.cos(LAT));
+  return { elev, az };
+}
+export function dirFrom(elev, az){ return new THREE.Vector3(Math.sin(az) * Math.cos(elev), Math.sin(elev), -Math.cos(az) * Math.cos(elev)); }
+const MONTH_DAYS = [31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31];
+function monthOf(h){ let d = Math.floor(h / 24); for (let m = 0; m < 12; m++) { if (d < MONTH_DAYS[m]) return m; d -= MONTH_DAYS[m]; } return 11; }
+/* cloudiness per hour: 1 − pv / clear-sky envelope (90th percentile per month × hour-of-day), forward-filled at night, smoothed */
+export function computeCloud(rec){
+  if (!rec || !rec.pv) return null;
+  const PV = rec.pv, N = PV.length, step = Math.round(8760 / N), pvCap = Math.max(...PV, 1);
+  const buckets = Array.from({ length: 12 * 24 }, () => []);
+  for (let h = 0; h < N; h++) buckets[monthOf(h * step) * 24 + ((h * step) % 24)].push(PV[h]);
+  const env90 = buckets.map(a => { const s = [...a].sort((x, y) => x - y); return s[Math.floor(s.length * 0.9)] || 0; });
+  const C = new Float32Array(N); let carry = 0.3;
+  for (let h = 0; h < N; h++) { const exp = env90[monthOf(h * step) * 24 + ((h * step) % 24)]; if (exp > pvCap * 0.06) carry = Math.min(1, Math.max(0, 1 - PV[h] / exp)); C[h] = carry; }
+  const sm = new Float32Array(N); for (let h = 0; h < N; h++) sm[h] = (C[Math.max(0, h - 1)] + C[h] * 2 + C[Math.min(N - 1, h + 1)]) / 4;
+  return sm;
+}
+const C_ = h => new THREE.Color(h), lerpC = (a, b, t) => a.clone().lerp(b, Math.min(1, Math.max(0, t))), smooth = (a, b, x) => { const t = Math.min(1, Math.max(0, (x - a) / (b - a))); return t * t * (3 - 2 * t); };
+const PAL = { nightTop: C_('#0b1322'), nightHor: C_('#1d2c40'), duskTop: C_('#54749c'), duskHor: C_('#f0ae72'), dayTop: C_('#8fbcdc'), dayHor: C_('#e6eef2'), grayTop: C_('#79858f'), grayHor: C_('#a8b2ba') };
+function glowTexture(inner, outer){ const c = document.createElement('canvas'); c.width = c.height = 128; const x = c.getContext('2d'); const g = x.createRadialGradient(64, 64, 4, 64, 64, 64); g.addColorStop(0, inner); g.addColorStop(0.35, outer); g.addColorStop(1, 'rgba(0,0,0,0)'); x.fillStyle = g; x.fillRect(0, 0, 128, 128); return new THREE.CanvasTexture(c); }
+
+export function makeWeather(lights){
+  const group = new THREE.Group();
+  const sunDisc = new THREE.Sprite(new THREE.SpriteMaterial({ map: glowTexture('rgba(255,246,220,1)', 'rgba(255,210,130,0.55)'), transparent: true, depthWrite: false })); sunDisc.scale.setScalar(70); group.add(sunDisc);
+  const moonDisc = new THREE.Sprite(new THREE.SpriteMaterial({ map: glowTexture('rgba(232,238,245,1)', 'rgba(170,190,215,0.35)'), transparent: true, depthWrite: false })); moonDisc.scale.setScalar(34); group.add(moonDisc);
+  const starGeo = new THREE.BufferGeometry(); { const pts = []; for (let i = 0; i < 900; i++) { const az = Math.random() * Math.PI * 2, el = Math.asin(Math.random()) * 0.98 + 0.02; const v = dirFrom(el, az).multiplyScalar(355); pts.push(v.x, v.y, v.z); } starGeo.setAttribute('position', new THREE.Float32BufferAttribute(pts, 3)); }
+  const stars = new THREE.Points(starGeo, new THREE.PointsMaterial({ color: '#dbe7f7', size: 1.7, sizeAttenuation: false, transparent: true, opacity: 0, depthWrite: false })); group.add(stars);
+  const cloudGroups = [], WIND_DIR = new THREE.Vector3(1, 0, 0.25).normalize();
+  for (let i = 0; i < 26; i++) { const g = new THREE.Group(), m = new THREE.MeshStandardMaterial({ color: '#ffffff', roughness: 1, metalness: 0, transparent: true, opacity: 0, flatShading: true });
+    const puffs = 5 + Math.floor(Math.random() * 3); for (let p = 0; p < puffs; p++) { const s = new THREE.Mesh(new THREE.SphereGeometry(1, 7, 5), m); s.position.set((Math.random() - 0.5) * 16, (Math.random() - 0.5) * 2.4, (Math.random() - 0.5) * 7); s.scale.set(6 + Math.random() * 8, 2.4 + Math.random() * 1.8, 4 + Math.random() * 4); g.add(s); }
+    g.position.set((Math.random() - 0.5) * 560, 58 + Math.random() * 30, (Math.random() - 0.5) * 560); g.userData = { mat: m, target: 0, drift: 0.75 + Math.random() * 0.5 }; group.add(g); cloudGroups.push(g); }
+  const RAIN_N = 4200, rainGeo = new THREE.BufferGeometry(); { const pts = new Float32Array(RAIN_N * 3); for (let i = 0; i < RAIN_N; i++) { pts[i * 3] = (Math.random() - 0.5) * 260; pts[i * 3 + 1] = Math.random() * 120; pts[i * 3 + 2] = (Math.random() - 0.5) * 260; } rainGeo.setAttribute('position', new THREE.BufferAttribute(pts, 3)); }
+  const rain = new THREE.Points(rainGeo, new THREE.PointsMaterial({ color: '#9fb4c8', size: 0.5, transparent: true, opacity: 0, depthWrite: false })); group.add(rain);
+  const W = { group, sunDisc, moonDisc, stars, cloudGroups, rain, rainGeo, RAIN_N, WIND_DIR, rainAmt: 0, bolt: 0, lights, state: {} };
+  /* one frame of the original loop: returns what the map and the HUD need */
+  W.update = function(simH, dt, plant, SER, exposureBase){
+    const L = this.lights, rec = SER && SER.__rec, N = rec && rec.pv ? rec.pv.length : 8760, step = Math.round(8760 / N);
+    const at = (arr, h) => { const i = Math.floor(h) % arr.length, f = h - Math.floor(h); return arr[i] + (arr[(i + 1) % arr.length] - arr[i]) * f; };
+    const pvNow = rec && rec.pv ? at(rec.pv, simH) : 0, wtNow = rec && rec.wt ? at(rec.wt, simH) : 0, wtCap = SER ? SER.__wtCap : 1, pvCap = SER ? SER.__pvCap : 1;
+    const cloudRaw = SER && SER.__cloud ? Math.min(1, Math.max(0, at(SER.__cloud, simH))) : 0.3, cloud = smooth(0.10, 0.78, cloudRaw);
+    const { elev, az } = sunAngles(plant.lat, plant.lon, simH * step), elevDeg = elev * 180 / Math.PI;
+    const rainTarget = (this.rainAmt > 0 ? cloud > 0.60 : cloud > 0.74) ? 1 : 0; this.rainAmt += (rainTarget - this.rainAmt) * Math.min(1, dt * 1.2); const raining = this.rainAmt > 0.45;
+    if (raining && this.rainAmt > 0.7 && Math.random() < dt * 0.25) this.bolt = 1; this.bolt = Math.max(0, this.bolt - dt * 5);
+    const dayF = smooth(-7, 12, elevDeg), duskF = Math.exp(-Math.pow((elevDeg - 1) / 9, 2)), nightF = 1 - dayF;
+    let top = lerpC(lerpC(PAL.nightTop, PAL.dayTop, dayF), PAL.duskTop, duskF * 0.8), hor = lerpC(lerpC(PAL.nightHor, PAL.dayHor, dayF), PAL.duskHor, duskF * 0.85);
+    top = lerpC(top, PAL.grayTop, cloud * 0.92 * dayF); hor = lerpC(hor, PAL.grayHor, cloud * 0.92 * dayF);
+    // lights (original intensities)
+    const sunDir = dirFrom(Math.max(elev, -0.12), az);
+    L.sun.position.copy(sunDir).multiplyScalar(130); L.sun.intensity = 2.5 * dayF * (1 - 0.92 * cloud); L.sun.color.copy(lerpC(C_('#ffd9a8'), C_('#fff6e8'), smooth(2, 25, elevDeg)));
+    L.hemi.intensity = 0.22 + 1.35 * dayF * (1 - 0.62 * cloud); L.hemi.color.copy(lerpC(C_('#27374d'), C_('#eaf2f8'), dayF)); L.hemi.groundColor.copy(lerpC(C_('#0e1216'), C_('#9aa090'), dayF));
+    L.fill.intensity = 0.12 + 0.78 * dayF + nightF * 0.25 * (1 - 0.7 * cloud); L.fill.color.copy(lerpC(C_('#9fb6d8'), C_('#a0bcd6'), dayF));
+    L.rim.intensity = 0.5 * dayF; L.amb.intensity = 0.14 + 0.36 * dayF;
+    let exposure = exposureBase * (0.78 + 0.5 * dayF) * (1 - 0.26 * cloud * dayF) * (1 - 0.18 * this.rainAmt);
+    if (this.bolt > 0) { L.hemi.intensity += this.bolt * 2.2; L.amb.intensity += this.bolt * 1.6; exposure += this.bolt * 0.55; }
+    // sun / moon / stars
+    this.sunDisc.position.copy(sunDir).multiplyScalar(352); this.sunDisc.material.opacity = smooth(-3, 4, elevDeg) * Math.pow(1 - cloud, 2.2);
+    const moonDir = dirFrom(Math.max(-elev, -0.1), az + Math.PI); this.moonDisc.position.copy(moonDir).multiplyScalar(352); this.moonDisc.material.opacity = nightF * Math.pow(1 - cloud, 1.2) * smooth(-2, 6, -elevDeg);
+    this.stars.material.opacity = nightF * (1 - 0.95 * cloud) * 0.95;
+    // clouds drift with the wind
+    const visible = Math.round(cloud * this.cloudGroups.length), windCF = Math.max(0, Math.min(1, wtNow / wtCap)), driftSpd = 3 + windCF * 30;
+    this.cloudGroups.forEach((g, i) => { g.userData.target = i < visible ? (0.65 + 0.35 * cloud) : 0; const m = g.userData.mat; m.opacity += (g.userData.target - m.opacity) * Math.min(1, dt * 0.7);
+      m.color.copy(lerpC(C_('#ffffff'), C_('#5e6a76'), cloud * 0.9)); m.visible = m.opacity > 0.02; g.position.addScaledVector(this.WIND_DIR, driftSpd * g.userData.drift * dt); if (g.position.x > 320) { g.position.x = -320; g.position.z = (Math.random() - 0.5) * 560; } });
+    // rain
+    this.rain.material.opacity = this.rainAmt * 0.85; this.rain.visible = this.rainAmt > 0.03;
+    if (this.rain.visible) { const p = this.rainGeo.attributes.position.array, fall = (75 + windCF * 45) * dt; for (let i = 0; i < this.RAIN_N; i++) { p[i * 3 + 1] -= fall; p[i * 3] += windCF * 22 * dt; if (p[i * 3 + 1] < 0) { p[i * 3 + 1] = 110 + Math.random() * 10; p[i * 3] = (Math.random() - 0.5) * 260; p[i * 3 + 2] = (Math.random() - 0.5) * 260; } } this.rainGeo.attributes.position.needsUpdate = true; }
+    const night = elevDeg < -2, cond = raining ? '🌧 Rain' : night ? (cloud > 0.55 ? '☁ Cloudy night' : '🌙 Clear night') : cloud < 0.25 ? '☀ Clear' : cloud < 0.55 ? '⛅ Partly cloudy' : '☁ Overcast';
+    const ghi = Math.round(1000 * Math.max(0, Math.sin(elevDeg * Math.PI / 180)) * (1 - 0.75 * cloud)), ws = (12 * Math.cbrt(Math.max(0, wtNow / wtCap))).toFixed(1);
+    this.state = { dayF, nightF, duskF, cloud, cloudRaw, elevDeg, raining, rainAmt: this.rainAmt, bolt: this.bolt, exposure, top: '#' + top.getHexString(), hor: '#' + hor.getHexString(), cond, ghi, ws, pvNow, wtNow, windCF };
+    return this.state;
+  };
+  return W;
 }

@@ -232,8 +232,8 @@ function makeTurbineLayer(){
     id: 'turbines-3d', type: 'custom', renderingMode: '3d', visible: true, n: 0,
     onAdd(map, gl){
       this.map = map; this.camera = new THREE.Camera(); this.scene = new THREE.Scene();
-      this.scene.add(new THREE.AmbientLight(0xffffff, .75));
-      const sun = new THREE.DirectionalLight(0xffffff, .9); sun.position.set(-.6, 1, .5); this.scene.add(sun);
+      this.ambL = new THREE.AmbientLight(0xffffff, .75); this.scene.add(this.ambL);
+      this.sunL = new THREE.DirectionalLight(0xffffff, .9); this.sunL.position.set(-.6, 1, .5); this.scene.add(this.sunL); this.daylight = 1;
       this.renderer = new THREE.WebGLRenderer({ canvas: map.getCanvas(), context: gl, antialias: true }); this.renderer.autoClear = false;
       this.group = new THREE.Group(); this.scene.add(this.group); this.t0 = performance.now();
     },
@@ -259,6 +259,7 @@ function makeTurbineLayer(){
     },
     render(gl, args){
       if (!this.n || !this.visible || !this.origin) return;
+      this.ambL.intensity = .75 * this.daylight; this.sunL.intensity = .9 * this.daylight;
       const proj = (args && args.defaultProjectionData) ? args.defaultProjectionData.mainMatrix : args;
       const M = new THREE.Matrix4().fromArray(proj);
       const Lm = new THREE.Matrix4().makeTranslation(this.origin.x, this.origin.y, this.origin.z)

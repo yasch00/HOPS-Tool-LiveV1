@@ -88,7 +88,10 @@ map next to the existing site, 330 m east of the plant's coordinates. `atlas/fac
 the page's placement, capacity scaling, obstacle-aware pipe routing and flow animation against real run data. Subsystems
 are present and sized from the selected run (a run without CCS has no capture unit; the electrolysis hall grows with P_EL),
 pipes light up only when the optimizer moves something through them in the scrubbed hour, rotors follow the wind output,
-and clicking a unit shows its description with the run's numbers. The old standalone page is no longer linked.
+and clicking a unit shows its description with the run's numbers. The live-sim's weather is ported too: sun and moon from the
+site's latitude and the hour, cloudiness derived from the PV output against its clear-sky envelope, drifting clouds, rain
+fronts with lightning, and the lighting following all of it — the map's imagery darkens at night and desaturates under cloud,
+the sky takes the palette, the turbines dim. Times in the bar are site-local. The old standalone page is no longer linked.
 
 ## Running the optimizer for a requested site (tools/hops_site_run.py)
 

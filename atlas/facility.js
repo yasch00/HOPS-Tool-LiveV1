@@ -29,20 +29,24 @@ function makeFacilityLayer(M){
       this.renderer.autoClear = false; this.renderer.outputColorSpace = THREE.SRGBColorSpace; this.renderer.toneMapping = THREE.ACESFilmicToneMapping; this.renderer.toneMappingExposure = 1.0;   // original 1.28 was tuned for its own pale sky; satellite ground reads better a touch darker
       this.renderer.shadowMap.enabled = false;                                      // no framebuffer switches inside the map's frame
       const pm = new THREE.PMREMGenerator(this.renderer); this.scene.environment = pm.fromEquirectangular(M.makeSkyTexture()).texture; pm.dispose();
-      this.lights = M.makeLights(FAC_SCALE); this.scene.add(this.lights.group);
       this.holder = new THREE.Group(); this.scene.add(this.holder); this.clock = new THREE.Clock();
+      this.lights = M.makeLights(1); this.scene.add(this.lights.group);                        // in the scene root (setPlant clears the holder); a directional light's direction is scale-free, so scene-unit positions are fine
     },
     setPlant(plant, P){
       this.holder.clear(); this.P = P; this.plant = plant; if (!plant || !P) { this.map.triggerRepaint(); return; }
       this.origin = maplibregl.MercatorCoordinate.fromLngLat([plant.lon, plant.lat], 0); this.scale = this.origin.meterInMercatorCoordinateUnits();
       const corners = [[0, 0], [-85, -55], [85, -55], [85, 55], [-85, 55]].map(([x, z]) => { const [lx, lz] = sceneToLocal({ x, z }); return this.map.queryTerrainElevation({ lng: facLocal2LngLat(plant, lx, lz)[0], lat: facLocal2LngLat(plant, lx, lz)[1] }) || 0; });
       const base = Math.max(...corners) + 0.4;
-      P.root.scale.setScalar(FAC_SCALE); P.root.position.set(FAC_OFFSET.x, base, FAC_OFFSET.z); this.holder.add(P.root); this.map.triggerRepaint();
+      P.root.scale.setScalar(FAC_SCALE); P.root.position.set(FAC_OFFSET.x, base, FAC_OFFSET.z); this.holder.add(P.root);
+      if (!P.weather) { P.weather = M.makeWeather(this.lights); P.root.add(P.weather.group); }
+      this.map.triggerRepaint();
     },
     render(gl, args){
       if (!this.P || !FAC.on || !this.origin) return;
       const dt = Math.min(this.clock.getDelta(), 0.05), t = this.clock.elapsedTime;
       this.P.tick(dt, t);
+      if (this.P.weather) { const st = this.P.weather.update(FAC.hour, dt, this.plant, this.P.SER, 1.0); this.renderer.toneMappingExposure = st.exposure; FAC.weather = st; applyWeatherToMap(st);
+        if (!this.__wxT || performance.now() - this.__wxT > 250) { this.__wxT = performance.now(); const wx = document.getElementById('facWeather'); if (wx) wx.textContent = `${st.cond} · sun ${st.elevDeg.toFixed(0)}° · ${st.ghi} W/m² · ${st.ws} m/s · cloud ${(st.cloud * 100).toFixed(0)}%`; } }
       const proj = (args && args.defaultProjectionData) ? args.defaultProjectionData.mainMatrix : args;
       const Mx = new THREE.Matrix4().fromArray(proj);
       const Lm = new THREE.Matrix4().makeTranslation(this.origin.x, this.origin.y, this.origin.z).scale(new THREE.Vector3(this.scale, -this.scale, this.scale)).multiply(new THREE.Matrix4().makeRotationX(Math.PI / 2));
@@ -82,7 +86,8 @@ function hideFacility(){
   if (map.getSource('fac-labels')) map.getSource('fac-labels').setData({ type: 'FeatureCollection', features: [] });
   const bar = document.getElementById('facilityBar'); if (bar) bar.hidden = true;
   if (map.getLayer('pv-blocks')) map.setPaintProperty('pv-blocks', 'fill-extrusion-color', '#1B3A5C');
-  if (turbineLayer) turbineLayer.speed = 1;
+  if (turbineLayer) { turbineLayer.speed = 1; turbineLayer.daylight = 1; }
+  applyWeatherToMap(null);
 }
 /* ---- click a subsystem (nearest label anchor on screen) → info card with the run's numbers */
 function facilityClick(e){
@@ -127,11 +132,12 @@ function facilitySetHour(h){
   }
   const el = document.getElementById('facHourLabel'); if (el) el.textContent = facHourLabel(h);
   const rd = document.getElementById('facReadout'); if (rd && rec) rd.innerHTML = facReadout(rec, Math.floor(h));
+  const wx = document.getElementById('facWeather'); if (wx && FAC.weather) wx.textContent = `${FAC.weather.cond} · sun ${FAC.weather.elevDeg.toFixed(0)}° · ${FAC.weather.ghi} W/m² · ${FAC.weather.ws} m/s · cloud ${(FAC.weather.cloud * 100).toFixed(0)}%`;
   const sl = document.getElementById('facSlider'); if (sl && Math.abs(+sl.value - h) > 0.5) sl.value = h;
   if (map) map.triggerRepaint();
 }
 const MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'], MSTART = [0, 31, 59, 90, 120, 151, 181, 212, 243, 273, 304, 334];
-function facHourLabel(h){ const step = FAC.rec && FAC.rec.pv ? Math.round(8760 / FAC.rec.pv.length) : 1, hr = Math.floor(h) * step, d = Math.floor(hr / 24); let m = 11; while (m > 0 && MSTART[m] > d) m--; return `${d - MSTART[m] + 1} ${MONTHS[m]} · ${String(hr % 24).padStart(2, '0')}:00`; }
+function facHourLabel(h){ const step = FAC.rec && FAC.rec.pv ? Math.round(8760 / FAC.rec.pv.length) : 1, tz = FAC.plant ? Math.round(FAC.plant.lon / 15) : 0, hr = ((Math.floor(h) * step + tz) % 8760 + 8760) % 8760, d = Math.floor(hr / 24); let m = 11; while (m > 0 && MSTART[m] > d) m--; return `${d - MSTART[m] + 1} ${MONTHS[m]} · ${String(hr % 24).padStart(2, '0')}:00 local`; }
 function facReadout(rec, h){
   const v = k => rec[k] ? fmt(rec[k][h], rec[k][h] < 10 ? 1 : 0) : '—';
   return [['Solar', v('pv'), 'MW'], ['Wind', v('wt'), 'MW'], ['Grid import', v('imp'), 'MW'], ['Export', v('exp'), 'MW'], ['Electrolysis', v('el'), 'MW'], ['H₂ electrolytic', v('h2el'), 't/h'], ['H₂ reformer', v('h2smr'), 't/h'], ['NH₃', v('nh3'), 't/h'], ['H₂ stored', v('h2st'), 't'], ['Battery', v('bsoc'), 'MWh']]
@@ -149,8 +155,20 @@ function renderFacilityBar(state){
     <div id="facInfo">${facilityInfoHTML()}</div>
     <div class="fb-ctl"><button class="btn sm" id="facPlay" onclick="FAC.playing?facilityPause():facilityPlay()">▶</button>
       <input type="range" id="facSlider" min="0" max="${n - 1}" step="0.25" value="${FAC.hour}" oninput="facilityPause();facilitySetHour(+this.value)">
-      <span class="mono" id="facHourLabel">${facHourLabel(FAC.hour)}</span>
+      <span class="mono" id="facHourLabel">${facHourLabel(FAC.hour)}</span><span class="mono" id="facWeather" style="min-width:0;text-align:left;color:var(--ink2)"></span>
       <select class="tg" onchange="FAC.speed=+this.value"><option value="1">slow</option><option value="6" selected>normal</option><option value="24">fast</option><option value="96">very fast</option></select></div>
     <div class="fb-read" id="facReadout">${FAC.rec ? facReadout(FAC.rec, Math.floor(FAC.hour)) : ''}</div>
     <div class="sub" style="font-size:10.5px">Subsystems are present and sized from this run's capacities; pipes light up only when the optimizer moves something through them in that hour, rotors follow the wind output. Plot layout is the HOPS reference design, placed next to the existing site. Right-drag to rotate, scroll to zoom.</div>`;
+}
+
+/* ---- the map follows the scene's weather: imagery darkens at night and desaturates under cloud, the sky takes the palette */
+let __wxLast = 0, __wxPrev = null;
+function applyWeatherToMap(st){
+  const now = performance.now(); if (st && now - __wxLast < 150) return; __wxLast = now;
+  if (!st) { st = { dayF: 1, cloud: 0, rainAmt: 0, top: '#8fbcdc', hor: '#e6eef2', nightF: 0 }; }
+  const bright = 0.18 + 0.82 * st.dayF * (1 - 0.35 * st.cloud) * (1 - 0.15 * st.rainAmt), sat = -0.75 * st.cloud - 0.5 * st.nightF, contrast = -0.25 * st.cloud;
+  if (map.getLayer('sat')) { map.setPaintProperty('sat', 'raster-brightness-max', bright); map.setPaintProperty('sat', 'raster-saturation', Math.max(-1, sat)); map.setPaintProperty('sat', 'raster-contrast', contrast); }
+  if (map.getLayer('buildings')) map.setPaintProperty('buildings', 'fill-extrusion-opacity', 0.92 * (0.35 + 0.65 * st.dayF));
+  if (map.setSky) { try { map.setSky({ 'sky-color': st.top, 'horizon-color': st.hor, 'fog-color': st.hor, 'sky-horizon-blend': 0.6, 'horizon-fog-blend': 0.6, 'fog-ground-blend': 0.75 + 0.2 * st.cloud, 'atmosphere-blend': ['interpolate', ['linear'], ['zoom'], 0, 1, 5, 1, 7, 0] }); } catch (e) {} }
+  if (turbineLayer) turbineLayer.daylight = 0.25 + 0.75 * st.dayF * (1 - 0.4 * st.cloud);
 }
