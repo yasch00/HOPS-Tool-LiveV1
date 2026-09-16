@@ -97,8 +97,11 @@ def collect(sources, since):
             items = list(COLLECTORS[s["type"]](s, since))
         except Exception as e:
             log(f"  {s['id']:16s} FAILED {type(e).__name__}: {e}"); continue
+        today = date.today().isoformat()
         for it in items:
             it.setdefault("category_hint", s.get("category_hint", "publication")); it.setdefault("region_hint", s.get("region_hint", "Global")); it["source_id"] = s["id"]
+            d = it.get("date") or ""
+            if len(d) < 10 or d > today: it["date"] = today          # partial (year-month, in-press) or future dates → the day it appeared
         log(f"  {s['id']:16s} {len(items):4d} items"); out += items
     return out
 
@@ -133,8 +136,23 @@ Rules — these are strict:
 {plist}
 Return one entry per input item, same ids, in the same order."""
 
+STRONG = re.compile(r"(ammonia|\bNH3\b|haber|nitrogen fertili[sz]|\b45V\b|\b45Q\b|CBAM)", re.I)
+def screen_keywords(items):
+    """WATCH_MODEL=none — no model call, no cost. Keeps items that name ammonia/fertiliser/its policies outright,
+    uses the source's category hint and the first sentences of the source text as the summary. Lower precision,
+    nothing invented."""
+    out = {}
+    for it in items:
+        hay = it["title"] + " " + it["text"]
+        rel = bool(STRONG.search(hay)); strong = len(STRONG.findall(hay))
+        summ = re.split(r"(?<=[.!?])\s+", it["text"])[:2]
+        out[it["id"]] = {"id": it["id"], "relevant": rel, "category": it["category_hint"], "region": it["region_hint"], "title": it["title"],
+                         "summary": (" ".join(summ) if it["text"] else "No abstract in the source feed — title only.")[:400], "relevance": min(1.0, 0.4 + 0.15 * strong) if rel else 0.0, "params_touched": []}
+    return out
+
 def screen(items, params, dry):
     if dry: return {}
+    if MODEL.lower() in ("none", "keywords", "off"): return screen_keywords(items)
     import anthropic
     client = anthropic.Anthropic()
     out = {}
@@ -189,7 +207,7 @@ def main():
         added.append({"id": "w-" + it["id"], "date": it["date"] or today.isoformat(), "category": v["category"] if v["category"] in CATS else it["category_hint"],
                       "region": v["region"] or it["region_hint"], "title": v["title"] or it["title"], "summary": v["summary"], "source": it["source"],
                       "url": it["url"] or "", "relevance": round(float(v["relevance"]), 2), "params_touched": [p for p in v["params_touched"] if any(p == q["id"] for q in params)],
-                      "screened": today.isoformat(), "model": MODEL})
+                      "screened": today.isoformat(), "model": MODEL if MODEL.lower() not in ("none", "keywords", "off") else "keywords"})
     for it in new:                                                               # prefilter rejects are seen too
         if it["id"] not in seen and it not in kept: seen[it["id"]] = today.isoformat()
     cutoff = (today - timedelta(days=FEED_DAYS)).isoformat()

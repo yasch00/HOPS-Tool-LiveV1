@@ -74,15 +74,53 @@ prefilters by keyword, and asks Claude to classify and summarise the survivors �
 Cost: ~150 items/day in batches of 20 ≈ 8 model calls ≈ well under $1/day at Opus rates. `python3 watch/watch.py --dry-run`
 shows what would be screened without calling the model.
 
+## The plant on the map (atlas/facility.js)
+
+Opening a site shows the run's plant in a fenced plot 300 m east of the real coordinates: process units sized from the
+run's capacities (electrolysis hall from P_EL, reformer from P_SMR, synthesis loop from P_NH3, battery, H₂ bullets,
+heat battery, CO₂ capture when CCS is on) and driven hour by hour by the run's own dispatch — glow = load, storage fill
+= state of charge, PV brightness and rotor speed follow the hour. The bar at the bottom scrubs the year. The old
+"process schematic" page (`atlas/pages/…live-sim.html`, baked-in data for three plants) is no longer linked.
+
+## Running the optimizer for a requested site (tools/hops_site_run.py)
+
+`hops_core.py` is never edited. `tools/hops_site_run.py` generates a derived copy (`_generated/hops_core_site.py`) with
+three multiplier hooks at exact anchor lines (reformer CAPEX, CCS CAPEX, CCS capture rates — the only technical settings
+hardcoded inside `build_model`), applies everything else through the environment variables hops_core already reads, and
+runs the CI sweep for any coordinates in the US/EU weather grids. Needs the Python 3.12 venv
+(`~/Documents/Stanford/PhD/hops-site-tools/.venv-siting`, has gurobipy), `~/gurobi.lic`, and `HOPS_DATA` on this Mac.
+
+```bash
+V=~/Documents/Stanford/PhD/hops-site-tools/.venv-siting/bin/python
+# prove the derived copy reproduces a published point (no overrides):
+$V tools/hops_site_run.py --validate 61 --ccs No --ci 0.5
+# run a request from the Build page (the downloaded spec JSON or the issue's JSON block):
+$V tools/hops_site_run.py --spec request.json --out ~/Documents/Stanford/PhD/HOPS/results/site_runs --label site_v1
+# publish: the converter reads the custom-site register written next to the results
+python3 tools/hops_to_web.py --results ~/Documents/Stanford/PhD/HOPS/results/site_runs --label site_v1 --bau-label BAU_v7 --names tools/plant_names.json -o data
+```
+
+Technical overrides accepted in the spec (`technical: {...}`, keys as on the Build page): `el_capex_usd_per_kw`,
+`pv_capex_mult`, `wt_capex_mult`, `battery_capex_usd_per_mwh`, `smr_capex_mult`, `ccs_capex_mult`, `ccs_capture_process`,
+`ccs_capture_flue`, `hb_capex_usd_per_mwh`, `gas_price_mult`, `grid_price_mult`, `nh3_price_usd_per_t`, `interest_rate`,
+`res_overbuild`, `el_minload`, `nh3_minload`, `asu_minload`, `hb_hours`, `export_frac`, `eua_price_eur_per_t`, `eu_ets`.
+
+## Siting for the whole fleet (tools/sherlock_siting/)
+
+`README.md` there has the three commands: upload, one-time venv setup, `sbatch run_siting_all.script` (69 tasks, 3 at a
+time so Overpass is not hammered), then rsync `$SCRATCH/HOPS_siting/` into `data/siting/` and push.
+
 ## The Finance tab (atlas/finance.js)
 
 A port of `ProjectFinance/build_finance_model.py`: the run's per-tonne cost lines are de-annualised with its CRF and pushed
 through construction + 30 years of operations (IDC, annuity debt, straight-line depreciation, tax, DSCR, IRR, NPV, banking
 haircut on merchant power). All assumptions are editable in the panel; the plant design is not re-optimised.
+For the ETS / 45V-45Q policy scenarios the levelised credit enters as a revenue line.
 
 ## Updating the tool's code
 
-`atlas/index.html` is the tool. Edit it directly. `tools/patch_atlas.py` documents how it was derived from the
+`atlas/index.html` is the tool; the map, plant, finance and build flows are `atlas/*.js`. Edit them directly and run
+`python3 tools/stamp_atlas.py` before pushing (bumps the `?v=` on the script tags so browsers and GitHub Pages' cache fetch the new files). `tools/patch_atlas.py` documents how it was derived from the
 Claude-Design export (the data seams, plant identity, restyle) and is kept only as a record — do not re-run it
 over an edited `atlas/`.
 

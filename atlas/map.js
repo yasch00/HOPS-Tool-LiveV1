@@ -140,7 +140,7 @@ async function openSite(idx, instant){
     map.getSource('dev').setData(dev); map.getSource('excl').setData(excl);
     const pref = (curScn && curScn.plant === idx) ? { path: scnPathwayLabel(curScn), ci: curCItarget } : { path: 'SMR', ci: null };
     selectLayout(pref.path, pref.ci);
-  } catch (e) { renderSitePanel(p, null, 'none'); }
+  } catch (e) { renderSitePanel(p, null, 'none'); const sc = SCN.find(s => s.plant === idx && s.hb && !s.policy); if (sc && typeof showFacility === 'function') { const rows = cappedRows(sc); if (rows.length) showFacility(p, sc, rows[lowestCostIdx(rows)].target); } }
   if (typeof syncURL === 'function') syncURL();
 }
 function layoutFor(path, ci){
@@ -161,6 +161,7 @@ async function selectLayout(path, ci){
   map.getSource('layout').setData(gj);
   const tf = gj.features.filter(f => f.properties.kind === 'turbine');
   turbineLayer.setTurbines(tf, PLANT[idx], siteInfo);
+  const sc = SCN.find(s => s.plant === idx && s.hb && !s.policy && scnPathwayLabel(s) === l.path); if (sc && typeof showFacility === 'function') showFacility(PLANT[idx], sc, l.ci);
   map.once('idle', () => { if (siteIdx === idx && siteLayoutKey === l.file) turbineLayer.setTurbines(tf, PLANT[idx], siteInfo); });
   renderSitePanel(PLANT[idx], l, 'ok');
 }
@@ -188,11 +189,12 @@ function renderSitePanel(p, l, state){
         .map(([id, n, c, on]) => `<label class="legend-row" style="cursor:pointer"><input type="checkbox" ${(map.getLayer(id) && map.getLayoutProperty(id, 'visibility') !== 'none') ? 'checked' : ''} onchange="toggleSiteLayer('${id}',this.checked);if('${id}'==='turbine-dots')turbineLayer.visible=this.checked;map.triggerRepaint()"><span class="dot" style="background:${c}"></span>${n}</label>`).join('')}
       <div class="sub" style="margin-top:6px">Exclusions: <span style="color:#D55E00">■</span> structures · <span style="color:#8A8F94">■</span> roads · <span style="color:#4C5B6E">■</span> rail · <span style="color:#0072B2">■</span> water · <span style="color:#009E73">■</span> forest/land use · <span style="color:#CC79A7">■</span> Natura 2000 — each buffered by the wind setback.</div></div>`;
   }
-  h += `<div class="sp-actions"><button class="btn" onclick="openDashboard(${p.idx})">Technical results →</button><button class="btn ghost" onclick="openFacilityOverlay('facility=${p.idx}')">Process schematic</button></div>`;
+  h += `<div class="sp-actions"><button class="btn" onclick="openDashboard(${p.idx})">Technical results →</button><button class="btn ghost" onclick="FAC.on?hideFacility():(siteInfo&&siteLayoutKey?selectLayout(layoutFor(FAC.scn?scnPathwayLabel(FAC.scn):'SMR',null).path,null):null)">${(typeof FAC!=='undefined'&&FAC.on)?'Hide plant':'Show plant'}</button></div>`;
   h += `<div class="sub" style="margin-top:10px;font-size:11px">Imagery Esri World Imagery · terrain Mapzen/AWS · buildings OpenStreetMap via OpenFreeMap · siting: HOPS land model (OSM + Natura 2000 exclusions)</div>`;
   host.innerHTML = h;
 }
 function leaveSite(){
+  if (typeof hideFacility === 'function') hideFacility();
   siteIdx = null; siteInfo = null; document.getElementById('sitePanel').hidden = true; document.body.classList.remove('site-mode');
   if (turbineLayer) turbineLayer.setTurbines([], null);
   ['dev', 'excl', 'layout', 'catchment', 'site-plant'].forEach(s => map.getSource(s) && map.getSource(s).setData({ type: 'FeatureCollection', features: [] }));
@@ -239,7 +241,8 @@ function makeTurbineLayer(){
         .scale(new THREE.Vector3(this.scale, -this.scale, this.scale)).multiply(new THREE.Matrix4().makeRotationX(Math.PI / 2));
       this.camera.projectionMatrix = M.multiply(Lm);
       if (this.blades) { // rotor spins about the east–west axis (nacelle faces west)
-        const t = (performance.now() - this.t0) / 1000, m = new THREE.Matrix4(), r = new THREE.Matrix4(), tr = new THREE.Matrix4();
+        const now = performance.now(); this.angle = (this.angle || 0) + (now - (this.tLast || now)) / 1000 * 0.9 * (this.speed || 1); this.tLast = now;
+      const t = this.angle / 0.9, m = new THREE.Matrix4(), r = new THREE.Matrix4(), tr = new THREE.Matrix4();
         this.pos.forEach((p, i) => { for (let b = 0; b < 3; b++) {
           tr.makeTranslation(p[0] - 4.5, p[1] + this.hub, p[2]); r.makeRotationX(t * 0.9 + this.phase[i] + b * 2 * Math.PI / 3);
           m.multiplyMatrices(tr, r); this.blades.setMatrixAt(i * 3 + b, m); } });

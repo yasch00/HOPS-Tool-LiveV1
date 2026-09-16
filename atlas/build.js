@@ -7,7 +7,34 @@
    5 Request   the exact HOPS run, queued as a GitHub issue with the full spec (solved on Sherlock, published to data/)
    Nothing here re-optimises: the proxy is the nearest real solve. That is said on screen. */
 
-const BUILD = { on: false, lat: null, lon: null, name: '', tpd: 1000, path: 'SMR+CCS', ci: 0.5, near: [], A: null };
+const BUILD = { on: false, lat: null, lon: null, name: '', tpd: 1000, path: 'SMR+CCS', ci: 0.5, near: [], A: null, T: {} };
+/* technical assumptions of the optimizer (keys = tools/hops_site_run.py OVERRIDES). Defaults are hops_core.py's;
+   the exact run applies them, the instant proxy cannot (it is a solved design). */
+const TECH_FIELDS = [
+  ['Capital cost', [
+    ['el_capex_usd_per_kw', 'Electrolyzer CAPEX', '$/kW', 300, 2500, 10, 1100],
+    ['pv_capex_mult', 'Solar PV CAPEX × regional', '×', 0.4, 2, 0.05, 1],
+    ['wt_capex_mult', 'Wind CAPEX × regional', '×', 0.4, 2, 0.05, 1],
+    ['battery_capex_usd_per_mwh', 'Battery CAPEX', '$/MWh', 100000, 600000, 5000, null],
+    ['smr_capex_mult', 'Reformer (SMR) CAPEX ×', '×', 0.5, 2, 0.05, 1],
+    ['ccs_capex_mult', 'CCS CAPEX ×', '×', 0.5, 3, 0.05, 1],
+    ['hb_capex_usd_per_mwh', 'Heat battery CAPEX', '$/MWh', 20000, 150000, 1000, 53750]]],
+  ['Prices', [
+    ['gas_price_mult', 'Gas price × local series', '×', 0.3, 3, 0.05, 1],
+    ['grid_price_mult', 'Grid price × local series', '×', 0.3, 3, 0.05, 1],
+    ['nh3_price_usd_per_t', 'NH₃ price (optimizer objective)', '$/t', 200, 1500, 5, null],
+    ['interest_rate', 'Interest rate (annuity)', '%', 0.03, 0.15, 0.005, 0.08]]],
+  ['Operation', [
+    ['res_overbuild', 'Renewable overbuild cap', '× E_ref', 1, 3, 0.1, 1.4],
+    ['el_minload', 'Electrolyzer minimum load', '%', 0, 0.5, 0.05, 0.1],
+    ['nh3_minload', 'Haber-Bosch minimum load', '%', 0.5, 1, 0.05, 0.95],
+    ['asu_minload', 'ASU minimum load', '%', 0.3, 1, 0.05, 0.7],
+    ['hb_hours', 'Heat battery hours', 'h', 0, 24, 1, 5],
+    ['ccs_capture_process', 'CCS capture — process stream', '%', 0.5, 1, 0.01, 0.99],
+    ['ccs_capture_flue', 'CCS capture — flue gas', '%', 0.5, 1, 0.01, 0.9]]]
+];
+function buildSetT(k, v){ if (v === '' || v == null) delete BUILD.T[k]; else BUILD.T[k] = +v; renderBuildPanel(); }
+function buildResetT(){ BUILD.T = {}; renderBuildPanel(); }
 const RHO_WIND = 5.0, RHO_PV = 50.0;             // MW/km², same central values as the siting model
 const REPO_ISSUES = 'https://github.com/yasch00/HOPS-Tool-LiveV1/issues/new';
 
@@ -98,7 +125,12 @@ function renderBuildPanel(){
   const A = BUILD.A, fld = ([k, n, u, lo, hi, st, dec]) => { const v = A[k], isPct = u.startsWith('%'); return `<label class="fin-f"><span class="fin-l">${n}<small>${u}</small></span><input type="range" min="${lo}" max="${hi}" step="${st}" value="${v}" oninput="buildSetA('${k}',this.value)"><input type="number" class="fin-n" step="${isPct ? st * 100 : st}" value="${isPct ? (v * 100).toFixed(dec) : (+v).toFixed(dec)}" onchange="buildSetA('${k}',${isPct ? 'this.value/100' : 'this.value'})"></label>`; };
   const pick = ['price', 'adder', 'gearing', 'debt_rate', 'hurdle', 'tax', 'disc'];
   h += `<div class="fin-group"><div class="fp-h">3 · Assumptions</div>${FIN_FIELDS.flatMap(g => g[1]).filter(f => pick.includes(f[0])).map(fld).join('')}
-    <div class="sub">Not adjustable in the instant estimate: gas and electricity prices, grid tariffs, technology CAPEX and the renewable cap — those change the optimizer's design, so they belong to the exact run (step 5).</div></div>`;
+    </div>
+  <div class="fin-group"><div class="fp-h">3b · Technical assumptions <span class="badge est" style="margin-left:6px">exact run only</span> <button class="btn ghost sm" style="float:right" onclick="buildResetT()">Defaults</button></div>
+    <div class="sub" style="margin-bottom:6px">These change the optimizer's design, so the instant estimate cannot apply them — they go into the exact run. Blank = the model's default. ${Object.keys(BUILD.T).length ? '<b>' + Object.keys(BUILD.T).length + ' changed.</b>' : ''}</div>
+    ${TECH_FIELDS.map(([g, fs]) => `<div class="fp-h" style="margin-top:8px">${g}</div>` + fs.map(([k, n, u, lo, hi, st, def]) => { const isPct = u === '%', v = BUILD.T[k], shown = v == null ? '' : (isPct ? (v * 100).toFixed(1) : v);
+      return `<label class="fin-f" style="grid-template-columns:1fr 84px"><span class="fin-l">${n}<small>${u}${def != null ? ' · default ' + (isPct ? def * 100 + '%' : def) : ' · default regional'}</small></span><input type="range" min="${lo}" max="${hi}" step="${st}" value="${v == null ? (def == null ? (lo + hi) / 2 : def) : v}" oninput="buildSetT('${k}',this.value)"><input type="number" class="fin-n" style="width:84px" step="${isPct ? st * 100 : st}" placeholder="default" value="${shown}" onchange="buildSetT('${k}',this.value===''?'':(${isPct ? 'this.value/100' : 'this.value'}))"></label>`; }).join('')).join('')}
+  </div>`;
   // 4 estimate
   if (E) {
     const K = E.F.K, M = 1e6, c = E.cap;
@@ -122,12 +154,13 @@ function buildSpec(E){
   return { requested: new Date().toISOString().slice(0, 10), site: { name: BUILD.name || null, lat: BUILD.lat, lon: BUILD.lon },
     plant: { tNH3_day: BUILD.tpd, pathway: BUILD.path, ci_targets: 'sweep 0–1.75', ci_focus: BUILD.ci },
     assumptions: Object.fromEntries(Object.entries(BUILD.A || {}).filter(([k]) => !k.startsWith('__'))),
+    technical: { ...BUILD.T },
     proxy: E ? { plant: E.n.p.idx, name: E.n.p.name, km: Math.round(E.n.km), lcoa: E.r.lcoa, ci: E.r.target } : null,
     data_version: MANIFEST.version };
 }
 function buildIssueURL(E){
   const spec = buildSpec(E), title = `Run request: ${BUILD.name || (BUILD.lat + ', ' + BUILD.lon)} · ${fmt(BUILD.tpd)} t/d ${BUILD.path}`;
-  const body = `## HOPS run request\n\n| | |\n|---|---|\n| Site | ${BUILD.name || '—'} (${BUILD.lat}, ${BUILD.lon}) |\n| Capacity | ${fmt(BUILD.tpd)} t NH₃/day |\n| Pathway | ${BUILD.path} |\n| Nearest modelled | ${E ? E.n.p.name + ' · ' + Math.round(E.n.km) + ' km' : '—'} |\n\n<details><summary>Spec (JSON)</summary>\n\n\`\`\`json\n${JSON.stringify(spec, null, 1)}\n\`\`\`\n</details>\n\n_Submitted from the atlas · data ${MANIFEST.version}_`;
+  const body = `## HOPS run request\n\n| | |\n|---|---|\n| Site | ${BUILD.name || '—'} (${BUILD.lat}, ${BUILD.lon}) |\n| Capacity | ${fmt(BUILD.tpd)} t NH₃/day |\n| Pathway | ${BUILD.path} |\n| Nearest modelled | ${E ? E.n.p.name + ' · ' + Math.round(E.n.km) + ' km' : '—'} |\n| Technical overrides | ${Object.keys(BUILD.T).length ? Object.entries(BUILD.T).map(([k, v]) => k + '=' + v).join(', ') : 'none (model defaults)'} |\n\n<details><summary>Spec (JSON)</summary>\n\n\`\`\`json\n${JSON.stringify(spec, null, 1)}\n\`\`\`\n</details>\n\n_Submitted from the atlas · data ${MANIFEST.version}_`;
   return `${REPO_ISSUES}?labels=run-request&title=${encodeURIComponent(title)}&body=${encodeURIComponent(body)}`;
 }
 function buildDownloadSpec(){

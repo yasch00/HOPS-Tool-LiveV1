@@ -48,7 +48,8 @@ function finInputsFromRow(r, plant){
   const iso = r.iso_unit === 'kw_yr' ? g('iso_trans') * tpy : 0;
   const ann_capex = CAPEX_KEYS.reduce((a, k) => a + g(k), 0) * tpy;
   const lines = { fixed_opex, ng: g('ng_cost') * tpy, grid_purchase, carbon: g('carbon_price') * tpy, ets: g('ets_cost') * tpy,
-                  demand: g('demand_cost') * tpy, iso, export_rev: g('sold') * tpy };
+                  demand: g('demand_cost') * tpy, iso, export_rev: g('sold') * tpy,
+                  policy_credit: (g('ets_credit') + g('us_credit')) * tpy };   // policy cases only; 0 in base runs
   const recon = ann_capex + lines.fixed_opex + lines.ng + lines.carbon + lines.ets + lines.grid_purchase + lines.demand + lines.iso - lines.export_rev;
   lines.residual = g('lcoa') * tpy - recon;
   return { tpy, crf, capex, capex_abs, ...lines, z: g('lcoa'), nh3_price_run: r.nh3_price, ci: r.target };
@@ -70,7 +71,7 @@ function runFinance(I, A){
   let dopen = senior;
   for (let t = 1; t <= A.life; t++) {
     const er = Math.pow(1 + A.rev_esc, t - 1), cr = Math.pow(1 + A.cost_esc, t - 1);
-    const price = (A.price + A.adder) * er, rev_nh3 = I.tpy * price, rev_grid = I.export_rev * er, rev = rev_nh3 + rev_grid;
+    const price = (A.price + A.adder) * er, rev_nh3 = I.tpy * price, rev_grid = I.export_rev * er, rev_policy = (I.policy_credit || 0), rev = rev_nh3 + rev_grid + rev_policy;
     const opx = (I.fixed_opex + I.ng + I.grid_purchase + I.carbon + I.ets + (I.demand + I.iso + I.residual)) * cr;
     const ebitda = rev - opx, dep = t <= A.dep_years ? total_cost / A.dep_years : 0, ebit = ebitda - dep;
     const interest = A.debt_rate * dopen, pay = t <= A.tenor ? senior * annuity : 0, principal = Math.min(pay - interest, dopen), dclose = dopen - principal;
@@ -78,7 +79,7 @@ function runFinance(I, A){
     const cfads = ebitda - tax, dscr = pay > 0 ? cfads / pay : null, eqcf = cfads - pay;
     const utax = Math.max(0, ebitda - dep) * A.tax, pcf = ebitda - utax;
     const cfads_b = cfads - (1 - A.merchant_credit) * rev_grid, dscr_b = pay > 0 ? cfads_b / pay : null;
-    P.push({ p: A.ncon + t, phase: 'ops', t, price, rev_nh3, rev_grid, rev, opx, ebitda, dep, ebit, debt_open: dopen, interest, pay, principal, debt_close: dclose, ebt, tax, ni, cfads, dscr, eqcf, pcf, cfads_b, dscr_b });
+    P.push({ p: A.ncon + t, phase: 'ops', t, price, rev_nh3, rev_grid, rev_policy, rev, opx, ebitda, dep, ebit, debt_open: dopen, interest, pay, principal, debt_close: dclose, ebt, tax, ni, cfads, dscr, eqcf, pcf, cfads_b, dscr_b });
     dopen = dclose;
   }
   // series in period order (construction years carry the draws as negatives)
@@ -174,7 +175,7 @@ function buildFinance(){
     ${kpi('Total project cost', '$' + finFmt(K.total_cost, 'bn'), 'overnight $' + finFmt(I.capex_abs, 'bn') + ' + IDC $' + finFmt(K.idc_total, 'm'))}
     ${kpi('Debt / equity', '$' + finFmt(K.senior, 'm') + ' / ' + finFmt(K.equity_total, 'm'), 'gearing ' + finFmt(K.senior / K.total_cost, 'pct') + ' incl. IDC')}
     ${kpi('Equity payback', K.payback + ' yr', 'from financial close')}
-    ${kpi('Merchant power share', finFmt(K.power_share, 'pct'), 'of year-1 revenue; lenders haircut this', K.power_share > 0.3)}
+    ${kpi('Merchant power share', finFmt(K.power_share, 'pct'), 'of year-1 revenue; lenders haircut this' + (I.policy_credit ? ' · policy credit $' + finFmt(I.policy_credit, 'm') + '/yr' : ''), K.power_share > 0.3)}
     </div>
     <p class="foot-note">Cost lines are the optimizer's: annualised per-tonne CAPEX de-annualised with the run's CRF, fixed OPEX, gas, grid purchase (electricity cost net of the renewables' own annuity), carbon and ETS, demand and capacity charges, and a reconciliation plug so year-1 cost ties to LCOA ${fmt(I.z)} $/t exactly (plug ${fmt(I.residual / M, 1)} M$/yr). NH₃ price default is the run's market benchmark; the optimizer's own IRR objective used ${fmt(I.nh3_price_run)} $/t.</p></div>`;
   h += `<div class="grid2">

@@ -134,6 +134,14 @@ def load_plants(results: Path, plants_xlsx: Path | None, amm_xlsx: Path | None, 
         recs[idx] = {"idx": idx, "lat": num(d["lat"].iloc[0], 5), "lon": num(d["lon"].iloc[0], 5),
                      "country": str(d["country"].iloc[0]), "region": str(d.get("Sales region", pd.Series(["?"])).iloc[0]),
                      "tpd": num(d["tNH3_day"].iloc[0], 1), "ktpa": num(d["tNH3_day"].iloc[0] * 365 / 1000, 0)}
+    reg = results / "sites.json"                       # custom sites from tools/hops_site_run.py
+    if reg.exists():
+        for sid, r in json.loads(reg.read_text()).items():
+            idx = int(sid)
+            recs[idx] = {"idx": idx, "lat": num(r["lat"], 5), "lon": num(r["lon"], 5), "country": str(r.get("country") or ""),
+                         "region": "US" if str(r.get("region", "")) in ("US",) or r.get("country") == "USA" else ("Europe" if r.get("country") else "?"),
+                         "tpd": num(r["tNH3_day"], 1), "ktpa": num(r["tNH3_day"] * 365 / 1000, 0), "custom": True, "spec": r.get("spec")}
+            names.setdefault(str(idx), {"name": r.get("name") or f"Site {idx}", "admin": "requested site"})
     amm = pd.read_excel(amm_xlsx) if amm_xlsx and amm_xlsx.exists() else None
     for idx, p in recs.items():
         if amm is not None:

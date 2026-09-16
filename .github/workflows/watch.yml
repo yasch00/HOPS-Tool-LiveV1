@@ -31,6 +31,7 @@ jobs:
         run: python watch/watch.py
         env:
           ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+          # WATCH_MODEL repo variable: claude-opus-5 (default) · claude-haiku-4-5 (~5x cheaper) · none (keyword mode, free, no key needed)
           WATCH_MODEL: ${{ vars.WATCH_MODEL || 'claude-opus-5' }}
           WATCH_LOOKBACK_DAYS: ${{ inputs.lookback_days || '3' }}
           WATCH_MAX_ITEMS: ${{ inputs.max_items || '150' }}
