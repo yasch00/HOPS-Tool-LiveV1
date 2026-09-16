@@ -11,7 +11,7 @@ function facOffsetFor(idx){ try { const v = JSON.parse(localStorage.getItem('hop
 function facMoveStart(){ FAC.moving = true; map.getCanvas().style.cursor = 'crosshair'; const b = document.getElementById('facMove'); if (b) b.textContent = 'click the map …'; map.once('click', e => {
   FAC.moving = false; map.getCanvas().style.cursor = ''; const p = FAC.plant; if (!p) return; const mLat = 110574, mLon = 111320 * Math.cos(p.lat * Math.PI / 180);
   FAC_OFFSET = { x: (e.lngLat.lng - p.lon) * mLon, z: -(e.lngLat.lat - p.lat) * mLat }; try { localStorage.setItem('hops_fac_pos_' + p.idx, JSON.stringify(FAC_OFFSET)); } catch (err) {}
-  facilityLayer.setPlant(p, FAC.P); facilityLabels(); renderFacilityBar(FAC.rec ? 'ok' : 'nohourly'); }); }
+  facilityLayer.setPlant(p, FAC.P); facilityLabels(); if (typeof siteLayoutGeo !== 'undefined' && siteLayoutGeo && map.getSource('layout')) { const shown = clipToPlot(siteLayoutGeo); map.getSource('layout').setData(shown); if (turbineLayer) turbineLayer.setTurbines(shown.features.filter(f => f.properties.kind === 'turbine'), p, siteInfo); } renderFacilityBar(FAC.rec ? 'ok' : 'nohourly'); }); }
 function facilityLabels(){ const p = FAC.plant, P = FAC.P; if (!p || !P || !map.getSource('fac-labels')) return;
   map.getSource('fac-labels').setData({ type: 'FeatureCollection', features: P.nodes.map(n => { const [x, z] = sceneToLocal(n.topAnchor); return { type: 'Feature', geometry: { type: 'Point', coordinates: facLocal2LngLat(p, x, z) }, properties: { label: `${n.def.num} · ${n.def.title}`, key: n.def.key } }; }) }); }
 let __plantMod = null;
@@ -35,8 +35,8 @@ function makeFacilityLayer(M){
     setPlant(plant, P){
       this.holder.clear(); this.P = P; this.plant = plant; if (!plant || !P) { this.map.triggerRepaint(); return; }
       this.origin = maplibregl.MercatorCoordinate.fromLngLat([plant.lon, plant.lat], 0); this.scale = this.origin.meterInMercatorCoordinateUnits();
-      const corners = [[0, 0], [-85, -55], [85, -55], [85, 55], [-85, 55]].map(([x, z]) => { const [lx, lz] = sceneToLocal({ x, z }); return this.map.queryTerrainElevation({ lng: facLocal2LngLat(plant, lx, lz)[0], lat: facLocal2LngLat(plant, lx, lz)[1] }) || 0; });
-      const base = Math.max(...corners) + 0.4;
+      const samples = []; for (let i = 0; i <= 8; i++) for (let j = 0; j <= 6; j++) { const [lx, lz] = sceneToLocal({ x: -88 + 176 * i / 8, z: -58 + 116 * j / 6 }); const ll = facLocal2LngLat(plant, lx, lz); samples.push(this.map.queryTerrainElevation({ lng: ll[0], lat: ll[1] }) || 0); }
+      const base = Math.max(...samples) + 1.5;                                             // graded pad: above the highest ground under the plot
       P.root.scale.setScalar(FAC_SCALE); P.root.position.set(FAC_OFFSET.x, base, FAC_OFFSET.z); this.holder.add(P.root);
       if (!P.weather) { P.weather = M.makeWeather(this.lights); P.root.add(P.weather.group); }
       this.map.triggerRepaint();
@@ -75,6 +75,7 @@ async function showFacility(plant, s, ci){
   const C = M.capsFromRow({ ...r, __ccs: s.ccs }, plant); const P = M.assemblePlant(C); FAC.P = P;
   facilityLayer.setPlant(plant, P);
   facilityLabels();
+  if (typeof siteLayoutGeo !== 'undefined' && siteLayoutGeo && map.getSource('layout')) { const shown = clipToPlot(siteLayoutGeo); map.getSource('layout').setData(shown); if (turbineLayer) turbineLayer.setTurbines(shown.features.filter(f => f.properties.kind === 'turbine'), plant, siteInfo); }
   renderFacilityBar('loading');
   const rec = await ensureHourly(s, hourlyCIfor(s, ci));
   if (!FAC.on || FAC.P !== P) return;
@@ -171,4 +172,24 @@ function applyWeatherToMap(st){
   if (map.getLayer('buildings')) map.setPaintProperty('buildings', 'fill-extrusion-opacity', 0.92 * (0.35 + 0.65 * st.dayF));
   if (map.setSky) { try { map.setSky({ 'sky-color': st.top, 'horizon-color': st.hor, 'fog-color': st.hor, 'sky-horizon-blend': 0.6, 'horizon-fog-blend': 0.6, 'fog-ground-blend': 0.75 + 0.2 * st.cloud, 'atmosphere-blend': ['interpolate', ['linear'], ['zoom'], 0, 1, 5, 1, 7, 0] }); } catch (e) {} }
   if (turbineLayer) turbineLayer.daylight = 0.25 + 0.75 * st.dayF * (1 - 0.4 * st.cloud);
+}
+
+/* ---- keep the siting buildout off the plant's plot */
+function facilityPlotBBox(){
+  if (!FAC.on || !FAC.plant) return null;
+  const pts = [[-88, -58], [88, -58], [88, 58], [-88, 58]].map(([x, z]) => { const [lx, lz] = sceneToLocal({ x, z }); return facLocal2LngLat(FAC.plant, lx, lz); });
+  return [Math.min(...pts.map(p => p[0])), Math.min(...pts.map(p => p[1])), Math.max(...pts.map(p => p[0])), Math.max(...pts.map(p => p[1]))];
+}
+function clipToPlot(gj){
+  const bb = facilityPlotBBox(); if (!bb || !gj || !gj.features) return gj;
+  const inside = c => c[0] > bb[0] && c[0] < bb[2] && c[1] > bb[1] && c[1] < bb[3];
+  const hit = g => { const cs = g.type === 'Point' ? [g.coordinates] : g.type === 'Polygon' ? g.coordinates.flat() : g.type === 'MultiPolygon' ? g.coordinates.flat(2) : []; return cs.some(inside); };
+  const out = [];
+  for (const f of gj.features) {
+    const g = f.geometry;
+    if (f.properties.kind === 'windland' || !g) { out.push(f); continue; }
+    if (g.type === 'MultiPolygon') { const parts = g.coordinates.filter(poly => !poly.flat().some(inside)); if (parts.length) out.push({ ...f, geometry: { type: 'MultiPolygon', coordinates: parts } }); }   // drop only the cells on the plot
+    else if (!hit(g)) out.push(f);
+  }
+  return { type: 'FeatureCollection', features: out };
 }

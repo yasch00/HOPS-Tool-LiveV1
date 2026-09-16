@@ -146,7 +146,7 @@ async function openSite(idx, instant){
   if (typeof syncURL === 'function') syncURL();
 }
 /* ---- the run shown at a site: pathway × policy × CI (independent of whether siting layers exist) */
-let siteRun = { path: 'SMR', policy: null, ci: null };
+let siteRun = { path: 'SMR', policy: null, ci: null }, siteLayoutGeo = null;
 function siteScenarios(idx){ return SCN.filter(s => s.plant === idx && s.hb); }
 function siteScn(idx, path, policy){ return siteScenarios(idx).find(s => scnPathwayLabel(s) === path && (s.policy || null) === (policy || null)) || null; }
 function layoutFor(path, ci){
@@ -166,7 +166,7 @@ function selectRun(path, policy, ci){
   if (l && siteLayoutKey !== l.file) {
     siteLayoutKey = l.file;
     fetch(`${SITING_BASE}plant${idx}/${l.file}`).then(r => r.json()).then(gj => { if (siteIdx !== idx || siteLayoutKey !== l.file) return;
-      map.getSource('layout').setData(gj); const tf = gj.features.filter(f => f.properties.kind === 'turbine'); turbineLayer.setTurbines(tf, PLANT[idx], siteInfo);
+      siteLayoutGeo = gj; const shown = (typeof clipToPlot === 'function') ? clipToPlot(gj) : gj; map.getSource('layout').setData(shown); const tf = shown.features.filter(f => f.properties.kind === 'turbine'); turbineLayer.setTurbines(tf, PLANT[idx], siteInfo);
       map.once('idle', () => { if (siteIdx === idx && siteLayoutKey === l.file) turbineLayer.setTurbines(tf, PLANT[idx], siteInfo); }); });
   }
   if (typeof showFacility === 'function') showFacility(PLANT[idx], s, r.target);   // policy cases share the base design's dispatch
