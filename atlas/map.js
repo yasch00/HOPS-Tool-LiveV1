@@ -14,6 +14,8 @@ const MAP_SOURCES = {
   ofm: { type: 'vector', url: 'https://tiles.openfreemap.org/planet', attribution: 'Buildings © OpenStreetMap contributors · OpenFreeMap' }
 };
 const SITE_ZOOM = 15.2, GLOBE_ZOOM = 1.7;          // arrive on the plant itself; the catchment is one zoom-out away
+/* same ground scale at every latitude: Web Mercator metres/pixel scale with cos(lat), so a Texas site at 15.2 looks half the size of a German one */
+function siteZoomFor(lat){ return SITE_ZOOM + Math.log2(Math.cos(lat * Math.PI / 180) / Math.cos(53.9 * Math.PI / 180)); }
 const SITING_BASE = (window.HOPS_DATA_BASE || '../data/') + 'siting/';
 
 /* ---------------------------------------------------------------- globe */
@@ -128,10 +130,12 @@ async function openSite(idx, instant){
   ['dev', 'excl', 'layout'].forEach(s => map.getSource(s).setData({ type: 'FeatureCollection', features: [] }));
   turbineLayer.setTurbines([], p);
   const mLon = 111320 * Math.cos(p.lat * Math.PI / 180), fo = (typeof facOffsetFor === 'function') ? facOffsetFor(idx) : { x: 650, z: 120 };
-  const view = { center: [p.lon + (fo.x * 0.6) / mLon, p.lat - (fo.z * 0.6) / 110574], zoom: SITE_ZOOM, pitch: 60, bearing: -25 };   // between the real plant and the new units
+  const view = { center: [p.lon + (fo.x * 0.6) / mLon, p.lat - (fo.z * 0.6) / 110574], zoom: siteZoomFor(p.lat), pitch: 60, bearing: -25 };   // between the real plant and the new units
   if (instant) map.jumpTo(view); else map.flyTo({ ...view, duration: 3200, essential: true });
   renderSitePanel(p, null, 'loading');
   try {
+    if (!window.__sitingIndex) { try { window.__sitingIndex = await fetchJSON(SITING_BASE + 'index.json'); } catch (e) { window.__sitingIndex = null; } }
+    if (window.__sitingIndex && !window.__sitingIndex.plants.includes(idx)) throw new Error('no siting layers');   // known absent: no probing request
     const r = await fetch(`${SITING_BASE}plant${idx}/site.json`);
     if (!r.ok) throw new Error(String(r.status));
     siteInfo = await r.json();
@@ -183,7 +187,7 @@ function renderSitePanel(p, l, state){
   const s = siteScn(p.idx, siteRun.path, siteRun.policy), rows = s ? cappedRows(s) : [], r = rows.find(x => Math.abs(x.target - siteRun.ci) < 1e-6) || rows[0];
   const bau = s ? bauFor(s) : null, base = s && s.policy ? siteScn(p.idx, siteRun.path, null) : null;
   const baseRow = base ? cappedRows(base).find(x => Math.abs(x.target - siteRun.ci) < 1e-6) : null;
-  let h = `<div class="sp-head" style="display:flex;justify-content:space-between;gap:10px;align-items:flex-start"><div><div class="fp-h" style="margin-bottom:4px">Site</div><h2>${p.name}</h2><div class="sub">${p.admin ? p.admin + ', ' : ''}${p.country} · ${fmt(p.ktpa)} ktpa NH₃ · ${p.lat.toFixed(3)}°, ${p.lon.toFixed(3)}°</div></div><span style="display:flex;gap:4px;flex-wrap:wrap;justify-content:flex-end;max-width:52%"><button class="btn ghost sm" title="25 km catchment: developable land, turbines, PV" onclick="map.flyTo({center:[PLANT[siteIdx].lon,PLANT[siteIdx].lat],zoom:11.3,pitch:55,bearing:-18,duration:1800})">Catchment</button><button class="btn ghost sm" title="Back to the plant" onclick="const p=PLANT[siteIdx],m=111320*Math.cos(p.lat*Math.PI/180),fo=facOffsetFor(p.idx);map.flyTo({center:[p.lon+fo.x*0.6/m,p.lat-fo.z*0.6/110574],zoom:SITE_ZOOM,pitch:60,bearing:-25,duration:1800})">Plant</button><button class="btn ghost sm" onclick="leaveSite()">← Globe</button></span></div>`;
+  let h = `<div class="sp-head" style="display:flex;justify-content:space-between;gap:10px;align-items:flex-start"><div><div class="fp-h" style="margin-bottom:4px">Site</div><h2>${p.name}</h2><div class="sub">${p.admin ? p.admin + ', ' : ''}${p.country} · ${fmt(p.ktpa)} ktpa NH₃ · ${p.lat.toFixed(3)}°, ${p.lon.toFixed(3)}°</div></div><span style="display:flex;gap:4px;flex-wrap:wrap;justify-content:flex-end;max-width:52%"><button class="btn ghost sm" title="25 km catchment: developable land, turbines, PV" onclick="map.flyTo({center:[PLANT[siteIdx].lon,PLANT[siteIdx].lat],zoom:siteZoomFor(PLANT[siteIdx].lat)-3.9,pitch:55,bearing:-18,duration:1800})">Catchment</button><button class="btn ghost sm" title="Back to the plant" onclick="const p=PLANT[siteIdx],m=111320*Math.cos(p.lat*Math.PI/180),fo=facOffsetFor(p.idx);map.flyTo({center:[p.lon+fo.x*0.6/m,p.lat-fo.z*0.6/110574],zoom:siteZoomFor(p.lat),pitch:60,bearing:-25,duration:1800})">Plant</button><button class="btn ghost sm" onclick="leaveSite()">← Globe</button></span></div>`;
   if (state === 'loading') { h += `<p class="sub" style="margin-top:12px">Loading …</p>`; host.innerHTML = h; return; }
   // the run: pathway × policy × CI
   h += `<div class="fin-group" style="margin-top:12px"><div class="fp-h">Run</div>

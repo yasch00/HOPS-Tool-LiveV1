@@ -71,7 +71,9 @@ async function showFacility(plant, s, ci){
   const M = await ensureFacilityLayers();
   const rows = cappedRows(s), r = rows.reduce((a, x) => Math.abs(x.target - ci) < Math.abs(a.target - ci) ? x : a, rows[0]);
   FAC_OFFSET = facOffsetFor(plant.idx);
-  FAC.plant = plant; FAC.row = r; FAC.scn = s; FAC.on = true; FAC.rec = null; FAC.hour = FAC.hour || 170 * 24 + 12; FAC.sel = null; facilityPause();
+  const newPlant = !FAC.plant || FAC.plant.idx !== plant.idx;
+  FAC.plant = plant; FAC.row = r; FAC.scn = s; FAC.on = true; FAC.rec = null; FAC.sel = null; facilityPause();
+  if (newPlant || !FAC.hour) FAC.hour = ((170 * 24 + 12 - Math.round(plant.lon / 15)) % 8760 + 8760) % 8760;   // open at local noon on 20 June (data index is UTC)
   const C = M.capsFromRow({ ...r, __ccs: s.ccs }, plant); const P = M.assemblePlant(C); FAC.P = P;
   facilityLayer.setPlant(plant, P);
   facilityLabels();

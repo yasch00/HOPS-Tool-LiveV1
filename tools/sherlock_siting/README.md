@@ -37,6 +37,6 @@ Re-submitting is safe: a plant with `site.json` is skipped. Overpass occasionall
 rsync -av sherlock:'$SCRATCH/HOPS_siting/' ~/Documents/Stanford/PhD/hops-site/HOPS-Tool-LiveV1/data/siting/
 ```
 
-then commit + push in GitHub Desktop. Every plant's site view picks its layers up automatically.
+then `python3 tools/siting_index.py` (so the atlas knows which plants have layers) and commit + push in GitHub Desktop. Every plant's site view picks its layers up automatically.
 Expected size: ~6 MB per plant, ~400 MB for the fleet (GitHub Pages limit is 1 GB, so this is fine; if the repo
 gets tight, the developable/exclusion GeoJSON can move to a release asset later).

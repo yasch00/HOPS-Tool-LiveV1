@@ -228,6 +228,8 @@ def convert(results: Path, out: Path, label: str, bau_label: str, plants_xlsx, a
     print(f"plants.json {kb('plants.json')} · scenarios.json {kb('scenarios.json')} · bau.json {kb('bau.json')} · summary.json {kb('summary.json')}")
     tot = sum(f.stat().st_size for f in (out / "runs").rglob("*.json.gz"))
     print(f"runs/: {sum(1 for _ in (out / 'runs').rglob('*.json.gz'))} files, {tot / 1e6:,.0f} MB")
+    sit = out / "siting"; plants = sorted(int(p.name[5:]) for p in sit.glob("plant*") if (p / "site.json").exists()) if sit.exists() else []
+    sit.mkdir(exist_ok=True); (sit / "index.json").write_text(json.dumps({"plants": plants, "n": len(plants)})); print(f"siting index: {len(plants)} plants")
 
 def write_hourly(parquet: Path, dest: Path, meta: dict) -> bool:
     if not parquet.exists(): return False
