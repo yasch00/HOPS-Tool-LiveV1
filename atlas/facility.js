@@ -6,7 +6,14 @@
 
 let facilityLayer = null, FAC = { on: false, plant: null, row: null, scn: null, rec: null, hour: 0, playing: false, speed: 6, timer: null, P: null, sel: null };
 const FAC_SCALE = 3.0;                                  // original scene units → metres (plot 170 × 110 → 510 × 330 m)
-const FAC_OFFSET = { x: 330, z: 40 };                   // plot centre relative to the plant's coordinates (m east, m south)
+let FAC_OFFSET = { x: 650, z: 120 };                    // plot centre relative to the plant's coordinates (m east, m south); per-plant override below
+function facOffsetFor(idx){ try { const v = JSON.parse(localStorage.getItem('hops_fac_pos_' + idx) || 'null'); if (v && isFinite(v.x)) return v; } catch (e) {} return { x: 650, z: 120 }; }
+function facMoveStart(){ FAC.moving = true; map.getCanvas().style.cursor = 'crosshair'; const b = document.getElementById('facMove'); if (b) b.textContent = 'click the map …'; map.once('click', e => {
+  FAC.moving = false; map.getCanvas().style.cursor = ''; const p = FAC.plant; if (!p) return; const mLat = 110574, mLon = 111320 * Math.cos(p.lat * Math.PI / 180);
+  FAC_OFFSET = { x: (e.lngLat.lng - p.lon) * mLon, z: -(e.lngLat.lat - p.lat) * mLat }; try { localStorage.setItem('hops_fac_pos_' + p.idx, JSON.stringify(FAC_OFFSET)); } catch (err) {}
+  facilityLayer.setPlant(p, FAC.P); facilityLabels(); renderFacilityBar(FAC.rec ? 'ok' : 'nohourly'); }); }
+function facilityLabels(){ const p = FAC.plant, P = FAC.P; if (!p || !P || !map.getSource('fac-labels')) return;
+  map.getSource('fac-labels').setData({ type: 'FeatureCollection', features: P.nodes.map(n => { const [x, z] = sceneToLocal(n.topAnchor); return { type: 'Feature', geometry: { type: 'Point', coordinates: facLocal2LngLat(p, x, z) }, properties: { label: `${n.def.num} · ${n.def.title}`, key: n.def.key } }; }) }); }
 let __plantMod = null;
 function loadPlantModule(){ return __plantMod || (__plantMod = import('./facility/plant_assembly.js')); }
 function facLocal2LngLat(plant, x, z){ const mLat = 110574, mLon = 111320 * Math.cos(plant.lat * Math.PI / 180); return [plant.lon + x / mLon, plant.lat - z / mLat]; }
@@ -28,7 +35,8 @@ function makeFacilityLayer(M){
     setPlant(plant, P){
       this.holder.clear(); this.P = P; this.plant = plant; if (!plant || !P) { this.map.triggerRepaint(); return; }
       this.origin = maplibregl.MercatorCoordinate.fromLngLat([plant.lon, plant.lat], 0); this.scale = this.origin.meterInMercatorCoordinateUnits();
-      const base = this.map.queryTerrainElevation({ lng: plant.lon, lat: plant.lat }) || 0;
+      const corners = [[0, 0], [-85, -55], [85, -55], [85, 55], [-85, 55]].map(([x, z]) => { const [lx, lz] = sceneToLocal({ x, z }); return this.map.queryTerrainElevation({ lng: facLocal2LngLat(plant, lx, lz)[0], lat: facLocal2LngLat(plant, lx, lz)[1] }) || 0; });
+      const base = Math.max(...corners) + 0.4;
       P.root.scale.setScalar(FAC_SCALE); P.root.position.set(FAC_OFFSET.x, base, FAC_OFFSET.z); this.holder.add(P.root); this.map.triggerRepaint();
     },
     render(gl, args){
@@ -58,10 +66,11 @@ async function ensureFacilityLayers(){
 async function showFacility(plant, s, ci){
   const M = await ensureFacilityLayers();
   const rows = cappedRows(s), r = rows.reduce((a, x) => Math.abs(x.target - ci) < Math.abs(a.target - ci) ? x : a, rows[0]);
+  FAC_OFFSET = facOffsetFor(plant.idx);
   FAC.plant = plant; FAC.row = r; FAC.scn = s; FAC.on = true; FAC.rec = null; FAC.hour = FAC.hour || 170 * 24 + 12; FAC.sel = null; facilityPause();
   const C = M.capsFromRow({ ...r, __ccs: s.ccs }, plant); const P = M.assemblePlant(C); FAC.P = P;
   facilityLayer.setPlant(plant, P);
-  map.getSource('fac-labels').setData({ type: 'FeatureCollection', features: P.nodes.map(n => { const [x, z] = sceneToLocal(n.topAnchor); return { type: 'Feature', geometry: { type: 'Point', coordinates: facLocal2LngLat(plant, x, z) }, properties: { label: `${n.def.num} · ${n.def.title}`, key: n.def.key } }; }) });
+  facilityLabels();
   renderFacilityBar('loading');
   const rec = await ensureHourly(s, hourlyCIfor(s, ci));
   if (!FAC.on || FAC.P !== P) return;
@@ -77,7 +86,7 @@ function hideFacility(){
 }
 /* ---- click a subsystem (nearest label anchor on screen) → info card with the run's numbers */
 function facilityClick(e){
-  if (!FAC.on || !FAC.P) return;
+  if (!FAC.on || !FAC.P || FAC.moving) return;
   let best = null, bd = 1e9;
   for (const n of FAC.P.nodes) { const [x, z] = sceneToLocal(n.center); const p = map.project(facLocal2LngLat(FAC.plant, x, z)); const d = Math.hypot(p.x - e.point.x, p.y - e.point.y); if (d < bd) { bd = d; best = n; } }
   if (best && bd < 60) { FAC.sel = best.def.key; FAC.P.select(FAC.sel); } else { FAC.sel = null; FAC.P.select(null); }
@@ -135,12 +144,13 @@ function renderFacilityBar(state){
   const bar = document.getElementById('facilityBar'); if (!bar) return; bar.hidden = false;
   const n = FAC.rec && FAC.rec.pv ? FAC.rec.pv.length : 8760, s = FAC.scn, r = FAC.row;
   bar.innerHTML = `<div class="fb-head"><b>${FAC.plant.name}</b> · ${scnShortName(s)} · CI ${r.target.toFixed(2)} · LCOA ${fmt(r.lcoa)} $/t <span class="sub">${state === 'loading' ? '· loading hourly dispatch …' : state === 'nohourly' ? '· no hourly dispatch for this run' : '· click a unit for its numbers'}</span>
-      <button class="btn ghost sm" style="margin-left:auto" onclick="openDashboard(${FAC.plant.idx})">Results →</button><button class="btn ghost sm" onclick="hideFacility()">Hide plant</button></div>
+      <span style="margin-left:auto;display:flex;gap:4px"><button class="btn ghost sm" title="Straight down" onclick="map.easeTo({pitch:0,bearing:0,duration:900})">Top</button><button class="btn ghost sm" title="Perspective" onclick="map.easeTo({pitch:60,bearing:-25,duration:900})">3D</button><button class="btn ghost sm" title="Rotate 45° (or right-drag the map)" onclick="map.easeTo({bearing:map.getBearing()+45,duration:900})">↻</button><button class="btn ghost sm" id="facMove" title="Click, then click the map where the plant should stand (remembered for this site)" onclick="facMoveStart()">Move</button></span>
+      <button class="btn ghost sm" onclick="openDashboard(${FAC.plant.idx})">Results →</button><button class="btn ghost sm" onclick="hideFacility()">Hide plant</button></div>
     <div id="facInfo">${facilityInfoHTML()}</div>
     <div class="fb-ctl"><button class="btn sm" id="facPlay" onclick="FAC.playing?facilityPause():facilityPlay()">▶</button>
       <input type="range" id="facSlider" min="0" max="${n - 1}" step="0.25" value="${FAC.hour}" oninput="facilityPause();facilitySetHour(+this.value)">
       <span class="mono" id="facHourLabel">${facHourLabel(FAC.hour)}</span>
       <select class="tg" onchange="FAC.speed=+this.value"><option value="1">slow</option><option value="6" selected>normal</option><option value="24">fast</option><option value="96">very fast</option></select></div>
     <div class="fb-read" id="facReadout">${FAC.rec ? facReadout(FAC.rec, Math.floor(FAC.hour)) : ''}</div>
-    <div class="sub" style="font-size:10.5px">Subsystems are present and sized from this run's capacities; pipes light up only when the optimizer moves something through them in that hour, rotors follow the wind output. Plot layout is the HOPS reference design, placed next to the existing site.</div>`;
+    <div class="sub" style="font-size:10.5px">Subsystems are present and sized from this run's capacities; pipes light up only when the optimizer moves something through them in that hour, rotors follow the wind output. Plot layout is the HOPS reference design, placed next to the existing site. Right-drag to rotate, scroll to zoom.</div>`;
 }
