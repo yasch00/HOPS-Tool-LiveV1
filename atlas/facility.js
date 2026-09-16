@@ -4,7 +4,7 @@
    scene inside a MapLibre custom layer — the map supplies terrain, imagery, camera and labels — and feeds it the run's
    capacities (which subsystems exist, how large) and hourly dispatch (which pipes carry flow, how fast rotors turn). */
 
-let facilityLayer = null, FAC = { on: false, plant: null, row: null, scn: null, rec: null, hour: 0, playing: false, speed: 6, timer: null, P: null, sel: null };
+let facilityLayer = null, FAC = { on: false, plant: null, row: null, scn: null, rec: null, hour: 0, playing: false, speed: 0.6, timer: null, P: null, sel: null };
 const FAC_SCALE = 3.0;                                  // original scene units → metres (plot 170 × 110 → 510 × 330 m)
 let FAC_OFFSET = { x: 650, z: 120 };                    // plot centre relative to the plant's coordinates (m east, m south); per-plant override below
 function facOffsetFor(idx){ try { const v = JSON.parse(localStorage.getItem('hops_fac_pos_' + idx) || 'null'); if (v && isFinite(v.x)) return v; } catch (e) {} return { x: 650, z: 120 }; }
@@ -156,7 +156,7 @@ function renderFacilityBar(state){
     <div class="fb-ctl"><button class="btn sm" id="facPlay" onclick="FAC.playing?facilityPause():facilityPlay()">▶</button>
       <input type="range" id="facSlider" min="0" max="${n - 1}" step="0.25" value="${FAC.hour}" oninput="facilityPause();facilitySetHour(+this.value)">
       <span class="mono" id="facHourLabel">${facHourLabel(FAC.hour)}</span><span class="mono" id="facWeather" style="min-width:0;text-align:left;color:var(--ink2)"></span>
-      <select class="tg" onchange="FAC.speed=+this.value"><option value="1">slow</option><option value="6" selected>normal</option><option value="24">fast</option><option value="96">very fast</option></select></div>
+      <select class="tg" onchange="FAC.speed=+this.value"><option value="0.15">slow · 1 h ≈ 1.7 s</option><option value="0.6" selected>normal · 1 day ≈ 10 s</option><option value="2">fast · 1 day ≈ 3 s</option><option value="6">very fast · 1 day ≈ 1 s</option></select></div>
     <div class="fb-read" id="facReadout">${FAC.rec ? facReadout(FAC.rec, Math.floor(FAC.hour)) : ''}</div>
     <div class="sub" style="font-size:10.5px">Subsystems are present and sized from this run's capacities; pipes light up only when the optimizer moves something through them in that hour, rotors follow the wind output. Plot layout is the HOPS reference design, placed next to the existing site. Right-drag to rotate, scroll to zoom.</div>`;
 }

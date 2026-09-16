@@ -114,11 +114,11 @@ export function makeSkyTexture(){
 export function assemblePlant(C){
   const root = new THREE.Group();
   // plot pad + painted border + grid (the original's campus pad; the map's ground replaces its 500 × 500 plane)
-  const plot = new THREE.Mesh(new THREE.BoxGeometry(170, 2.0, 110), new THREE.MeshStandardMaterial({ color: 0xc9cbbf, roughness: 0.9, metalness: 0 }));
+  const plot = new THREE.Mesh(new THREE.BoxGeometry(170, 2.0, 110), new THREE.MeshStandardMaterial({ color: 0xa9aba2, roughness: 0.95, metalness: 0 }));   // gravel grey, closer to the imagery
   plot.position.y = -1.0 + 0.02; root.add(plot);                                  // top face at y = 0.02, slab 2 units (~6 m) deep into the ground
   const paintLine = (x1, z1, x2, z2, color = 0x2e3e4b, w = 0.25) => { const len = Math.hypot(x2 - x1, z2 - z1); const line = new THREE.Mesh(new THREE.PlaneGeometry(len, w), new THREE.MeshBasicMaterial({ color })); line.rotation.x = -Math.PI / 2; line.position.set((x1 + x2) / 2, 0.06, (z1 + z2) / 2); line.rotation.z = -Math.atan2(z2 - z1, x2 - x1); root.add(line); };
   paintLine(-83, -53, 83, -53); paintLine(-83, 53, 83, 53); paintLine(-83, -53, -83, 53); paintLine(83, -53, 83, 53);
-  const grid = new THREE.GridHelper(180, 36, 0x9aa48f, 0xb2b8a8); grid.position.y = 0.04; grid.material.opacity = 0.25; grid.material.transparent = true; root.add(grid);
+  const grid = new THREE.GridHelper(180, 36, 0x9aa48f, 0xb2b8a8); grid.position.y = 0.04; grid.material.opacity = 0.08; grid.material.transparent = true; root.add(grid);   // faint: the real ground is the picture
   const nodes = [], pickables = [];
   const active = SUBSYSTEMS.filter(d => capForKey(d.key, C) > 0);
   active.forEach((d, i) => { d.num = String(i + 1).padStart(2, '0'); });
@@ -273,7 +273,7 @@ export function makeWeather(lights){
     // sun / moon / stars
     this.sunDisc.position.copy(sunDir).multiplyScalar(352); this.sunDisc.material.opacity = smooth(-3, 4, elevDeg) * Math.pow(1 - cloud, 2.2);
     const moonDir = dirFrom(Math.max(-elev, -0.1), az + Math.PI); this.moonDisc.position.copy(moonDir).multiplyScalar(352); this.moonDisc.material.opacity = nightF * Math.pow(1 - cloud, 1.2) * smooth(-2, 6, -elevDeg);
-    this.stars.material.opacity = nightF * (1 - 0.95 * cloud) * 0.95;
+    this.stars.material.opacity = 0;   // no stars on the map: at scene distance they would draw over the real ground
     // clouds drift with the wind
     const visible = Math.round(cloud * this.cloudGroups.length), windCF = Math.max(0, Math.min(1, wtNow / wtCap)), driftSpd = 3 + windCF * 30;
     this.cloudGroups.forEach((g, i) => { g.userData.target = i < visible ? (0.65 + 0.35 * cloud) : 0; const m = g.userData.mat; m.opacity += (g.userData.target - m.opacity) * Math.min(1, dt * 0.7);
