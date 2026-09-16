@@ -74,13 +74,15 @@ prefilters by keyword, and asks Claude to classify and summarise the survivors �
 Cost: ~150 items/day in batches of 20 ≈ 8 model calls ≈ well under $1/day at Opus rates. `python3 watch/watch.py --dry-run`
 shows what would be screened without calling the model.
 
-## The plant on the map (atlas/facility.js)
+## The plant on the map (atlas/facility.js + atlas/facility/)
 
-Opening a site shows the run's plant in a fenced plot 300 m east of the real coordinates: process units sized from the
-run's capacities (electrolysis hall from P_EL, reformer from P_SMR, synthesis loop from P_NH3, battery, H₂ bullets,
-heat battery, CO₂ capture when CCS is on) and driven hour by hour by the run's own dispatch — glow = load, storage fill
-= state of charge, PV brightness and rotor speed follow the hour. The bar at the bottom scrubs the year. The old
-"process schematic" page (`atlas/pages/…live-sim.html`, baked-in data for three plants) is no longer linked.
+Opening a site places the HOPS reference plant — the original Claude-Design 3D facility, unchanged in look — on the real
+map next to the existing site, 330 m east of the plant's coordinates. `atlas/facility/plant_builders.js` and
+`three.module.js` are extracted verbatim from the old page by `tools/port_plant_scene.py`; `plant_assembly.js` re-implements
+the page's placement, capacity scaling, obstacle-aware pipe routing and flow animation against real run data. Subsystems
+are present and sized from the selected run (a run without CCS has no capture unit; the electrolysis hall grows with P_EL),
+pipes light up only when the optimizer moves something through them in the scrubbed hour, rotors follow the wind output,
+and clicking a unit shows its description with the run's numbers. The old standalone page is no longer linked.
 
 ## Running the optimizer for a requested site (tools/hops_site_run.py)
 

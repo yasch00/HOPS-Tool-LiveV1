@@ -64,6 +64,14 @@ body.build-mode .brand h1,body.build-mode .brand .sub,body.build-mode .globe-foo
 .facility-bar .fb-read{display:grid;grid-template-columns:repeat(10,1fr);gap:6px;margin:4px 0 6px}
 .facility-bar .fb-read span{font-family:'IBM Plex Mono',monospace;font-size:12px;line-height:1.2}
 .facility-bar .fb-read small{color:var(--mut);font-size:10px}.facility-bar .fb-read em{font-style:normal;font-size:10px;color:var(--faint);letter-spacing:.04em;text-transform:uppercase}
+/* subsystem info card (old design's panel, with the run's numbers) */
+.fac-info{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:10px 12px;margin:8px 0 4px}
+.fac-info-head{display:flex;align-items:center;gap:8px;font-size:13px}.fac-info-head .sub{font-size:11px}
+.fac-num{width:22px;height:22px;border-radius:50%;display:inline-grid;place-items:center;font-family:'IBM Plex Mono',monospace;font-size:10px;font-weight:700;color:#0b1014}
+.fac-info p.sub{margin:6px 0;font-size:12px;line-height:1.45}
+.fac-io{display:flex;gap:12px;flex-wrap:wrap;font-size:11.5px;color:var(--ink2);margin-bottom:6px}.fac-io i{display:inline-block;width:8px;height:8px;border-radius:50%;margin-right:5px}
+.fac-specs{display:grid;grid-template-columns:repeat(auto-fit,minmax(110px,1fr));gap:6px}.fac-specs>div{background:var(--paper2);border-radius:6px;padding:6px 8px}
+.fac-specs .l{font-size:9.5px;letter-spacing:.12em;text-transform:uppercase;color:var(--mut);font-weight:600}.fac-specs .v{font-family:'IBM Plex Mono',monospace;font-size:13px;margin-top:2px}.fac-specs .v small{color:var(--mut);font-size:10px}
 @media(max-width:1100px){.facility-bar{width:calc(100vw - 32px);left:16px;transform:none}.facility-bar .fb-read{grid-template-columns:repeat(5,1fr)}}
 /* finance tab */
 .fin-grid{display:grid;grid-template-columns:300px minmax(0,1fr);gap:18px;align-items:start}
@@ -373,10 +381,10 @@ function buildLayerList(){
   });
 }
 </script>
-<script src="map.js?v=202609152047"></script>
-<script src="finance.js?v=202609152047"></script>
-<script src="build.js?v=202609152047"></script>
-<script src="facility.js?v=202609152047"></script>
+<script src="map.js?v=202609152105"></script>
+<script src="finance.js?v=202609152105"></script>
+<script src="build.js?v=202609152105"></script>
+<script src="facility.js?v=202609152105"></script>
 <script>
 /* ============ NAVIGATION ============ */
 let curScn=null, curPlantIdx=null, curCItarget=null;
