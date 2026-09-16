@@ -64,7 +64,7 @@ cd ~/Documents/Stanford/PhD/HOPS        # so the OSM layer cache in ./land_sitin
 ```
 
 First run for a plant downloads 25 km of OpenStreetMap through Overpass (minutes to tens of minutes); the layers are cached.
-The site view shows the catchment, terrain and buildings for every plant, and the buildout only where this has run.
+The site view shows the catchment, terrain and buildings for every plant, and the buildout where layers exist (all 69 plants since 2026-09-16; `data/siting/index.json` lists them). The site panel's **Hide renewables** button switches the whole buildout off and on.
 
 ## The Watch page (watch/)
 

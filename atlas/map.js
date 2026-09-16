@@ -147,10 +147,18 @@ async function openSite(idx, instant){
   if (siteIdx !== idx) return;
   const pref = (curScn && curScn.plant === idx) ? { path: scnPathwayLabel(curScn), policy: curScn.policy || null, ci: curCItarget } : { path: 'SMR', policy: null, ci: null };
   siteLayoutKey = null; selectRun(pref.path, pref.policy, pref.ci);
+  if (!renewOn) siteRenewables(false);
   if (typeof syncURL === 'function') syncURL();
 }
 /* ---- the run shown at a site: pathway × policy × CI (independent of whether siting layers exist) */
-let siteRun = { path: 'SMR', policy: null, ci: null }, siteLayoutGeo = null;
+let siteRun = { path: 'SMR', policy: null, ci: null }, siteLayoutGeo = null, renewOn = true;
+/* one switch for the whole renewable buildout: turbines (3D + dots), PV blocks, developable wind land */
+function siteRenewables(on){
+  renewOn = on;
+  ['pv-blocks', 'turbine-dots', 'dev-wind', 'dev-wind-line', 'windland'].forEach(id => toggleSiteLayer(id, on));
+  if (turbineLayer) turbineLayer.visible = on;
+  map.triggerRepaint(); renderSitePanel(PLANT[siteIdx], layoutFor(siteRun.path, siteRun.ci), siteInfo ? 'ok' : 'none');
+}
 function siteScenarios(idx){ return SCN.filter(s => s.plant === idx && s.hb); }
 function siteScn(idx, path, policy){ return siteScenarios(idx).find(s => scnPathwayLabel(s) === path && (s.policy || null) === (policy || null)) || null; }
 function layoutFor(path, ci){
@@ -214,10 +222,10 @@ function renderSitePanel(p, l, state){
       <div><div class="l">Developable land</div><div class="v">${fmt(info.developable_km2.wind)}<small> km²</small></div><div class="d">wind after setbacks · ${fmt(info.developable_km2.solar)} km² solar</div></div>
       <div><div class="l">Fits within 25 km?</div><div class="v">${(l.wind_short || l.pv_short) ? 'No' : 'Yes'}</div><div class="d">${info.max_turbines} positions at ${fmt(info.spacing_m)} m spacing</div></div></div></div>`;
   if (state !== 'none') h += `<div class="fin-group"><div class="fp-h">Layers</div>
-      ${[['pv-blocks', 'PV blocks (buildout)', '#1B3A5C', true], ['turbine-dots', 'Turbines (buildout)', '#FBFAF8', true], ['dev-wind', 'Developable — wind', '#56B4E9', true], ['dev-solar', 'Developable — solar', '#E69F00', false], ['excl-fill', 'Exclusions by class', '#D55E00', false], ['buildings', 'Buildings (OSM, 3D)', '#cfc9bd', true]]
+      ${[['pv-blocks', 'PV blocks (buildout)', '#1B3A5C', renewOn], ['turbine-dots', 'Turbines (buildout)', '#FBFAF8', renewOn], ['dev-wind', 'Developable — wind', '#56B4E9', renewOn], ['dev-solar', 'Developable — solar', '#E69F00', false], ['excl-fill', 'Exclusions by class', '#D55E00', false], ['buildings', 'Buildings (OSM, 3D)', '#cfc9bd', true]]
         .map(([id, n, c, on]) => `<label class="legend-row" style="cursor:pointer"><input type="checkbox" ${(map.getLayer(id) && map.getLayoutProperty(id, 'visibility') !== 'none') ? 'checked' : ''} onchange="toggleSiteLayer('${id}',this.checked);if('${id}'==='turbine-dots')turbineLayer.visible=this.checked;map.triggerRepaint()"><span class="dot" style="background:${c}"></span>${n}</label>`).join('')}
       <div class="sub" style="margin-top:6px">Exclusions: <span style="color:#D55E00">■</span> structures · <span style="color:#8A8F94">■</span> roads · <span style="color:#4C5B6E">■</span> rail · <span style="color:#0072B2">■</span> water · <span style="color:#009E73">■</span> forest/land use · <span style="color:#CC79A7">■</span> Natura 2000 — each buffered by the wind setback.</div></div>`;
-  h += `<div class="sp-actions"><button class="btn" onclick="openDashboard(${p.idx})">Technical results →</button><button class="btn ghost" onclick="FAC.on?hideFacility():selectRun(siteRun.path,siteRun.policy,siteRun.ci)">${(typeof FAC !== 'undefined' && FAC.on) ? 'Hide plant' : 'Show plant'}</button></div>`;
+  h += `<div class="sp-actions"><button class="btn" onclick="openDashboard(${p.idx})">Technical results →</button><button class="btn ghost" onclick="FAC.on?hideFacility():selectRun(siteRun.path,siteRun.policy,siteRun.ci)">${(typeof FAC !== 'undefined' && FAC.on) ? 'Hide plant' : 'Show plant'}</button>${state !== 'none' ? `<button class="btn ghost" onclick="siteRenewables(${!renewOn})">${renewOn ? 'Hide renewables' : 'Show renewables'}</button>` : ''}</div>`;
   h += `<div class="sub" style="margin-top:10px;font-size:11px">Imagery Esri World Imagery · terrain Mapzen/AWS · buildings OpenStreetMap via OpenFreeMap · siting: HOPS land model (OSM + Natura 2000 exclusions)</div>`;
   host.innerHTML = h;
 }
