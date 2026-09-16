@@ -3,6 +3,16 @@ on:
   schedule:
     - cron: '20 6 * * *'        # daily 06:20 UTC (GitHub may delay scheduled runs under load)
   workflow_dispatch:
+    inputs:
+      lookback_days:
+        description: 'How far back to collect (days). Use 365 for the first backfill.'
+        default: '3'
+      max_items:
+        description: 'Cap on items sent to the model this run'
+        default: '150'
+      pages:
+        description: 'Pages of 50 per API source (raise to 6 for a backfill)'
+        default: '1'
 permissions:
   contents: write
 concurrency: watch
@@ -22,6 +32,9 @@ jobs:
         env:
           ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
           WATCH_MODEL: ${{ vars.WATCH_MODEL || 'claude-opus-5' }}
+          WATCH_LOOKBACK_DAYS: ${{ inputs.lookback_days || '3' }}
+          WATCH_MAX_ITEMS: ${{ inputs.max_items || '150' }}
+          WATCH_PAGES: ${{ inputs.pages || '1' }}
       - name: Commit the feed
         run: |
           git config user.name "hops-watch"

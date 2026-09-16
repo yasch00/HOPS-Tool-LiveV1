@@ -39,9 +39,14 @@ def clean(s, n=1200): return re.sub(r"\s+", " ", re.sub(r"<[^>]+>", " ", str(s o
 def get(url, params=None, timeout=40):
     r = requests.get(url, params=params, headers=UA, timeout=timeout); r.raise_for_status(); return r
 
+PAGES = int(os.environ.get("WATCH_PAGES", "1"))          # pages of 50 per API source; raise for a backfill
+
 def c_openalex(src, since):
-    r = get("https://api.openalex.org/works", {"search": src["query"], "filter": f"from_publication_date:{since}", "per-page": 50, "sort": "publication_date:desc"})
-    for w in r.json().get("results", []):
+  for page in range(1, PAGES + 1):
+    r = get("https://api.openalex.org/works", {"search": src["query"], "filter": f"from_publication_date:{since}", "per-page": 50, "page": page, "sort": "publication_date:desc"})
+    res = r.json().get("results", [])
+    if not res: break
+    for w in res:
         inv = w.get("abstract_inverted_index") or {}
         words = sorted((pos, t) for t, ps in inv.items() for pos in ps); abstract = " ".join(t for _, t in words)
         loc = w.get("primary_location") or {}
@@ -49,22 +54,28 @@ def c_openalex(src, since):
                "date": w.get("publication_date"), "source": ((loc.get("source") or {}).get("display_name")) or "OpenAlex"}
 
 def c_crossref(src, since):
-    r = get("https://api.crossref.org/works", {"query.bibliographic": src["query"], "filter": f"from-pub-date:{since}", "rows": 50, "sort": "published", "order": "desc"})
-    for w in r.json().get("message", {}).get("items", []):
+  for page in range(PAGES):
+    r = get("https://api.crossref.org/works", {"query.bibliographic": src["query"], "filter": f"from-pub-date:{since}", "rows": 50, "offset": 50 * page, "sort": "published", "order": "desc"})
+    res = r.json().get("message", {}).get("items", [])
+    if not res: break
+    for w in res:
         d = (w.get("published") or w.get("created") or {}).get("date-parts", [[None]])[0]
         yield {"id": hid(w.get("DOI")), "title": clean((w.get("title") or [""])[0], 300), "text": clean(w.get("abstract")), "url": w.get("URL") or f"https://doi.org/{w.get('DOI')}",
                "date": "-".join(f"{x:02d}" if i else str(x) for i, x in enumerate(d)) if d and d[0] else None, "source": (w.get("container-title") or ["Crossref"])[0]}
 
 def c_arxiv(src, since):
-    r = get("http://export.arxiv.org/api/query", {"search_query": src["query"], "sortBy": "submittedDate", "sortOrder": "descending", "max_results": 50})
+    r = get("http://export.arxiv.org/api/query", {"search_query": src["query"], "sortBy": "submittedDate", "sortOrder": "descending", "max_results": 50 * PAGES})
     for e in feedparser.parse(r.text).entries:
         d = time.strftime("%Y-%m-%d", e.published_parsed) if getattr(e, "published_parsed", None) else None
         yield {"id": hid(e.get("id")), "title": clean(e.get("title"), 300), "text": clean(e.get("summary")), "url": e.get("link"), "date": d, "source": "arXiv"}
 
 def c_federalregister(src, since):
     for term in src["terms"]:
-        r = get("https://www.federalregister.gov/api/v1/documents.json", {"conditions[term]": term, "conditions[publication_date][gte]": since, "order": "newest", "per_page": 50})
-        for d in r.json().get("results", []):
+      for page in range(1, PAGES + 1):
+        r = get("https://www.federalregister.gov/api/v1/documents.json", {"conditions[term]": term, "conditions[publication_date][gte]": since, "order": "newest", "per_page": 50, "page": page})
+        res = r.json().get("results", [])
+        if not res: break
+        for d in res:
             yield {"id": hid(d.get("document_number")), "title": clean(d.get("title"), 300), "text": clean(d.get("abstract")), "url": d.get("html_url"),
                    "date": d.get("publication_date"), "source": "Federal Register · " + ((d.get("agencies") or [{}])[0].get("name") or "")}
 
