@@ -39,6 +39,12 @@ docs/                                  design + pipeline notes from the Design e
 3. Commit and push (GitHub Desktop). No code changes needed — the tool reads `data/manifest.json` and
    shows the data version in the globe footer.
 
+**Policy cases and LCOA.** The Sherlock re-pricings (`_ETSlaw`, `_ETSprop`, `_USCred`) change the ammonia-only LCOA columns
+by the levelised credit and leave `z_cost` and IRR as solved. The converter carries that delta onto the headline `lcoa`
+(`lcoa = z_cost + (LCOA_LCOE − LCOA_LCOE_no-policy)`), keeps the solved value as `lcoa_zcost`, and stores the delta as
+`policy_delta`; BAU rows are treated the same. The Finance tab reconciles its cost lines to `lcoa_zcost` and books the
+credit as a revenue line, so nothing is counted twice.
+
 Plant numbering is the HOPS index from `Plants_US_and_Europe.xlsx` (Brunsbüttel = 61, Mannheim/Ludwigshafen = 60,
 Brazoria County TX = 22). `plants.json` carries `amm_idx` to cross-reference the global fleet list drawn on the globe.
 Town names come from `tools/plant_names.json` (OpenStreetMap reverse geocoding) — edit that file to rename a plant.

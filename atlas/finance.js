@@ -51,7 +51,7 @@ function finInputsFromRow(r, plant){
                   demand: g('demand_cost') * tpy, iso, export_rev: g('sold') * tpy,
                   policy_credit: (g('ets_credit') + g('us_credit')) * tpy };   // policy cases only; 0 in base runs
   const recon = ann_capex + lines.fixed_opex + lines.ng + lines.carbon + lines.ets + lines.grid_purchase + lines.demand + lines.iso - lines.export_rev;
-  lines.residual = g('lcoa') * tpy - recon;
+  lines.residual = (r.lcoa_zcost != null ? r.lcoa_zcost : g('lcoa')) * tpy - recon;   // reconcile to the solved z_cost; the policy credit is its own revenue line
   return { tpy, crf, capex, capex_abs, ...lines, z: g('lcoa'), nh3_price_run: r.nh3_price, ci: r.target };
 }
 /* ---- the cash-flow model. Periods 1..ncon are construction, then `life` operating years. */

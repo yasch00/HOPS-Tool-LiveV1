@@ -122,6 +122,13 @@ def row_from(r: pd.Series) -> dict:
             if c in r.index:
                 out[k] = num(r[c]); break
     out["opex_fixed"] = num(sum((out.get(k) or 0) for k in OPEX_SUM))
+    # Policy re-pricings (ETS / 45V-45Q) change the ammonia-only LCOA columns but leave z_cost as solved. The tool's
+    # headline "lcoa" is z_cost, so carry the policy delta onto it: lcoa = z_cost + (LCOA_LCOE - LCOA_LCOE_no-policy),
+    # i.e. minus the levelised credit. The unchanged solve value is kept as lcoa_zcost (the finance model's cost basis).
+    out["lcoa_zcost"] = out.get("lcoa")
+    if out.get("lcoa_lcoe") is not None and out.get("lcoa_lcoe_nopolicy") is not None and out.get("lcoa") is not None:
+        out["policy_delta"] = num(out["lcoa_lcoe"] - out["lcoa_lcoe_nopolicy"])
+        out["lcoa"] = num(out["lcoa"] + out["policy_delta"])
     return out
 
 def load_plants(results: Path, plants_xlsx: Path | None, amm_xlsx: Path | None, names: dict) -> dict[int, dict]:

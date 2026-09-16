@@ -17,7 +17,7 @@ REPO = "yasch00/HOPS-Tool-LiveV1"
 HERE = Path(__file__).resolve().parent
 SITE_REPO = Path.home() / "Documents/Stanford/PhD/hops-site/HOPS-Tool-LiveV1"
 OUT = Path.home() / "Documents/Stanford/PhD/HOPS/results/site_runs"
-PY = HERE / ".venv-siting/bin/python"
+PY = next((c for c in [HERE / ".venv-siting/bin/python", Path.home() / "Documents/Stanford/PhD/hops-site-tools/.venv-siting/bin/python"] if c.exists()), Path(sys.executable))   # the 3.12 venv with gurobipy
 
 def api(path, method="GET", data=None):
     req = urllib.request.Request(f"https://api.github.com/repos/{REPO}{path}", method=method, headers={"Accept": "application/vnd.github+json", "User-Agent": "hops-run-requests"})
@@ -36,7 +36,9 @@ def main():
     ap.add_argument("--publish", action="store_true"); ap.add_argument("--label", default="site_v1")
     a = ap.parse_args()
     if a.list or a.run is None:
-        for it in api("/issues?labels=run-request&state=open&per_page=50"):
+        issues = api("/issues?labels=run-request&state=open&per_page=50")
+        if not issues: print("no open run requests (label run-request) on", REPO); return
+        for it in issues:
             sp = None
             try: sp = spec_from_issue(it)
             except SystemExit: pass

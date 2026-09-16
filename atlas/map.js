@@ -139,58 +139,81 @@ async function openSite(idx, instant){
     const [dev, excl] = await Promise.all([fetch(`${SITING_BASE}plant${idx}/developable.geojson`).then(r => r.json()), fetch(`${SITING_BASE}plant${idx}/exclusions.geojson`).then(r => r.json())]);
     if (siteIdx !== idx) return;
     map.getSource('dev').setData(dev); map.getSource('excl').setData(excl);
-    const pref = (curScn && curScn.plant === idx) ? { path: scnPathwayLabel(curScn), ci: curCItarget } : { path: 'SMR', ci: null };
-    selectLayout(pref.path, pref.ci);
-  } catch (e) { renderSitePanel(p, null, 'none'); const sc = SCN.find(s => s.plant === idx && s.hb && !s.policy); if (sc && typeof showFacility === 'function') { const rows = cappedRows(sc); if (rows.length) showFacility(p, sc, rows[lowestCostIdx(rows)].target); } }
+  } catch (e) { siteInfo = null; }
+  if (siteIdx !== idx) return;
+  const pref = (curScn && curScn.plant === idx) ? { path: scnPathwayLabel(curScn), policy: curScn.policy || null, ci: curCItarget } : { path: 'SMR', policy: null, ci: null };
+  siteLayoutKey = null; selectRun(pref.path, pref.policy, pref.ci);
   if (typeof syncURL === 'function') syncURL();
 }
+/* ---- the run shown at a site: pathway × policy × CI (independent of whether siting layers exist) */
+let siteRun = { path: 'SMR', policy: null, ci: null };
+function siteScenarios(idx){ return SCN.filter(s => s.plant === idx && s.hb); }
+function siteScn(idx, path, policy){ return siteScenarios(idx).find(s => scnPathwayLabel(s) === path && (s.policy || null) === (policy || null)) || null; }
 function layoutFor(path, ci){
   if (!siteInfo) return null;
   const L = siteInfo.layouts.filter(l => l.path === path); if (!L.length) return null;
-  if (ci == null) { // lowest-cost run of that pathway
-    const s = SCN.find(s => s.plant === siteIdx && scnPathwayLabel(s) === path && !s.policy);
-    if (s) { const rows = cappedRows(s); if (rows.length) ci = rows[lowestCostIdx(rows)].target; }
-  }
-  if (ci == null) return L[0];
   return L.reduce((a, l) => Math.abs(l.ci - ci) < Math.abs(a.ci - ci) ? l : a, L[0]);
 }
-async function selectLayout(path, ci){
-  const l = layoutFor(path, ci); if (!l) { renderSitePanel(PLANT[siteIdx], null, 'none'); return; }
-  siteLayoutKey = l.file;
-  const idx = siteIdx, gj = await fetch(`${SITING_BASE}plant${idx}/${l.file}`).then(r => r.json());
-  if (siteIdx !== idx || siteLayoutKey !== l.file) return;
-  map.getSource('layout').setData(gj);
-  const tf = gj.features.filter(f => f.properties.kind === 'turbine');
-  turbineLayer.setTurbines(tf, PLANT[idx], siteInfo);
-  const sc = SCN.find(s => s.plant === idx && s.hb && !s.policy && scnPathwayLabel(s) === l.path); if (sc && typeof showFacility === 'function') showFacility(PLANT[idx], sc, l.ci);
-  map.once('idle', () => { if (siteIdx === idx && siteLayoutKey === l.file) turbineLayer.setTurbines(tf, PLANT[idx], siteInfo); });
-  renderSitePanel(PLANT[idx], l, 'ok');
+function selectRun(path, policy, ci){
+  const idx = siteIdx; if (idx == null) return;
+  let s = siteScn(idx, path, policy) || siteScn(idx, path, null) || siteScenarios(idx)[0]; if (!s) { renderSitePanel(PLANT[idx], null, siteInfo ? 'ok' : 'none'); return; }
+  const rows = cappedRows(s); if (!rows.length) return;
+  if (ci == null) ci = rows[lowestCostIdx(rows)].target;
+  const r = rows.reduce((a, x) => Math.abs(x.target - ci) < Math.abs(a.target - ci) ? x : a, rows[0]);
+  siteRun = { path: scnPathwayLabel(s), policy: s.policy || null, ci: r.target };
+  curScn = s; curCItarget = r.target; curPlantIdx = idx;                       // the dashboard opens on the same run
+  const l = layoutFor(siteRun.path, siteRun.ci);
+  if (l && siteLayoutKey !== l.file) {
+    siteLayoutKey = l.file;
+    fetch(`${SITING_BASE}plant${idx}/${l.file}`).then(r => r.json()).then(gj => { if (siteIdx !== idx || siteLayoutKey !== l.file) return;
+      map.getSource('layout').setData(gj); const tf = gj.features.filter(f => f.properties.kind === 'turbine'); turbineLayer.setTurbines(tf, PLANT[idx], siteInfo);
+      map.once('idle', () => { if (siteIdx === idx && siteLayoutKey === l.file) turbineLayer.setTurbines(tf, PLANT[idx], siteInfo); }); });
+  }
+  if (typeof showFacility === 'function') showFacility(PLANT[idx], s, r.target);   // policy cases share the base design's dispatch
+  renderSitePanel(PLANT[idx], l, siteInfo ? 'ok' : 'none');
+  if (typeof syncURL === 'function') syncURL();
 }
+async function selectLayout(path, ci){ selectRun(path, siteRun.policy, ci); }
 function toggleSiteLayer(id, on){ if (map.getLayer(id)) map.setLayoutProperty(id, 'visibility', on ? 'visible' : 'none'); }
 function renderSitePanel(p, l, state){
   const host = document.getElementById('sitePanel'); if (!host) return;
   host.hidden = false;
-  const info = siteInfo, paths = info ? [...new Set(info.layouts.map(x => x.path))] : [];
-  const cis = (l && info) ? info.layouts.filter(x => x.path === l.path).map(x => x.ci) : [];
+  const info = siteInfo, scns = siteScenarios(p.idx);
+  const paths = [...new Set(scns.map(scnPathwayLabel))], policies = [null, ...new Set(scns.map(s => s.policy).filter(Boolean))];
+  const s = siteScn(p.idx, siteRun.path, siteRun.policy), rows = s ? cappedRows(s) : [], r = rows.find(x => Math.abs(x.target - siteRun.ci) < 1e-6) || rows[0];
+  const bau = s ? bauFor(s) : null, base = s && s.policy ? siteScn(p.idx, siteRun.path, null) : null;
+  const baseRow = base ? cappedRows(base).find(x => Math.abs(x.target - siteRun.ci) < 1e-6) : null;
   let h = `<div class="sp-head" style="display:flex;justify-content:space-between;gap:10px;align-items:flex-start"><div><div class="fp-h" style="margin-bottom:4px">Site</div><h2>${p.name}</h2><div class="sub">${p.admin ? p.admin + ', ' : ''}${p.country} · ${fmt(p.ktpa)} ktpa NH₃ · ${p.lat.toFixed(3)}°, ${p.lon.toFixed(3)}°</div></div><span style="display:flex;gap:4px;flex-wrap:wrap;justify-content:flex-end;max-width:52%"><button class="btn ghost sm" title="25 km catchment: developable land, turbines, PV" onclick="map.flyTo({center:[PLANT[siteIdx].lon,PLANT[siteIdx].lat],zoom:11.3,pitch:55,bearing:-18,duration:1800})">Catchment</button><button class="btn ghost sm" title="Back to the plant" onclick="const p=PLANT[siteIdx],m=111320*Math.cos(p.lat*Math.PI/180),fo=facOffsetFor(p.idx);map.flyTo({center:[p.lon+fo.x*0.6/m,p.lat-fo.z*0.6/110574],zoom:SITE_ZOOM,pitch:60,bearing:-25,duration:1800})">Plant</button><button class="btn ghost sm" onclick="leaveSite()">← Globe</button></span></div>`;
-  if (state === 'loading') h += `<p class="sub" style="margin-top:12px">Loading siting layers …</p>`;
-  else if (state === 'none') h += `<p class="sub" style="margin-top:12px">Siting layers have not been computed for this plant yet. The catchment (25 km) and the real terrain and buildings are shown; the renewable buildout appears once <code>tools/export_siting.py</code> has run for plant ${p.idx}.</p>`;
-  else {
-    h += `<div class="fp-section" style="margin-top:14px"><div class="fp-h">Buildout · which run</div>
-      <div class="ci-bar" style="margin:0 0 6px">${paths.map(pt => `<button class="ci-pill sm ${l.path === pt ? 'active' : ''}" onclick="selectLayout('${pt}',${l.ci})">${pt.replace('+CCS', ' +CCS')}</button>`).join('')}</div>
-      <div class="ci-bar" style="margin:0"><span class="lbl">CI target</span>${cis.map(c => `<button class="ci-pill sm ${Math.abs(c - l.ci) < 1e-6 ? 'active' : ''}" onclick="selectLayout('${l.path}',${c})">${c.toFixed(2)}</button>`).join('')}</div></div>`;
+  if (state === 'loading') { h += `<p class="sub" style="margin-top:12px">Loading …</p>`; host.innerHTML = h; return; }
+  // the run: pathway × policy × CI
+  h += `<div class="fin-group" style="margin-top:12px"><div class="fp-h">Run</div>
+    <div class="ci-bar" style="margin:0 0 4px"><span class="lbl">Pathway</span>${paths.map(pt => `<button class="ci-pill sm ${siteRun.path === pt ? 'active' : ''}" onclick="selectRun('${pt}',siteRun.policy,siteRun.ci)">${pt.replace('+CCS', ' +CCS')}</button>`).join('')}</div>
+    <div class="ci-bar" style="margin:0 0 4px"><span class="lbl">Policy</span>${policies.map(pol => `<button class="ci-pill sm ${(siteRun.policy || null) === pol ? 'active' : ''}" onclick="selectRun(siteRun.path,${pol ? "'" + pol + "'" : 'null'},siteRun.ci)">${pol ? policyLabel(pol) : 'None (base)'}</button>`).join('')}</div>
+    <div class="ci-bar" style="margin:0"><span class="lbl">CI target</span>${rows.map(x => `<button class="ci-pill sm ${Math.abs(x.target - siteRun.ci) < 1e-6 ? 'active' : ''}" title="LCOA ${fmt(x.lcoa)} $/t" onclick="selectRun(siteRun.path,siteRun.policy,${x.target})">${x.target.toFixed(2)}${x === rows[lowestCostIdx(rows)] ? ' ★' : ''}</button>`).join('')}</div></div>`;
+  // headline results of that run
+  if (r) {
+    const d = bau ? r.lcoa - bau.lcoa : null;
     h += `<div class="site-kpis">
-      <div><div class="l">Wind</div><div class="v">${fmt(l.wind_mw_placed)}<small> MW</small></div><div class="d">${l.turbines} × ${info.turbine_mw} MW · hub ${info.hub_m} m · rotor ${info.rotor_m} m${l.wind_short ? ' · <b style="color:var(--rust)">short of ' + fmt(l.wind_mw_target) + ' MW</b>' : ''}</div></div>
-      <div><div class="l">Solar PV</div><div class="v">${fmt(l.pv_mw_placed)}<small> MW</small></div><div class="d">${l.pv_km2} km² at ${info.rho_pv_mw_km2} MW/km²${l.pv_short ? ' · <b style="color:var(--rust)">short of ' + fmt(l.pv_mw_target) + ' MW</b>' : ''}</div></div>
-      <div><div class="l">Developable land</div><div class="v">${fmt(info.developable_km2.wind)}<small> km²</small></div><div class="d">wind, after setbacks (${info.setback_scenario}) · ${fmt(info.developable_km2.solar)} km² solar</div></div>
-      <div><div class="l">Fits within 25 km?</div><div class="v">${(l.wind_short || l.pv_short) ? 'No' : 'Yes'}</div><div class="d">${info.max_turbines} turbine positions at ${fmt(info.spacing_m)} m spacing</div></div>
+      <div><div class="l">LCOA</div><div class="v">${fmt(r.lcoa)}<small> $/t</small></div><div class="d">${bau ? (d <= 0 ? '−' : '+') + fmt(Math.abs(d)) + ' vs BAU ' + fmt(bau.lcoa) : ''}${baseRow ? ' · base case ' + fmt(baseRow.lcoa) : ''}${s.policy && r.ets_credit != null ? ' · ETS ' + fmt(r.ets_credit) + ' $/t' : ''}${s.policy && r.us_credit != null ? ' · credit ' + fmt(r.us_credit) + ' $/t' : ''}</div></div>
+      <div><div class="l">Carbon intensity</div><div class="v">${(s.ccs ? r.ci_ccs : r.ci_noccs).toFixed(2)}<small> t/t</small></div><div class="d">target ${r.target.toFixed(2)} · BAU ${bau ? bau.ci.toFixed(2) : '—'}${s.ccs ? ' · capture ' + fmt(r.cap_rate) + '%' : ''}</div></div>
+      <div><div class="l">Renewables</div><div class="v">${fmt(r.p_wt)}<small> MW wind</small></div><div class="d">${fmt(r.p_pv)} MW PV · ${fmt(r.p_b)} MW battery · ${fmt((r.e_pv + r.e_wt) / 1000)} GWh/yr</div></div>
+      <div><div class="l">Hydrogen</div><div class="v">${fmt(r.p_el)}<small> MW electrolysis</small></div><div class="d">${fmt(r.p_smr)} t H₂/d reformer · ${fmt(r.h2_el / (r.h2_el + r.h2_smr || 1) * 100)}% electrolytic · ${fmt(r.p_st)} t storage</div></div>
+      <div><div class="l">Grid</div><div class="v">${fmt(r.e_imp / 1000)}<small> GWh import</small></div><div class="d">${fmt((r.e_exp || 0) / 1000)} GWh export · ${fmt(r.elec_int, 1)} MWh/t</div></div>
+      <div><div class="l">Project IRR</div><div class="v">${r.irr != null ? r.irr.toFixed(1) : '—'}<small> %</small></div><div class="d">${s.policy ? 'base solve (policy case not re-optimised)' : 'optimizer objective'} · CAPEX $${fmt((r.capex_overnight || 0) / 1e9, 2)} bn</div></div>
     </div>`;
-    h += `<div class="fp-section"><div class="fp-h">Layers</div>
+  }
+  // siting
+  if (state === 'none') h += `<p class="sub" style="margin:4px 0 8px">Siting layers have not been computed for this plant yet — the catchment, terrain and buildings are shown; the renewable footprint appears once the fleet siting job has run for plant ${p.idx}.</p>`;
+  else if (l) h += `<div class="fin-group"><div class="fp-h">Renewable footprint · ${info.setback_scenario} setbacks</div><div class="site-kpis">
+      <div><div class="l">Wind placed</div><div class="v">${fmt(l.wind_mw_placed)}<small> MW</small></div><div class="d">${l.turbines} × ${info.turbine_mw} MW · hub ${info.hub_m} m · rotor ${info.rotor_m} m${l.wind_short ? ' · <b style="color:var(--rust)">short of ' + fmt(l.wind_mw_target) + ' MW</b>' : ''}</div></div>
+      <div><div class="l">Solar placed</div><div class="v">${fmt(l.pv_mw_placed)}<small> MW</small></div><div class="d">${l.pv_km2} km² at ${info.rho_pv_mw_km2} MW/km²${l.pv_short ? ' · <b style="color:var(--rust)">short of ' + fmt(l.pv_mw_target) + ' MW</b>' : ''}</div></div>
+      <div><div class="l">Developable land</div><div class="v">${fmt(info.developable_km2.wind)}<small> km²</small></div><div class="d">wind after setbacks · ${fmt(info.developable_km2.solar)} km² solar</div></div>
+      <div><div class="l">Fits within 25 km?</div><div class="v">${(l.wind_short || l.pv_short) ? 'No' : 'Yes'}</div><div class="d">${info.max_turbines} positions at ${fmt(info.spacing_m)} m spacing</div></div></div></div>`;
+  if (state !== 'none') h += `<div class="fin-group"><div class="fp-h">Layers</div>
       ${[['pv-blocks', 'PV blocks (buildout)', '#1B3A5C', true], ['turbine-dots', 'Turbines (buildout)', '#FBFAF8', true], ['dev-wind', 'Developable — wind', '#56B4E9', true], ['dev-solar', 'Developable — solar', '#E69F00', false], ['excl-fill', 'Exclusions by class', '#D55E00', false], ['buildings', 'Buildings (OSM, 3D)', '#cfc9bd', true]]
         .map(([id, n, c, on]) => `<label class="legend-row" style="cursor:pointer"><input type="checkbox" ${(map.getLayer(id) && map.getLayoutProperty(id, 'visibility') !== 'none') ? 'checked' : ''} onchange="toggleSiteLayer('${id}',this.checked);if('${id}'==='turbine-dots')turbineLayer.visible=this.checked;map.triggerRepaint()"><span class="dot" style="background:${c}"></span>${n}</label>`).join('')}
       <div class="sub" style="margin-top:6px">Exclusions: <span style="color:#D55E00">■</span> structures · <span style="color:#8A8F94">■</span> roads · <span style="color:#4C5B6E">■</span> rail · <span style="color:#0072B2">■</span> water · <span style="color:#009E73">■</span> forest/land use · <span style="color:#CC79A7">■</span> Natura 2000 — each buffered by the wind setback.</div></div>`;
-  }
-  h += `<div class="sp-actions"><button class="btn" onclick="openDashboard(${p.idx})">Technical results →</button><button class="btn ghost" onclick="FAC.on?hideFacility():(siteInfo&&siteLayoutKey?selectLayout(layoutFor(FAC.scn?scnPathwayLabel(FAC.scn):'SMR',null).path,null):null)">${(typeof FAC!=='undefined'&&FAC.on)?'Hide plant':'Show plant'}</button></div>`;
+  h += `<div class="sp-actions"><button class="btn" onclick="openDashboard(${p.idx})">Technical results →</button><button class="btn ghost" onclick="FAC.on?hideFacility():selectRun(siteRun.path,siteRun.policy,siteRun.ci)">${(typeof FAC !== 'undefined' && FAC.on) ? 'Hide plant' : 'Show plant'}</button></div>`;
   h += `<div class="sub" style="margin-top:10px;font-size:11px">Imagery Esri World Imagery · terrain Mapzen/AWS · buildings OpenStreetMap via OpenFreeMap · siting: HOPS land model (OSM + Natura 2000 exclusions)</div>`;
   host.innerHTML = h;
 }

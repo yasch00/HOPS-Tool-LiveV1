@@ -302,7 +302,7 @@ let DATA={hourlyByCI:{}}, SCN=[], AMM=[], BAU={base:{}}, GEO={coast:[],border:[]
 // resolution is taken from the first hourly file loaded: 8760 = true hourly, 2190 = every 4th hour
 let HPTS=8760, HSTEP=1;
 const DATA_BASE = window.HOPS_DATA_BASE || '../data/';
-async function fetchJSON(url){ const r=await fetch(url); if(!r.ok) throw new Error(url+' → HTTP '+r.status); return r.json(); }
+async function fetchJSON(url){ const r=await fetch(url,{cache:'no-cache'}); if(!r.ok) throw new Error(url+' → HTTP '+r.status); return r.json(); }   // revalidate: results change without the page changing
 async function fetchGz(url){
   const r=await fetch(url); if(!r.ok) throw new Error(url+' → HTTP '+r.status);
   const buf=await r.arrayBuffer(), u=new Uint8Array(buf);
@@ -383,10 +383,10 @@ function buildLayerList(){
   });
 }
 </script>
-<script src="map.js?v=202609152133"></script>
-<script src="finance.js?v=202609152133"></script>
-<script src="build.js?v=202609152133"></script>
-<script src="facility.js?v=202609152133"></script>
+<script src="map.js?v=202609152142"></script>
+<script src="finance.js?v=202609152142"></script>
+<script src="build.js?v=202609152142"></script>
+<script src="facility.js?v=202609152142"></script>
 <script>
 /* ============ NAVIGATION ============ */
 let curScn=null, curPlantIdx=null, curCItarget=null;
@@ -430,10 +430,12 @@ window.addEventListener('message', e=>{
 
 /* open the technical dashboard for a plant (used via ?facility=X&dash=1) */
 function openDashboard(idx){
+  const keep=(curScn && curScn.plant===idx) ? curScn : null, keepCI=keep?curCItarget:null;
   curPlantIdx=idx;
-  curScn=scnsForPlant(idx)[0];
+  curScn=keep||scnsForPlant(idx)[0];
   cmpPlant=idx;
   initDash();
+  if(keep){ curCItarget=keepCI; buildCISelect(); renderActiveTab(); }
   show('dashView');
   syncURL();
 }
