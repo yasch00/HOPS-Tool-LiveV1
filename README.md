@@ -102,6 +102,17 @@ $V tools/hops_site_run.py --spec request.json --out ~/Documents/Stanford/PhD/HOP
 python3 tools/hops_to_web.py --results ~/Documents/Stanford/PhD/HOPS/results/site_runs --label site_v1 --bau-label BAU_v7 --names tools/plant_names.json -o data
 ```
 
+**The request loop.** A visitor's "Request the run" opens a prefilled GitHub issue labelled `run-request` (site, capacity,
+both pathways, full CI sweep, every optimizer input resolved). Then, on this Mac:
+
+```bash
+python3 tools/run_requests.py --list            # what is waiting
+python3 tools/run_requests.py --run 12 --publish  # solve issue #12 (both pathways, 8 CI points each, ~1–2 h) and convert into data/
+```
+
+then commit + push in GitHub Desktop; the new site appears in the atlas as `#plant=<id>&view=site` (ids ≥ 1000). With a
+`GITHUB_TOKEN` in the environment the script also comments the link on the issue and closes it; otherwise close it by hand.
+
 Technical overrides accepted in the spec (`technical: {...}`, keys as on the Build page): `el_capex_usd_per_kw`,
 `pv_capex_mult`, `wt_capex_mult`, `battery_capex_usd_per_mwh`, `smr_capex_mult`, `ccs_capex_mult`, `ccs_capture_process`,
 `ccs_capture_flue`, `hb_capex_usd_per_mwh`, `gas_price_mult`, `grid_price_mult`, `nh3_price_usd_per_t`, `interest_rate`,

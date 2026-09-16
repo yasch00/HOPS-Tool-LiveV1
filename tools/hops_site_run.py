@@ -205,14 +205,22 @@ def main():
         validate(a.validate, a.ccs, float(a.ci or 0.5), Path(a.results), a.ref_label); return
     if not a.spec: ap.error("--spec or --validate required")
     spec = json.loads(Path(a.spec).read_text())
-    if "site" in spec:   # the atlas request format → flat
-        A = spec.get("assumptions", {}); T = spec.get("technical", {}) or {}
-        spec = {"name": spec["site"].get("name"), "lat": spec["site"]["lat"], "lon": spec["site"]["lon"], "tNH3_day": spec["plant"]["tNH3_day"],
-                "ccs": "+CCS" in spec["plant"]["pathway"], "pathway_code": "SMR_INT_ASU", "objective": "IRR", "overrides": T, "country": spec["site"].get("country")}
+    runs = []
+    if "site" in spec:   # the atlas request format: both pathways, full CI sweep, technical inputs resolved
+        T = spec.get("technical", {}) or {}
+        paths = spec["plant"].get("pathways") or [spec["plant"].get("pathway", "SMR")]
+        cis_spec = spec["plant"].get("ci_targets") if isinstance(spec["plant"].get("ci_targets"), list) else None
+        for pth in paths:
+            runs.append(({"name": spec["site"].get("name"), "lat": spec["site"]["lat"], "lon": spec["site"]["lon"], "tNH3_day": spec["plant"]["tNH3_day"],
+                          "ccs": "+CCS" in pth, "pathway_code": "SMR_INT_ASU", "objective": "IRR", "overrides": T, "country": spec["site"].get("country")}, cis_spec))
+    else:
+        runs.append((spec, None))
     out = Path(a.out); reg = out / "sites.json"; sites = json.loads(reg.read_text()) if reg.exists() else {}
     site_id = a.site_id or (max([int(k) for k in sites] + [999]) + 1)
-    cis = [float(x) for x in a.ci.split(",")] if a.ci else [i * 0.25 for i in range(8)]
-    run_site(spec, out, a.label, site_id, cis)
+    for sp, cis_spec in runs:
+        cis = [float(x) for x in a.ci.split(",")] if a.ci else (cis_spec or [i * 0.25 for i in range(8)])
+        print(f"\n===== site {site_id} · CCS={'Yes' if sp['ccs'] else 'No'} · {len(cis)} CI targets =====")
+        run_site(sp, out, a.label, site_id, cis)
 
 if __name__ == "__main__":
     main()
