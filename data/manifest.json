@@ -4852,12 +4852,45 @@
     }
    ],
    "BAU": "runs/plant82/BAU/bau.json.gz"
+  },
+  "1002": {
+   "SMR": [
+    {
+     "ci": 0.0,
+     "file": "runs/plant1002/SMR/ci0.00.json.gz"
+    },
+    {
+     "ci": 0.25,
+     "file": "runs/plant1002/SMR/ci0.25.json.gz"
+    },
+    {
+     "ci": 0.5,
+     "file": "runs/plant1002/SMR/ci0.50.json.gz"
+    },
+    {
+     "ci": 0.75,
+     "file": "runs/plant1002/SMR/ci0.75.json.gz"
+    },
+    {
+     "ci": 1.0,
+     "file": "runs/plant1002/SMR/ci1.00.json.gz"
+    },
+    {
+     "ci": 1.25,
+     "file": "runs/plant1002/SMR/ci1.25.json.gz"
+    },
+    {
+     "ci": 1.5,
+     "file": "runs/plant1002/SMR/ci1.50.json.gz"
+    }
+   ],
+   "BAU": "runs/plant1002/BAU/bau.json.gz"
   }
  },
  "extra_labels": [
   "site_v1"
  ],
- "n_scenarios": 350,
- "n_runs": 2768,
- "n_plants": 69
+ "n_scenarios": 352,
+ "n_runs": 2782,
+ "n_plants": 70
 }

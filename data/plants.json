@@ -826,5 +826,48 @@
 "amm_idx": 106,
 "name": "Devnya",
 "admin": "Varna"
+},
+{
+"idx": 1002,
+"lat": 37.4088,
+"lon": -122.1772,
+"country": "USA",
+"region": "US",
+"tpd": 650.0,
+"ktpa": 237.0,
+"custom": true,
+"spec": {
+"name": null,
+"lat": 37.4088,
+"lon": -122.1772,
+"tNH3_day": 650,
+"ccs": true,
+"pathway_code": "SMR_INT_ASU",
+"objective": "IRR",
+"overrides": {
+"nh3_price_usd_per_t": 450,
+"gas_price_mult": 1,
+"grid_price_mult": 1,
+"interest_rate": 0.08,
+"eua_price_eur_per_t": 72,
+"el_capex_usd_per_kw": 1100,
+"pv_capex_mult": 1,
+"wt_capex_mult": 1,
+"battery_capex_usd_per_mwh": 300000,
+"smr_capex_mult": 1,
+"ccs_capex_mult": 1,
+"hb_capex_usd_per_mwh": 53750,
+"res_overbuild": 1.4,
+"el_minload": 0.1,
+"nh3_minload": 0.95,
+"asu_minload": 0.7,
+"hb_hours": 5,
+"ccs_capture_process": 0.99,
+"ccs_capture_flue": 0.9
+},
+"country": "USA"
+},
+"name": "Site 1002",
+"admin": "requested site"
 }
 ]
