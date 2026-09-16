@@ -112,13 +112,12 @@ export function makeSkyTexture(){
 /* ---- assemble: subsystems placed as in the original, then the pipes between them */
 export function assemblePlant(C){
   const root = new THREE.Group();
-  // plot pad + painted border (the original's campus pad; the map's ground replaces the 500 × 500 plane)
+  // plot pad + painted border + grid (the original's campus pad; the map's ground replaces its 500 × 500 plane)
   const plot = new THREE.Mesh(new THREE.PlaneGeometry(170, 110), new THREE.MeshStandardMaterial({ color: 0xc9cbbf, roughness: 0.9, metalness: 0 }));
   plot.rotation.x = -Math.PI / 2; plot.position.y = 0.02; root.add(plot);
   const paintLine = (x1, z1, x2, z2, color = 0x2e3e4b, w = 0.25) => { const len = Math.hypot(x2 - x1, z2 - z1); const line = new THREE.Mesh(new THREE.PlaneGeometry(len, w), new THREE.MeshBasicMaterial({ color })); line.rotation.x = -Math.PI / 2; line.position.set((x1 + x2) / 2, 0.06, (z1 + z2) / 2); line.rotation.z = -Math.atan2(z2 - z1, x2 - x1); root.add(line); };
   paintLine(-83, -53, 83, -53); paintLine(-83, 53, 83, 53); paintLine(-83, -53, -83, 53); paintLine(83, -53, 83, 53);
   const grid = new THREE.GridHelper(180, 36, 0x9aa48f, 0xb2b8a8); grid.position.y = 0.04; grid.material.opacity = 0.25; grid.material.transparent = true; root.add(grid);
-
   const nodes = [], pickables = [];
   const active = SUBSYSTEMS.filter(d => capForKey(d.key, C) > 0);
   active.forEach((d, i) => { d.num = String(i + 1).padStart(2, '0'); });

@@ -13,7 +13,7 @@ const MAP_SOURCES = {
          encoding: 'terrarium', tileSize: 256, maxzoom: 15, attribution: 'Terrain: Mapzen Terrain Tiles (AWS)' },
   ofm: { type: 'vector', url: 'https://tiles.openfreemap.org/planet', attribution: 'Buildings © OpenStreetMap contributors · OpenFreeMap' }
 };
-const SITE_ZOOM = 11.3, GLOBE_ZOOM = 1.7;
+const SITE_ZOOM = 15.2, GLOBE_ZOOM = 1.7;          // arrive on the plant itself; the catchment is one zoom-out away
 const SITING_BASE = (window.HOPS_DATA_BASE || '../data/') + 'siting/';
 
 /* ---------------------------------------------------------------- globe */
@@ -127,8 +127,9 @@ async function openSite(idx, instant){
   map.getSource('site-plant').setData({ type: 'FeatureCollection', features: [{ type: 'Feature', geometry: { type: 'Point', coordinates: [p.lon, p.lat] }, properties: {} }] });
   ['dev', 'excl', 'layout'].forEach(s => map.getSource(s).setData({ type: 'FeatureCollection', features: [] }));
   turbineLayer.setTurbines([], p);
-  const view = { center: [p.lon, p.lat], zoom: SITE_ZOOM, pitch: 58, bearing: -18 };
-  if (instant) map.jumpTo(view); else map.flyTo({ ...view, duration: 2800, essential: true });
+  const mLon = 111320 * Math.cos(p.lat * Math.PI / 180);
+  const view = { center: [p.lon + 250 / mLon, p.lat - 60 / 110574], zoom: SITE_ZOOM, pitch: 60, bearing: -25 };   // centred between the real plant and the new units
+  if (instant) map.jumpTo(view); else map.flyTo({ ...view, duration: 3200, essential: true });
   renderSitePanel(p, null, 'loading');
   try {
     const r = await fetch(`${SITING_BASE}plant${idx}/site.json`);
@@ -171,7 +172,7 @@ function renderSitePanel(p, l, state){
   host.hidden = false;
   const info = siteInfo, paths = info ? [...new Set(info.layouts.map(x => x.path))] : [];
   const cis = (l && info) ? info.layouts.filter(x => x.path === l.path).map(x => x.ci) : [];
-  let h = `<div class="sp-head" style="display:flex;justify-content:space-between;gap:10px;align-items:flex-start"><div><div class="fp-h" style="margin-bottom:4px">Site</div><h2>${p.name}</h2><div class="sub">${p.admin ? p.admin + ', ' : ''}${p.country} · ${fmt(p.ktpa)} ktpa NH₃ · ${p.lat.toFixed(3)}°, ${p.lon.toFixed(3)}°</div></div><button class="btn ghost" style="flex:none" onclick="leaveSite()">← Globe</button></div>`;
+  let h = `<div class="sp-head" style="display:flex;justify-content:space-between;gap:10px;align-items:flex-start"><div><div class="fp-h" style="margin-bottom:4px">Site</div><h2>${p.name}</h2><div class="sub">${p.admin ? p.admin + ', ' : ''}${p.country} · ${fmt(p.ktpa)} ktpa NH₃ · ${p.lat.toFixed(3)}°, ${p.lon.toFixed(3)}°</div></div><span style="display:flex;gap:6px;flex:none"><button class="btn ghost sm" title="25 km catchment: developable land, turbines, PV" onclick="map.flyTo({center:[PLANT[siteIdx].lon,PLANT[siteIdx].lat],zoom:11.3,pitch:55,bearing:-18,duration:1800})">Catchment</button><button class="btn ghost sm" title="Back to the plant" onclick="const p=PLANT[siteIdx],m=111320*Math.cos(p.lat*Math.PI/180);map.flyTo({center:[p.lon+250/m,p.lat-60/110574],zoom:SITE_ZOOM,pitch:60,bearing:-25,duration:1800})">Plant</button><button class="btn ghost sm" onclick="leaveSite()">← Globe</button></span></div>`;
   if (state === 'loading') h += `<p class="sub" style="margin-top:12px">Loading siting layers …</p>`;
   else if (state === 'none') h += `<p class="sub" style="margin-top:12px">Siting layers have not been computed for this plant yet. The catchment (25 km) and the real terrain and buildings are shown; the renewable buildout appears once <code>tools/export_siting.py</code> has run for plant ${p.idx}.</p>`;
   else {
