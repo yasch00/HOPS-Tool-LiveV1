@@ -1,0 +1,485 @@
+{
+ "0": {
+  "name": "Columbia County",
+  "admin": "Oregon",
+  "country": "USA",
+  "lat": 45.911,
+  "lon": -122.824
+ },
+ "1": {
+  "name": "El Segundo",
+  "admin": "California",
+  "country": "USA",
+  "lat": 33.916,
+  "lon": -118.419
+ },
+ "8": {
+  "name": "Sweetwater County",
+  "admin": "Wyoming",
+  "country": "USA",
+  "lat": 41.541,
+  "lon": -109.131
+ },
+ "10": {
+  "name": "Laramie County",
+  "admin": "Wyoming",
+  "country": "USA",
+  "lat": 41.095,
+  "lon": -104.908
+ },
+ "11": {
+  "name": "Mercer County",
+  "admin": "North Dakota",
+  "country": "USA",
+  "lat": 47.361,
+  "lon": -101.838
+ },
+ "12": {
+  "name": "Hutchinson County",
+  "admin": "Texas",
+  "country": "USA",
+  "lat": 35.641,
+  "lon": -101.42
+ },
+ "13": {
+  "name": "Ford County",
+  "admin": "Kansas",
+  "country": "USA",
+  "lat": 37.78,
+  "lon": -100.006
+ },
+ "15": {
+  "name": "Woodward County",
+  "admin": "Oklahoma",
+  "country": "USA",
+  "lat": 36.437,
+  "lon": -99.471
+ },
+ "16": {
+  "name": "Garfield County",
+  "admin": "Oklahoma",
+  "country": "USA",
+  "lat": 36.38,
+  "lon": -97.765
+ },
+ "17": {
+  "name": "Fillmore County",
+  "admin": "Nebraska",
+  "country": "USA",
+  "lat": 40.539,
+  "lon": -97.58
+ },
+ "18": {
+  "name": "Gage County",
+  "admin": "Nebraska",
+  "country": "USA",
+  "lat": 40.319,
+  "lon": -96.841
+ },
+ "19": {
+  "name": "Liberty Township",
+  "admin": "Iowa",
+  "country": "USA",
+  "lat": 42.328,
+  "lon": -96.365
+ },
+ "20": {
+  "name": "Rogers County",
+  "admin": "Oklahoma",
+  "country": "USA",
+  "lat": 36.234,
+  "lon": -95.719
+ },
+ "21": {
+  "name": "Coffeyville",
+  "admin": "Kansas",
+  "country": "USA",
+  "lat": 37.045,
+  "lon": -95.605
+ },
+ "22": {
+  "name": "Brazoria County",
+  "admin": "Texas",
+  "country": "USA",
+  "lat": 29.003,
+  "lon": -95.394
+ },
+ "23": {
+  "name": "Mayes County",
+  "admin": "Oklahoma",
+  "country": "USA",
+  "lat": 36.241,
+  "lon": -95.278
+ },
+ "24": {
+  "name": "Creston",
+  "admin": "Iowa",
+  "country": "USA",
+  "lat": 41.071,
+  "lon": -94.357
+ },
+ "25": {
+  "name": "Colfax Township",
+  "admin": "Iowa",
+  "country": "USA",
+  "lat": 42.499,
+  "lon": -94.017
+ },
+ "26": {
+  "name": "Nederland",
+  "admin": "Texas",
+  "country": "USA",
+  "lat": 29.973,
+  "lon": -93.997
+ },
+ "27": {
+  "name": "El Dorado",
+  "admin": "Arkansas",
+  "country": "USA",
+  "lat": 33.225,
+  "lon": -92.647
+ },
+ "28": {
+  "name": "Lee County",
+  "admin": "Iowa",
+  "country": "USA",
+  "lat": 40.69,
+  "lon": -91.23
+ },
+ "29": {
+  "name": "Ascension Parish",
+  "admin": "Louisiana",
+  "country": "USA",
+  "lat": 30.226,
+  "lon": -91.053
+ },
+ "30": {
+  "name": "Ascension Parish",
+  "admin": "Louisiana",
+  "country": "USA",
+  "lat": 30.087,
+  "lon": -90.958
+ },
+ "31": {
+  "name": "St. James Parish",
+  "admin": "Louisiana",
+  "country": "USA",
+  "lat": 30.083,
+  "lon": -90.915
+ },
+ "32": {
+  "name": "Menominee Township",
+  "admin": "Illinois",
+  "country": "USA",
+  "lat": 42.443,
+  "lon": -90.557
+ },
+ "33": {
+  "name": "Yazoo County",
+  "admin": "Mississippi",
+  "country": "USA",
+  "lat": 32.928,
+  "lon": -90.407
+ },
+ "34": {
+  "name": "Jefferson Parish",
+  "admin": "Louisiana",
+  "country": "USA",
+  "lat": 29.965,
+  "lon": -90.265
+ },
+ "35": {
+  "name": "Colbert County",
+  "admin": "Alabama",
+  "country": "USA",
+  "lat": 34.803,
+  "lon": -87.94
+ },
+ "36": {
+  "name": "Shawnee Township",
+  "admin": "Ohio",
+  "country": "USA",
+  "lat": 40.711,
+  "lon": -84.138
+ },
+ "37": {
+  "name": "Greene County",
+  "admin": "Tennessee",
+  "country": "USA",
+  "lat": 36.194,
+  "lon": -83.003
+ },
+ "39": {
+  "name": "Augusta",
+  "admin": "Georgia",
+  "country": "USA",
+  "lat": 33.47,
+  "lon": -81.97
+ },
+ "40": {
+  "name": "Prince George County",
+  "admin": "Virginia",
+  "country": "USA",
+  "lat": 37.182,
+  "lon": -77.162
+ },
+ "41": {
+  "name": "Huelva",
+  "admin": "Andalusia",
+  "country": "Spain",
+  "lat": 37.22220709,
+  "lon": -6.94427212
+ },
+ "42": {
+  "name": "Argamasilla de Calatrava",
+  "admin": "Castile-La Mancha",
+  "country": "Spain",
+  "lat": 38.71831435,
+  "lon": -4.08940063
+ },
+ "45": {
+  "name": "Mont",
+  "admin": "Nouvelle-Aquitaine",
+  "country": "France",
+  "lat": 43.40310001,
+  "lon": -0.63634344
+ },
+ "46": {
+  "name": "Sabiñánigo",
+  "admin": "Aragon",
+  "country": "Spain",
+  "lat": 42.51853025,
+  "lon": -0.35544464
+ },
+ "48": {
+  "name": "Le Havre",
+  "admin": "Normandy",
+  "country": "France",
+  "lat": 49.48069272,
+  "lon": 0.19006976
+ },
+ "49": {
+  "name": "Le Grand-Quevilly",
+  "admin": "Normandy",
+  "country": "France",
+  "lat": 49.40828094,
+  "lon": 1.02254511
+ },
+ "50": {
+  "name": "Grandpuits-Bailly-Carrois",
+  "admin": "Ile-de-France",
+  "country": "France",
+  "lat": 48.58865777,
+  "lon": 2.94683619
+ },
+ "51": {
+  "name": "Waziers",
+  "admin": "Hauts-de-France",
+  "country": "France",
+  "lat": 50.3926772,
+  "lon": 3.11272867
+ },
+ "52": {
+  "name": "Hoek",
+  "admin": "Zeeland",
+  "country": "Netherlands",
+  "lat": 51.33664233,
+  "lon": 3.7518322
+ },
+ "53": {
+  "name": "Saint-Ghislain",
+  "admin": "Hainaut",
+  "country": "Belgium",
+  "lat": 50.47613238,
+  "lon": 3.81305306
+ },
+ "54": {
+  "name": "Antwerp",
+  "admin": "Antwerp",
+  "country": "Belgium",
+  "lat": 51.25689728,
+  "lon": 4.33749385
+ },
+ "55": {
+  "name": "Maastricht",
+  "admin": "Limburg",
+  "country": "Belgium",
+  "lat": 50.86986625,
+  "lon": 5.70314133
+ },
+ "56": {
+  "name": "Born",
+  "admin": "Limburg",
+  "country": "Netherlands",
+  "lat": 51.05297426,
+  "lon": 5.81733801
+ },
+ "57": {
+  "name": "Cologne",
+  "admin": "North Rhine-Westphalia",
+  "country": "Germany",
+  "lat": 50.97514042,
+  "lon": 6.98724375
+ },
+ "58": {
+  "name": "Gelsenkirchen",
+  "admin": "North Rhine-Westphalia",
+  "country": "Germany",
+  "lat": 51.60255904,
+  "lon": 7.0304467
+ },
+ "59": {
+  "name": "Ottmarsheim",
+  "admin": "Grand Est",
+  "country": "France",
+  "lat": 47.80313016,
+  "lon": 7.53365543
+ },
+ "60": {
+  "name": "Mannheim",
+  "admin": "Baden-Württemberg",
+  "country": "Germany",
+  "lat": 49.52499378,
+  "lon": 8.44491331
+ },
+ "61": {
+  "name": "Brunsbüttel",
+  "admin": "Schleswig-Holstein",
+  "country": "Germany",
+  "lat": 53.90941191,
+  "lon": 9.15982632
+ },
+ "63": {
+  "name": "Ferrara",
+  "admin": "Emilia-Romagna",
+  "country": "Italy",
+  "lat": 44.85703414,
+  "lon": 11.59310182
+ },
+ "64": {
+  "name": "Wittenberg",
+  "admin": "Saxony-Anhalt",
+  "country": "Germany",
+  "lat": 51.89913201,
+  "lon": 12.61732267
+ },
+ "65": {
+  "name": "Litvínov",
+  "admin": "Ústí nad Labem Region",
+  "country": "Czechia",
+  "lat": 50.56752653,
+  "lon": 13.59884383
+ },
+ "66": {
+  "name": "Schwedt/Oder",
+  "admin": "Brandenburg",
+  "country": "Germany",
+  "lat": 53.09396727,
+  "lon": 14.23459886
+ },
+ "67": {
+  "name": "Linz",
+  "admin": "Upper Austria",
+  "country": "Austria",
+  "lat": 48.29673314,
+  "lon": 14.33037722
+ },
+ "68": {
+  "name": "Szczecin",
+  "admin": "West Pomeranian Voivodeship",
+  "country": "Poland",
+  "lat": 53.42348725,
+  "lon": 14.58175736
+ },
+ "69": {
+  "name": "Grad Kutina",
+  "admin": "",
+  "country": "Croatia",
+  "lat": 45.46416634,
+  "lon": 16.80225077
+ },
+ "70": {
+  "name": "Močenok",
+  "admin": "Region of Nitra",
+  "country": "Slovakia",
+  "lat": 48.1796254,
+  "lon": 17.93920341
+ },
+ "71": {
+  "name": "Várpalota",
+  "admin": "Transdanubia",
+  "country": "Hungary",
+  "lat": 47.2016813,
+  "lon": 18.21133072
+ },
+ "72": {
+  "name": "Kędzierzyn-Koźle",
+  "admin": "Opole Voivodeship",
+  "country": "Poland",
+  "lat": 50.35595724,
+  "lon": 18.2897621
+ },
+ "73": {
+  "name": "Włocławek",
+  "admin": "Kuyavian-Pomeranian Voivodeship",
+  "country": "Poland",
+  "lat": 52.71033846,
+  "lon": 18.96877637
+ },
+ "74": {
+  "name": "Wola Rzędzińska",
+  "admin": "Lesser Poland Voivodeship",
+  "country": "Poland",
+  "lat": 50.02850116,
+  "lon": 21.08241739
+ },
+ "75": {
+  "name": "Puławy",
+  "admin": "Lublin Voivodeship",
+  "country": "Poland",
+  "lat": 51.45655313,
+  "lon": 21.98115965
+ },
+ "76": {
+  "name": "Târgu Mureș",
+  "admin": "",
+  "country": "Romania",
+  "lat": 46.51192849,
+  "lon": 24.50109396
+ },
+ "77": {
+  "name": "Kavala",
+  "admin": "Eastern Macedonia and Thrace",
+  "country": "Greece",
+  "lat": 40.95868196,
+  "lon": 24.54419709
+ },
+ "78": {
+  "name": "Turnu Măgurele",
+  "admin": "",
+  "country": "Romania",
+  "lat": 43.76039695,
+  "lon": 24.88131257
+ },
+ "79": {
+  "name": "Plant 79",
+  "admin": "Haskovo",
+  "country": "Bulgaria",
+  "lat": 42.07350445,
+  "lon": 25.54863523
+ },
+ "81": {
+  "name": "Slobozia",
+  "admin": "",
+  "country": "Romania",
+  "lat": 44.5777603,
+  "lon": 27.38141358
+ },
+ "82": {
+  "name": "Devnya",
+  "admin": "Varna",
+  "country": "Bulgaria",
+  "lat": 43.22417507,
+  "lon": 27.56477726
+ }
+}

@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>HOPS — Data &amp; assumptions</title>
+<meta name="description" content="Every parameter in the HOPS model with its value, unit, source, source year, direct link and verification status.">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,300;0,6..72,400;0,6..72,500;1,6..72,400&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="tokens.css"><link rel="stylesheet" href="components.css"><style>
+.legend{display:flex;gap:var(--s5);flex-wrap:wrap;margin:var(--s5) 0 0;font-size:13px;color:var(--ink-2)}
+.legend div{display:flex;gap:var(--s2);align-items:center}
+</style>
+</head>
+<body>
+<a class="skip" href="#main">Skip to content</a><header class="nav"><div class="wrap nav-in">
+<a class="brand" href="index.html"><b>HOPS</b><span>Stanford</span></a>
+<button class="nav-toggle" aria-expanded="false" aria-controls="nav-links">Menu</button>
+<nav class="links" id="nav-links"><a href="index.html">Home</a><a href="method.html">Method</a><a href="results.html">Results</a><a href="data.html" aria-current="page">Data &amp; assumptions</a><a href="watch.html">Watch</a><a href="team.html">Team</a><a href="about.html">About</a></nav>
+<a class="btn" href="atlas/">Open the tool →</a>
+</div></header><main id="main">
+<div class="wrap"><div style="padding:var(--s8) 0 var(--s7);border-bottom:1px solid var(--rule)">
+<span class="eyebrow">Data &amp; assumptions</span>
+<h1 style="font-size:clamp(32px,4.2vw,52px);margin:var(--s4) 0 var(--s5);max-width:24ch">Every number, with its receipt.</h1>
+<p class="lede">Each row is one modelled parameter. If a value has no source, it is badged as unsourced rather than quietly used. Filter by category, status, or search.</p>
+</div></div>
+<div class="wrap" id="data-scope">
+<div class="legend">
+<div><span class="badge ok">Verified</span> value and link checked against the cited source</div>
+<div><span class="badge est">Assumption</span> modelling choice, not a measurement</div>
+<div><span class="badge todo">Unsourced</span> pending citation</div>
+</div>
+<div class="filterbar" role="search" style="margin-top:var(--s5)">
+<label class="search"><svg width="14" height="14" viewBox="0 0 16 16" fill="none" aria-hidden="true"><circle cx="7" cy="7" r="4.5" stroke="currentColor" stroke-width="1.4"/><path d="M10.5 10.5L14 14" stroke="currentColor" stroke-width="1.4"/></svg><input type="search" placeholder="Search parameters, sources, units…" aria-label="Search parameters"></label>
+<div class="chips" role="group" aria-label="Filter by category">
+<button class="chip" data-field="category" data-value="Electrolysis" aria-pressed="false">Electrolysis</button><button class="chip" data-field="category" data-value="Reforming" aria-pressed="false">Reforming</button><button class="chip" data-field="category" data-value="Capture" aria-pressed="false">Capture</button><button class="chip" data-field="category" data-value="Synthesis" aria-pressed="false">Synthesis</button><button class="chip" data-field="category" data-value="Storage" aria-pressed="false">Storage</button><button class="chip" data-field="category" data-value="Renewables" aria-pressed="false">Renewables</button><button class="chip" data-field="category" data-value="Markets" aria-pressed="false">Markets</button><button class="chip" data-field="category" data-value="Emissions" aria-pressed="false">Emissions</button><button class="chip" data-field="category" data-value="Finance" aria-pressed="false">Finance</button><button class="chip" data-field="category" data-value="Fleet" aria-pressed="false">Fleet</button>
+</div>
+<select class="sel" data-field="status" aria-label="Filter by verification status"><option value="all">All statuses</option><option value="ok">Verified</option><option value="est">Assumption</option><option value="todo">Unsourced</option></select>
+<span class="result-count" id="pcount" aria-live="polite"></span>
+</div>
+<div id="pstatus" style="margin-top:var(--s5)"></div>
+<table class="ptable" id="ptable" style="margin-top:var(--s5)">
+<thead><tr><th scope="col">Parameter</th><th scope="col">Value</th><th scope="col">Source</th><th scope="col">Status</th></tr></thead>
+<tbody id="pbody"></tbody>
+</table>
+<p class="small mono" style="color:var(--ink-3);margin-top:var(--s6)">Parameter set v[0.0.0] · last reviewed [YYYY-MM-DD] · <a href="data/parameters.json">download JSON</a></p>
+</div>
+</main><footer class="site"><div class="wrap">
+<div class="foot-grid">
+<div><a class="brand" href="index.html" style="margin-bottom:var(--s3)"><b>HOPS</b><span>Stanford</span></a><p class="small" style="color:var(--ink-2);max-width:34ch">Hybrid Optimization of Plant Systems. A research tool for siting and sizing low-carbon ammonia production.</p></div>
+<div><h4>Pages</h4><ul><li><a href="method.html">Method</a></li><li><a href="results.html">Results</a></li><li><a href="data.html">Data &amp; assumptions</a></li><li><a href="watch.html">Watch</a></li></ul></div>
+<div><h4>Project</h4><ul><li><a href="team.html">Team</a></li><li><a href="about.html#cite">How to cite</a></li><li><a href="about.html#licence">Licence</a></li><li><a href="about.html#contact">Contact</a></li></ul></div>
+<div><h4>Affiliation</h4><ul><li>Stanford University</li><li>STEER program</li></ul></div>
+</div>
+<div class="stamp"><span>Model v[0.0.0] · site v[0.0.0]</span><span>Content last updated [YYYY-MM-DD] · figures regenerated [YYYY-MM-DD]</span></div>
+</div></footer>
+<script src="site.js"></script>
+<script>
+var badge={ok:['ok','Verified'],est:['est','Assumption'],todo:['todo','Unsourced']};
+HOPS.list({
+url:'data/parameters.json',scope:'#data-scope',mount:'#pbody',status:'#pstatus',count:'#pcount',noun:'parameters',skeleton:5,
+emptyTitle:'No parameters match',emptyBody:'Nothing in the parameter set matches this combination of search text, category and status.',
+searchText:function(r){return [r.name,r.note,r.unit,r.source,r.category].join(' ')},
+render:function(r){var b=badge[r.status]||badge.todo,e=HOPS.esc;
+return '<tr>'
++'<td data-label="Parameter" class="p-name">'+e(r.name)+'<span>'+e(r.note)+'</span></td>'
++'<td data-label="Value" class="p-val">'+e(r.value)+'<em>'+e(r.unit)+'</em></td>'
++'<td data-label="Source" class="p-src">'+(r.url?'<a href="'+e(r.url)+'">'+e(r.source)+'</a>':e(r.source))+'<span>'+e(r.source_year)+' · '+e(r.category)+'</span></td>'
++'<td data-label="Status"><span class="badge '+b[0]+'">'+b[1]+'</span></td></tr>'}
+});
+</script>
+</body>
+</html>

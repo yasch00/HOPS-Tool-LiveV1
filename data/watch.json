@@ -1,0 +1,8 @@
+[
+{"id":"w-001","date":"[YYYY-MM-DD]","category":"publication","region":"Global","title":"[PUBLICATION TITLE — to be filled from the daily feed]","summary":"[One- or two-sentence plain-language readout of the finding, written by the feed generator. No summary is written by hand.]","source":"[JOURNAL OR PREPRINT SERVER]","url":""},
+{"id":"w-002","date":"[YYYY-MM-DD]","category":"policy","region":"Europe","title":"[POLICY CHANGE HEADLINE]","summary":"[What changed and what it means for unsubsidised hybrid ammonia economics.]","source":"[OFFICIAL JOURNAL / AGENCY]","url":""},
+{"id":"w-003","date":"[YYYY-MM-DD]","category":"project","region":"United States","title":"[PROJECT ANNOUNCEMENT HEADLINE]","summary":"[Capacity, location, technology, stated cost basis if disclosed.]","source":"[COMPANY RELEASE / TRADE PRESS]","url":""},
+{"id":"w-004","date":"[YYYY-MM-DD]","category":"cost","region":"Global","title":"[COST DATA RELEASE HEADLINE]","summary":"[Which HOPS parameters this release could update, and whether the value moved up or down.]","source":"[ORGANISATION]","url":""},
+{"id":"w-005","date":"[YYYY-MM-DD]","category":"policy","region":"United States","title":"[TAX CREDIT GUIDANCE HEADLINE]","summary":"[Guidance detail relevant to 45V / 45Q eligibility for ammonia production.]","source":"[AGENCY]","url":""},
+{"id":"w-006","date":"[YYYY-MM-DD]","category":"publication","region":"Asia","title":"[PUBLICATION TITLE]","summary":"[Plain-language readout.]","source":"[JOURNAL]","url":""}
+]

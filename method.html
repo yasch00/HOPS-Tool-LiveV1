@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>HOPS — Method</title>
+<meta name="description" content="The optimization framing behind HOPS: objective, constraints, endogenous and exogenous variables, plant fleet, data sources and limitations.">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,300;0,6..72,400;0,6..72,500;1,6..72,400&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="tokens.css"><link rel="stylesheet" href="components.css">
+<style>
+.doc{display:grid;grid-template-columns:210px minmax(0,1fr);gap:var(--s8);padding:var(--s8) 0}
+.doc h2{margin:var(--s8) 0 var(--s4);max-width:24ch}
+.doc h2:first-child{margin-top:0}
+.doc h3{margin:var(--s6) 0 var(--s3)}
+.doc figure{margin:var(--s6) 0}
+.flowdiag rect{fill:var(--panel);stroke:var(--ink);stroke-width:1}
+.flowdiag text{font-family:var(--sans);font-size:12px;fill:var(--ink)}
+.flowdiag .lbl{font-family:var(--mono);font-size:9.5px;fill:var(--ink-3);letter-spacing:.08em}
+.flowdiag path,.flowdiag line{stroke:var(--ink-3);stroke-width:1.2;fill:none}
+.flowdiag .elec{stroke:var(--d1)}.flowdiag .h2{stroke:var(--d3)}.flowdiag .co2{stroke:var(--d6)}.flowdiag .gas{stroke:var(--d2)}
+table.plain{width:100%;border-collapse:collapse;font-size:var(--t-small);max-width:var(--measure)}
+table.plain th{text-align:left;font-family:var(--mono);font-size:var(--t-label);letter-spacing:.1em;text-transform:uppercase;color:var(--ink-3);font-weight:500;padding:var(--s2) var(--s3) var(--s2) 0;border-bottom:1px solid var(--ink)}
+table.plain td{padding:var(--s3) var(--s3) var(--s3) 0;border-bottom:1px solid var(--rule);vertical-align:top;color:var(--ink-2)}
+table.plain td:first-child{color:var(--ink);font-weight:500;width:34%}
+@media(max-width:900px){.doc{grid-template-columns:1fr;gap:var(--s5);padding:var(--s6) 0}}
+</style>
+</head>
+<body>
+<a class="skip" href="#main">Skip to content</a><header class="nav"><div class="wrap nav-in">
+<a class="brand" href="index.html"><b>HOPS</b><span>Stanford</span></a>
+<button class="nav-toggle" aria-expanded="false" aria-controls="nav-links">Menu</button>
+<nav class="links" id="nav-links"><a href="index.html">Home</a><a href="method.html" aria-current="page">Method</a><a href="results.html">Results</a><a href="data.html">Data &amp; assumptions</a><a href="watch.html">Watch</a><a href="team.html">Team</a><a href="about.html">About</a></nav>
+<a class="btn" href="atlas/">Open the tool →</a>
+</div></header><main id="main">
+<div class="wrap"><div style="padding:var(--s8) 0 var(--s7);border-bottom:1px solid var(--rule)">
+<span class="eyebrow">Method</span>
+<h1 style="font-size:clamp(32px,4.2vw,52px);margin:var(--s4) 0 var(--s5);max-width:24ch">One optimization, sizing and dispatch solved together.</h1>
+<p class="lede">What HOPS decides, what it takes as given, where the data comes from, and — in detail — what it cannot tell you.</p>
+</div></div>
+<div class="wrap"><div class="doc">
+<nav class="toc" aria-label="On this page">
+<a href="#framing">Framing</a><a href="#objective">Objective &amp; constraints</a><a href="#vars">Endogenous vs. exogenous</a><a href="#system">System boundary</a><a href="#fleet">Plant fleet</a><a href="#data">Data sources</a><a href="#solving">Solving</a><a href="#limits">Limitations</a>
+</nav>
+<div>
+<h2 id="framing">Framing</h2>
+<p>HOPS is a single mixed-integer linear program per plant-scenario. Capacity choices and 8,760 hours of operation are decided simultaneously, because in a hybrid plant they are not separable: the value of an electrolyser depends on how the synthesis loop is allowed to ramp, and the value of storage depends on the hourly shape of the local wind and solar resource.</p>
+<p>The carbon-intensity target enters as a constraint rather than a price. Sweeping the target from business-as-usual down to near-zero traces the cost-versus-carbon frontier for that plant; the Economic Decarbonization Threshold is where the frontier crosses the unsubsidised conventional cost.</p>
+
+<h2 id="objective">Objective and constraints</h2>
+<p>The objective minimises levelized cost of ammonia over the modelled year: annualised capital charges on endogenous capacities plus hourly variable cost, net of any grid export revenue.</p>
+<div class="eq"><span class="eq-label">(1)</span>min &nbsp; <var>LCOA</var> &nbsp;<span class="op">=</span>&nbsp; <span class="op">[</span> Σ<sub>u</sub> <var>CRF</var><sub>u</sub> · <var>capex</var><sub>u</sub> · <var>C</var><sub>u</sub> &nbsp;+&nbsp; Σ<sub>t</sub> <var>c</var><sub>t</sub><span class="op">ᵀ</span><var>x</var><sub>t</sub> <span class="op">]</span> <span class="op">/</span> <var>M</var><sub>NH₃</sub></div>
+<dl class="defs">
+<dt>C<sub>u</sub></dt><dd>installed capacity of unit <em>u</em> (endogenous, continuous)</dd>
+<dt>x<sub>t</sub></dt><dd>vector of hourly flows and states in hour <em>t</em></dd>
+<dt>c<sub>t</sub></dt><dd>hourly cost vector: electricity, gas, CO₂ transport and storage, variable O&amp;M</dd>
+<dt>CRF<sub>u</sub></dt><dd>capital recovery factor from WACC and unit lifetime</dd>
+<dt>M<sub>NH₃</sub></dt><dd>annual ammonia production, fixed to the plant's nameplate demand</dd>
+</dl>
+<p>The carbon constraint caps annual emissions per unit of product, counting process CO₂, captured fractions, imported grid electricity at its hourly emissions factor, and upstream methane leakage.</p>
+<div class="eq"><span class="eq-label">(2)</span>Σ<sub>t</sub> <var>e</var><sub>t</sub><span class="op">ᵀ</span><var>x</var><sub>t</sub> &nbsp;<span class="op">≤</span>&nbsp; <var>CI</var><sup>target</sup> · <var>M</var><sub>NH₃</sub></div>
+<p>Remaining constraints are conventional: mass and energy balances at each node, capacity limits, storage state-of-charge dynamics with round-trip losses, ramp limits and minimum stable load on the reformer and synthesis loop (the integer part), and grid connection limits in both directions.</p>
+
+<h2 id="vars">Endogenous vs. exogenous</h2>
+<table class="plain"><thead><tr><th>Endogenous</th><th>Exogenous</th></tr></thead><tbody>
+<tr><td>Unit capacities — wind, PV, battery, electrolyser, H₂ storage, SMR, capture, ASU, synthesis loop, NH₃ storage</td><td>Hourly wind and solar capacity factors at the plant site</td></tr>
+<tr><td>Hourly dispatch of every unit, including turndown</td><td>Hourly wholesale electricity price and grid emissions factor</td></tr>
+<tr><td>Storage charge/discharge and state of charge</td><td>Delivered natural gas price</td></tr>
+<tr><td>Grid import, export and curtailment</td><td>Plant location, nameplate capacity, ammonia demand</td></tr>
+<tr><td>Commitment (on/off) of reformer and synthesis loop</td><td>Technology capex, opex, efficiency, lifetime</td></tr>
+</tbody></table>
+
+<h2 id="system">System boundary</h2>
+<figure data-reveal>
+<div class="fig-frame">
+<svg class="flowdiag" viewBox="0 0 620 300" width="100%" role="img" aria-label="Block flow diagram: wind, solar, battery and grid supply electricity to electrolysis and air separation; natural gas feeds reforming with carbon capture; hydrogen storage buffers between hydrogen production and the Haber-Bosch loop, which produces ammonia into storage.">
+<g class="rise">
+<rect x="12" y="24" width="96" height="34" rx="2"/><text x="60" y="46" text-anchor="middle">Wind + PV</text>
+<rect x="12" y="72" width="96" height="34" rx="2"/><text x="60" y="94" text-anchor="middle">Battery</text>
+<rect x="12" y="120" width="96" height="34" rx="2"/><text x="60" y="142" text-anchor="middle">Grid</text>
+<rect x="12" y="204" width="96" height="34" rx="2"/><text x="60" y="226" text-anchor="middle">Natural gas</text>
+<rect x="176" y="60" width="104" height="40" rx="2"/><text x="228" y="84" text-anchor="middle">Electrolysis</text>
+<rect x="176" y="120" width="104" height="40" rx="2"/><text x="228" y="144" text-anchor="middle">Air separation</text>
+<rect x="176" y="196" width="104" height="50" rx="2"/><text x="228" y="216" text-anchor="middle">Reforming</text><text x="228" y="234" text-anchor="middle">+ capture</text>
+<rect x="330" y="60" width="92" height="40" rx="2"/><text x="376" y="84" text-anchor="middle">H₂ storage</text>
+<rect x="330" y="150" width="92" height="46" rx="2"/><text x="376" y="170" text-anchor="middle">Haber–</text><text x="376" y="187" text-anchor="middle">Bosch</text>
+<rect x="472" y="150" width="112" height="46" rx="2"/><text x="528" y="170" text-anchor="middle">NH₃ storage</text><text x="528" y="187" text-anchor="middle">→ product</text>
+<path class="elec" d="M108 41 L 142 41 L 142 80 L 176 80"/><path class="elec" d="M108 89 L 142 89 L 142 80"/><path class="elec" d="M108 137 L 142 137 L 142 140 L 176 140"/>
+<path class="gas" d="M108 221 L 176 221"/>
+<path class="h2" d="M280 80 L 330 80"/><path class="h2" d="M376 100 L 376 150"/><path class="h2" d="M280 221 L 304 221 L 304 100 L 330 100" stroke-dasharray="4 3"/>
+<path d="M280 140 L 304 140 L 304 173 L 330 173"/>
+<path d="M422 173 L 472 173"/>
+<path class="co2" d="M228 246 L 228 274 L 470 274" stroke-dasharray="4 3"/><text class="lbl" x="478" y="278">CO₂ → T&amp;S</text>
+<text class="lbl" x="150" y="20">ELECTRICITY</text><text class="lbl" x="312" y="52">HYDROGEN</text>
+</g>
+</svg>
+</div>
+<figcaption><b>Fig. 2</b>Modelled system boundary. Solid lines are flows co-optimised in every hour; dashed lines are the fossil route's hydrogen and captured CO₂. Upstream methane leakage is accounted at the gas inlet; downstream ammonia use is out of scope.</figcaption>
+</figure>
+
+<h2 id="fleet">Plant fleet</h2>
+<p>The fleet is ~91 existing ammonia plants in the United States and Europe, each with its own location, nameplate capacity, market zone and local renewable resource. Retrofit logic starts from the existing reformer rather than a greenfield site, so the threshold reflects the capital already in the ground.</p>
+<div class="note"><span class="eyebrow">Fleet composition</span><p class="small" style="margin:0">[VALUE] plants in the United States and [VALUE] in Europe, together [VALUE] Mt NH₃/yr of nameplate capacity.<a class="cite" href="data.html" tabindex="0">[3]<span class="card"><i>Source</i>[PLANT DATABASE NAME], [YEAR]. Per-plant records on the <a href="data.html">data page</a>.<span class="badge todo" style="margin-top:8px">To be sourced</span></span></a></p></div>
+
+<h2 id="data">Data sources</h2>
+<p>Every input is listed on the data and assumptions page with its value, unit, source, source year, direct link and verification status. Nothing in the model is a round number chosen for convenience; where a value is an assumption rather than a measurement, it is badged as one.</p>
+<p><a href="data.html">Browse all modelled parameters →</a></p>
+
+<h2 id="solving">Solving</h2>
+<p>Each plant-scenario is one MILP with 8,760 hourly time steps solved at full resolution — no representative days or clustering, since the threshold is sensitive to the tails of the resource distribution. Sweeping the carbon target and the fleet gives [VALUE] solves per published run; solver, version and settings are recorded with each run.</p>
+
+<h2 id="limits">Limitations</h2>
+<p>The results are useful for comparing plants and pathways, not for underwriting a project. In particular:</p>
+<div class="note warn">
+<span class="eyebrow">What this model does not do</span>
+<ul style="margin-bottom:0">
+<li><strong>Perfect foresight.</strong> The optimizer sees the whole year at once, so it overstates achievable arbitrage and understates the cost of forecast error.</li>
+<li><strong>Price taking.</strong> Electricity and gas prices are exogenous; large-scale deployment would move them, and that feedback is absent.</li>
+<li><strong>Deterministic, single weather year.</strong> One resource and price year per run. Interannual variability is not propagated into the reported threshold unless a multi-year run is stated.</li>
+<li><strong>Linearised process engineering.</strong> Efficiencies are constant or piecewise; part-load behaviour of the synthesis loop is approximated by minimum load and ramp limits.</li>
+<li><strong>No grid or permitting constraints beyond a connection limit.</strong> Interconnection queues, land availability and local siting limits are out of scope.</li>
+<li><strong>Costs are levelized, not financed.</strong> A single WACC stands in for real capital structure, contracting and offtake risk.</li>
+<li><strong>Emissions accounting is attributional.</strong> Grid imports are charged at an hourly average factor, not a marginal or consequential one; results shift if that choice changes.</li>
+</ul>
+</div>
+<p>Where a limitation materially moves the threshold, the results page reports the sensitivity rather than a single number.</p>
+</div>
+</div></div>
+</main><footer class="site"><div class="wrap">
+<div class="foot-grid">
+<div><a class="brand" href="index.html" style="margin-bottom:var(--s3)"><b>HOPS</b><span>Stanford</span></a><p class="small" style="color:var(--ink-2);max-width:34ch">Hybrid Optimization of Plant Systems. A research tool for siting and sizing low-carbon ammonia production.</p></div>
+<div><h4>Pages</h4><ul><li><a href="method.html">Method</a></li><li><a href="results.html">Results</a></li><li><a href="data.html">Data &amp; assumptions</a></li><li><a href="watch.html">Watch</a></li></ul></div>
+<div><h4>Project</h4><ul><li><a href="team.html">Team</a></li><li><a href="about.html#cite">How to cite</a></li><li><a href="about.html#licence">Licence</a></li><li><a href="about.html#contact">Contact</a></li></ul></div>
+<div><h4>Affiliation</h4><ul><li>Stanford University</li><li>STEER program</li></ul></div>
+</div>
+<div class="stamp"><span>Model v[0.0.0] · site v[0.0.0]</span><span>Content last updated [YYYY-MM-DD] · figures regenerated [YYYY-MM-DD]</span></div>
+</div></footer>
+<script src="site.js"></script>
+</body>
+</html>

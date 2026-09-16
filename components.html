@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>HOPS — Component reference</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,300;0,6..72,400;0,6..72,500;1,6..72,400&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="tokens.css"><link rel="stylesheet" href="components.css">
+<style>
+.spec{padding:var(--s7) 0;border-bottom:1px solid var(--rule)}
+.spec>.eyebrow{margin-bottom:var(--s4)}
+.spec h2{font-size:26px;margin-bottom:var(--s5)}
+code.cls{font-family:var(--mono);font-size:11.5px;background:var(--paper-3);padding:2px 6px;border-radius:var(--r-sm);color:var(--ink-2)}
+.swatches{display:grid;grid-template-columns:repeat(auto-fit,minmax(84px,1fr));gap:var(--s2)}
+.sw{height:52px;border-radius:var(--r-sm);border:1px solid rgba(0,0,0,.07)}
+.sw-l{font-family:var(--mono);font-size:10px;color:var(--ink-3);margin-top:5px;display:block}
+.ramp{display:flex;height:34px;border-radius:var(--r-sm);overflow:hidden;border:1px solid var(--rule)}
+.ramp i{flex:1}
+.scalerow{display:flex;align-items:baseline;gap:var(--s5);padding:var(--s3) 0;border-bottom:1px dotted var(--rule-2)}
+.scalerow code{margin-left:auto}
+.spacing{display:flex;gap:var(--s3);align-items:flex-end;flex-wrap:wrap}
+.spacing div{text-align:center}
+.spacing i{display:block;background:var(--anchor-tint);border:1px solid var(--anchor);border-radius:var(--r-sm)}
+</style>
+</head>
+<body>
+<a class="skip" href="#main">Skip to content</a>
+<header class="nav"><div class="wrap nav-in">
+<a class="brand" href="index.html"><b>HOPS</b><span>Stanford</span></a>
+<button class="nav-toggle" aria-expanded="false" aria-controls="nav-links">Menu</button>
+<nav class="links" id="nav-links"><a href="index.html">Home</a><a href="method.html">Method</a><a href="results.html">Results</a><a href="data.html">Data &amp; assumptions</a><a href="watch.html">Watch</a><a href="team.html">Team</a><a href="about.html">About</a></nav>
+<a class="btn" href="atlas/">Open the tool →</a>
+</div></header>
+<main id="main"><div class="wrap">
+<div style="padding:var(--s8) 0 var(--s6);border-bottom:1px solid var(--rule)">
+<span class="eyebrow">Reference — not a public page</span>
+<h1 style="font-size:clamp(30px,4vw,46px);margin:var(--s4) 0 var(--s5);max-width:24ch">Every reusable piece, once.</h1>
+<p class="lede">Tokens, then components, in the order they appear in <span class="mono">components.css</span>. Rationale in <span class="mono">RATIONALE.md</span>.</p>
+</div>
+
+<div class="spec"><span class="eyebrow">Tokens — colour</span>
+<h2>Palette</h2>
+<div class="grid-2">
+<div><span class="eyebrow" style="margin-bottom:var(--s2)">UI</span>
+<div class="swatches">
+<div><div class="sw" style="background:var(--ink)"></div><span class="sw-l">--ink</span></div>
+<div><div class="sw" style="background:var(--anchor)"></div><span class="sw-l">--anchor</span></div>
+<div><div class="sw" style="background:var(--accent)"></div><span class="sw-l">--accent</span></div>
+<div><div class="sw" style="background:var(--paper-2)"></div><span class="sw-l">--paper-2</span></div>
+</div>
+<span class="eyebrow" style="margin:var(--s5) 0 var(--s2)">Neutral ramp</span>
+<div class="ramp"><i style="background:var(--panel)"></i><i style="background:var(--paper)"></i><i style="background:var(--paper-2)"></i><i style="background:var(--paper-3)"></i><i style="background:var(--rule)"></i><i style="background:var(--rule-2)"></i><i style="background:var(--ink-3)"></i><i style="background:var(--ink-2)"></i><i style="background:var(--ink)"></i></div>
+</div>
+<div><span class="eyebrow" style="margin-bottom:var(--s2)">Data series — Okabe–Ito</span>
+<div class="swatches" style="grid-template-columns:repeat(6,1fr)">
+<div><div class="sw" style="background:var(--d1)"></div><span class="sw-l">d1</span></div>
+<div><div class="sw" style="background:var(--d2)"></div><span class="sw-l">d2</span></div>
+<div><div class="sw" style="background:var(--d3)"></div><span class="sw-l">d3</span></div>
+<div><div class="sw" style="background:var(--d4)"></div><span class="sw-l">d4</span></div>
+<div><div class="sw" style="background:var(--d5)"></div><span class="sw-l">d5</span></div>
+<div><div class="sw" style="background:var(--d6)"></div><span class="sw-l">d6</span></div>
+</div>
+<span class="eyebrow" style="margin:var(--s5) 0 var(--s2)">Status</span>
+<div style="display:flex;gap:var(--s3);flex-wrap:wrap"><span class="badge ok">Verified</span><span class="badge est">Assumption</span><span class="badge todo">Unsourced</span></div>
+</div>
+</div>
+</div>
+
+<div class="spec"><span class="eyebrow">Tokens — type &amp; spacing</span>
+<h2>Scale</h2>
+<div style="max-width:var(--measure)">
+<div class="scalerow"><span style="font-family:var(--serif);font-size:46px;line-height:1">Display</span><code class="cls">--t-display</code></div>
+<div class="scalerow"><span style="font-family:var(--serif);font-size:34px">Heading 2</span><code class="cls">--t-h2</code></div>
+<div class="scalerow"><span style="font-family:var(--serif);font-size:21px">Heading 3</span><code class="cls">--t-h3</code></div>
+<div class="scalerow"><span class="lede" style="font-size:21px">Lede — serif, 48ch</span><code class="cls">.lede</code></div>
+<div class="scalerow"><span>Body — IBM Plex Sans 17px / 1.6</span><code class="cls">--t-body</code></div>
+<div class="scalerow"><span class="mono">Numeric — 0123456789 €/MWh</span><code class="cls">.mono</code></div>
+<div class="scalerow"><span class="eyebrow">Eyebrow label</span><code class="cls">.eyebrow</code></div>
+</div>
+<div class="spacing" style="margin-top:var(--s6)">
+<div><i style="width:4px;height:4px"></i><span class="sw-l">s1</span></div>
+<div><i style="width:8px;height:8px"></i><span class="sw-l">s2</span></div>
+<div><i style="width:12px;height:12px"></i><span class="sw-l">s3</span></div>
+<div><i style="width:16px;height:16px"></i><span class="sw-l">s4</span></div>
+<div><i style="width:24px;height:24px"></i><span class="sw-l">s5</span></div>
+<div><i style="width:32px;height:32px"></i><span class="sw-l">s6</span></div>
+<div><i style="width:48px;height:48px"></i><span class="sw-l">s7</span></div>
+<div><i style="width:72px;height:72px"></i><span class="sw-l">s8</span></div>
+<div><i style="width:112px;height:112px"></i><span class="sw-l">s9</span></div>
+</div>
+</div>
+
+<div class="spec"><span class="eyebrow">Component</span>
+<h2>Citation <code class="cls">.cite</code></h2>
+<p>Inline in prose: the fleet-median threshold is [VALUE] kg CO₂e/kg NH₃<a class="cite" href="#" tabindex="0">[1]<span class="card"><i>Source</i>[ORGANISATION — REPORT TITLE], [YEAR]. <a href="#">Direct link</a><span class="badge ok" style="margin-top:8px">Verified</span></span></a> — hover or focus the marker. Works identically in captions and table cells.</p>
+</div>
+
+<div class="spec"><span class="eyebrow">Component</span>
+<h2>Stat callout with uncertainty <code class="cls">.stat</code> <code class="cls">.unc</code></h2>
+<div class="stat">
+<div class="v">[VALUE]<small>kg CO₂e / kg NH₃</small></div>
+<div class="unc"><div class="bar"><i style="left:18%;right:22%"></i><u style="left:44%"></u></div><div class="ticks"><span>[LOW]</span><span>interquartile range</span><span>[HIGH]</span></div></div>
+<p>The interval's meaning is always named. In prose, use <span class="pm">[VALUE] ± [ERR]</span> via <code class="cls">.pm</code>.</p>
+</div>
+</div>
+
+<div class="spec"><span class="eyebrow">Component</span>
+<h2>Readout strip <code class="cls">.readout</code></h2>
+<div class="readout">
+<div><span class="eyebrow">Plants modelled</span><b>[VALUE]</b><small>US + Europe</small></div>
+<div><span class="eyebrow">Dispatch resolution</span><b>8,760 h</b><small>per plant, per run</small></div>
+<div><span class="eyebrow">Parameters</span><b>[VALUE]</b><small>each sourced</small></div>
+</div>
+</div>
+
+<div class="spec"><span class="eyebrow">Component</span>
+<h2>Figure with caption <code class="cls">.fig-frame</code> <code class="cls">figcaption</code></h2>
+<figure data-reveal style="max-width:560px">
+<div class="fig-frame">
+<svg viewBox="0 0 480 240" width="100%" role="img" aria-label="Example figure in house chart style.">
+<g class="grid"><line x1="52" y1="40" x2="466" y2="40"/><line x1="52" y1="100" x2="466" y2="100"/><line x1="52" y1="160" x2="466" y2="160"/></g>
+<line class="axis" x1="52" y1="200" x2="466" y2="200"/><line class="axis" x1="52" y1="24" x2="52" y2="200"/>
+<path class="draw" d="M70 70 C 160 110, 260 155, 456 178" fill="none" stroke="var(--d1)" stroke-width="2.2"/>
+<line class="fade" x1="70" y1="160" x2="456" y2="160" stroke="var(--d2)" stroke-width="1.6" stroke-dasharray="7 5"/>
+<text class="serieslabel" x="80" y="62" fill="var(--d1)">series A</text><text class="serieslabel" x="80" y="152" fill="var(--d2)">baseline</text>
+<text class="axlabel" x="52" y="228">x axis label  →</text>
+</svg>
+</div>
+<figcaption><b>Fig. n</b>Caption text, 64ch measure, with provenance attached.<a class="cite" href="#" tabindex="0">[2]<span class="card"><i>Source</i>HOPS run [RUN ID], [YYYY-MM-DD].<span class="badge todo" style="margin-top:8px">Awaiting run</span></span></a></figcaption>
+</figure>
+</div>
+
+<div class="spec"><span class="eyebrow">Component</span>
+<h2>Filter bar <code class="cls">.filterbar</code></h2>
+<div class="filterbar" style="position:static">
+<label class="search"><svg width="14" height="14" viewBox="0 0 16 16" fill="none" aria-hidden="true"><circle cx="7" cy="7" r="4.5" stroke="currentColor" stroke-width="1.4"/><path d="M10.5 10.5L14 14" stroke="currentColor" stroke-width="1.4"/></svg><input type="search" placeholder="Search…" aria-label="Search example"></label>
+<div class="chips"><button class="chip" aria-pressed="true">Selected</button><button class="chip" aria-pressed="false">Unselected</button></div>
+<select class="sel"><option>All statuses</option></select>
+<span class="result-count">12 / 26 items</span>
+</div>
+</div>
+
+<div class="spec"><span class="eyebrow">Component</span>
+<h2>Parameter table row <code class="cls">.ptable</code></h2>
+<table class="ptable">
+<thead><tr><th style="position:static">Parameter</th><th style="position:static">Value</th><th style="position:static">Source</th><th style="position:static">Status</th></tr></thead>
+<tbody><tr>
+<td data-label="Parameter" class="p-name">Alkaline electrolyser capex<span>Installed, system level</span></td>
+<td data-label="Value" class="p-val">[VALUE]<em>$/kW</em></td>
+<td data-label="Source" class="p-src"><a href="#">[ORGANISATION — REPORT TITLE]</a><span>[YYYY] · Electrolysis</span></td>
+<td data-label="Status"><span class="badge todo">Unsourced</span></td>
+</tr></tbody>
+</table>
+</div>
+
+<div class="spec"><span class="eyebrow">Component</span>
+<h2>Watch feed card <code class="cls">.fcard</code></h2>
+<div class="feed">
+<article class="fcard" data-cat="policy">
+<time datetime="[YYYY-MM-DD]">[YYYY-MM-DD]</time>
+<div><h3><a href="#">[POLICY CHANGE HEADLINE]</a></h3><p>[One- or two-sentence plain-language readout.]</p>
+<div class="fmeta"><span class="cat">Policy</span><span>Europe</span><span>[AGENCY]</span></div></div>
+<a class="btn ghost sm" href="#">Source →</a>
+</article>
+</div>
+</div>
+
+<div class="spec"><span class="eyebrow">Component</span>
+<h2>Loading and empty states <code class="cls">.skeleton</code> <code class="cls">.empty</code></h2>
+<div class="grid-2">
+<div class="feed" aria-busy="true"><div class="skeleton"><div class="sk-line" style="width:38%"></div><div class="sk-line" style="width:72%"></div><div class="sk-line" style="width:24%"></div></div><div class="skeleton"><div class="sk-line" style="width:30%"></div><div class="sk-line" style="width:64%"></div><div class="sk-line" style="width:20%"></div></div></div>
+<div class="empty"><h3>Nothing matches these filters</h3><p>The feed updates daily. Widen the region or clear a category to see more.</p><button class="btn ghost sm">Clear all filters</button></div>
+</div>
+</div>
+
+<div class="spec"><span class="eyebrow">Component</span>
+<h2>Section header, note, equation, team card</h2>
+<div class="sec-head"><span class="eyebrow">01 — Section</span><div><h2 style="margin-bottom:var(--s3)">Section header pattern</h2><p class="small" style="color:var(--ink-2);margin:0">Eyebrow in a 180px rail, heading and prose in the second column.</p></div></div>
+<div class="note warn"><span class="eyebrow">Limitation</span><p class="small" style="margin:0">Warning variant for candid caveats — used for the limitations list on the method page.</p></div>
+<div class="eq"><span class="eq-label">(n)</span>min &nbsp;<var>LCOA</var> <span class="op">=</span> <span class="op">[</span> Σ<sub>u</sub> <var>CRF</var><sub>u</sub> · <var>capex</var><sub>u</sub> · <var>C</var><sub>u</sub> <span class="op">]</span> <span class="op">/</span> <var>M</var><sub>NH₃</sub></div>
+<div class="tcard" style="max-width:460px;margin-top:var(--s5)"><div class="portrait">[PHOTO]</div><div><h3>[NAME]</h3><div class="role">[TITLE] · [INSTITUTION]</div><p>[Short bio.]</p><div class="tlinks"><a href="#">Profile</a></div></div></div>
+</div>
+</div></main>
+<footer class="site"><div class="wrap"><div class="stamp" style="margin-top:0;border-top:0"><span>Component reference · site v[0.0.0]</span><span>Tokens: tokens.css · Rationale: RATIONALE.md</span></div></div></footer>
+<script src="site.js"></script>
+</body>
+</html>
