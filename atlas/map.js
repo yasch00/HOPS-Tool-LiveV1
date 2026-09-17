@@ -197,7 +197,8 @@ function selectRun(path, policy, ci){
   if (typeof syncURL === 'function') syncURL();
 }
 async function selectLayout(path, ci){ selectRun(path, siteRun.policy, ci); }
-function toggleSiteLayer(id, on){ if (map.getLayer(id)) map.setLayoutProperty(id, 'visibility', on ? 'visible' : 'none'); }
+const LAYER_COMPANIONS = { 'dev-wind': ['dev-wind-line', 'windland'], 'excl-fill': ['excl-line'] };   // a checkbox drives the fill and its outline / the placed wind land together
+function toggleSiteLayer(id, on){ [id, ...(LAYER_COMPANIONS[id] || [])].forEach(l => { if (map.getLayer(l)) map.setLayoutProperty(l, 'visibility', on ? 'visible' : 'none'); }); }
 function renderSitePanel(p, l, state){
   const host = document.getElementById('sitePanel'); if (!host) return;
   host.hidden = false;
@@ -380,7 +381,7 @@ async function refreshPendingProgress(){
       run = { state: allDone ? ((pub && pub.conclusion === 'success') ? 'done' : 'failed') : (pub && pub.conclusion === 'success') ? 'done' : 'running', id: r.runId, url: `https://github.com/yasch00/HOPS-Tool-LiveV1/actions/runs/${r.runId}`, started, done, total: solves.length || 17, failed, jobs: solves, stage,
               progress: Math.min(0.97, 0.03 + 0.85 * (solves.length ? done / solves.length : 0) + (stage === 'publish' ? 0.05 : stage === 'siting' ? 0.09 : 0)) };
     } else run = { state: 'waiting' };
-  } catch (e) { run = { state: 'unknown', error: String(e.message || e) }; }
+  } catch (e) { run = /404/.test(String(e.message)) && r.runId ? { state: 'gone' } : { state: 'unknown', error: String(e.message || e) }; }
   if (PENDING.open !== r) return;
   PENDING.run = run; renderPendingPanel(r, run);
   if (typeof setConstructionProgress === 'function') setConstructionProgress(run.progress != null ? run.progress : 0.02);
@@ -400,6 +401,7 @@ function renderPendingPanel(r, run){
   if (!run) h += `<div class="fin-group"><div class="fp-h">Progress</div><p class="sub">Checking the solver …</p></div>`;
   else if (run.state === 'waiting') h += `<div class="fin-group"><div class="fp-h">Progress</div><p class="sub">Queued — the cloud solver has not picked the request up yet (it starts within a minute of the request if the workflow is enabled; otherwise the local worker or a manual run publishes it).</p></div>`;
   else if (run.state === 'published' || run.state === 'done') h += `<div class="fin-group"><div class="fp-h">Progress</div><p class="sub">Published — loading the results …</p></div>`;
+  else if (run.state === 'gone') h += `<div class="fin-group"><div class="fp-h">Progress</div><p class="sub" style="color:var(--rust)">The solver run linked from this request no longer exists (deleted from the Actions page), so nothing is being solved. The request itself is still open, which is why the site is shown here: deleting a run does not delete a request. Remove it with "Stop &amp; cancel" below, or — as the repository owner — close <a href="${r.url}" target="_blank" rel="noopener">#${r.issue}</a> on GitHub as "not planned". To solve it after all: Actions → solve run request → Run workflow with issue ${r.issue}.</p></div>`;
   else if (run.state === 'unknown') h += `<div class="fin-group"><div class="fp-h">Progress</div><p class="sub">Could not read the progress (${run.error}). The GitHub API allows 60 anonymous requests per hour; try again in a while.</p></div>`;
   else {
     const pct = Math.round((run.progress || 0) * 100), el = run.started ? Math.round((Date.now() - new Date(run.started)) / 60000) : null;
