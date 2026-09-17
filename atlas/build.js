@@ -126,13 +126,13 @@ function renderBuildPanel(){
     const c = E.cap;
     h += `<div class="fin-group"><div class="fp-h">4 · Estimate <span class="badge est" style="margin-left:6px">proxy</span></div>
       <div class="site-kpis">
-        <div><div class="l">LCOA, lowest-cost point</div><div class="v">${fmt(E.r.lcoa)}<small> $/t</small></div><div class="d">at CI ${E.r.target.toFixed(2)} · BAU ${fmt(E.bau && E.bau.lcoa)} $/t · sweep ${fmt(Math.min(...E.sweep.map(x => x[1])))}–${fmt(Math.max(...E.sweep.map(x => x[1])))} $/t</div></div>
+        <div><div class="l">${(typeof lcoaLabel === 'function') ? lcoaLabel() : 'LCOA'}, lowest-cost point</div><div class="v">${fmt(E.r.lcoa)}<small> $/t</small></div><div class="d">at CI ${E.r.target.toFixed(2)} · BAU ${fmt(E.bau && E.bau.lcoa)} $/t · sweep ${fmt(Math.min(...E.sweep.map(x => x[1])))}–${fmt(Math.max(...E.sweep.map(x => x[1])))} $/t</div></div>
         <div><div class="l">Design</div><div class="v">${fmt(c.wt)}<small> MW wind</small></div><div class="d">${fmt(c.pv)} MW PV · ${fmt(c.el)} MW electrolysis · ${fmt(c.smr)} t H₂/d reformer · ${fmt(c.b)} MW battery</div></div>
         <div><div class="l">Land for renewables</div><div class="v">${fmt(E.land.wind_km2 + E.land.pv_km2)}<small> km²</small></div><div class="d">${fmt(E.land.wind_km2)} km² wind at ${RHO_WIND} MW/km² · ${fmt(E.land.pv_km2)} km² PV at ${RHO_PV} MW/km² — before setbacks; a 25 km catchment is ${fmt(Math.PI * 625)} km² gross</div></div>
         <div><div class="l">Carbon intensity</div><div class="v">${E.r.target.toFixed(2)}<small> t/t</small></div><div class="d">${E.s.ccs ? 'post-capture; ' : ''}BAU ${E.bau ? E.bau.ci.toFixed(2) : '—'} t/t</div></div>
       </div>
       <div class="sub">Proxy = ${E.n.p.name}'s optimized ${BUILD.path.replace('+CCS', ' +CCS')} run at its lowest-cost point, scaled ×${E.k.toFixed(2)} to ${fmt(BUILD.tpd)} t/d (HOPS costs are linear in capacity, so per-tonne values carry over; resource, prices and grid are the proxy plant's, and changed assumptions above are not applied — the exact run applies them). ${E.n.km > 150 ? '<b style="color:var(--rust)">The nearest modelled plant is ' + fmt(E.n.km) + ' km away — indicative only.</b>' : ''}</div>
-      <div class="sp-actions"><button class="btn ghost sm" onclick="openDashboard(${E.n.p.idx})">Open ${E.n.p.name}'s full results →</button></div></div>`;
+      <div class="sp-actions"><button class="btn ghost sm" onclick="openDashboard(${E.n.p.idx})">Open ${E.n.p.name}'s full results →</button>${(typeof lcoaBasisToggle === 'function') ? lcoaBasisToggle(true) : ''}</div></div>`;
   } else h += `<div class="fin-group"><div class="fp-h">4 · Estimate</div><p class="sub">No solved run of the nearest plant for this pathway.</p></div>`;
   // 5 request
   h += `<div class="fin-group"><div class="fp-h">5 · Exact run</div>

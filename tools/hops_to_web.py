@@ -86,6 +86,7 @@ ROW_MAP = {
     # policy re-pricing extras (present only in the policy CSVs)
     "ets_credit": "ETS_levelised_credit_$/tNH3", "us_credit": "US_credit_$/tNH3",
     "lcoa_lcoe_nopolicy": ("LCOA_ammonia_only_LCOE_noETS", "LCOA_ammonia_only_LCOE_noCredit"),
+    "lcoa_export_nopolicy": ("LCOA_ammonia_only_EXPORT_noETS", "LCOA_ammonia_only_EXPORT_noCredit"),
 }
 OPEX_SUM = ["opex_pv","opex_wt","opex_el","opex_b","opex_cp","opex_asu","opex_nh3","opex_smr","opex_hb","opex_ccs","opex_stturb"]
 
@@ -177,7 +178,8 @@ def convert(results: Path, out: Path, label: str, bau_label: str, plants_xlsx, a
             rr = row_from(r)
             o[int(r["plant_idx"])] = {"lcoa": rr["lcoa"], "ci": rr["ci_noccs"], "elec_cost": rr["elec_cost"],
                                       "ng_cost": rr["ng_cost"], "carbon_price": rr["carbon_price"], "ets_cost": rr.get("ets_cost"),
-                                      "lcoa_base": rr.get("lcoa_base"), "irr": rr.get("irr"), "row": rr}
+                                      "lcoa_base": rr.get("lcoa_base"), "lcoa_lcoe": rr.get("lcoa_lcoe"), "lcoa_export": rr.get("lcoa_export"),   # the tool's headline is basis A (LCOE) by default, switchable to B (EXPORT); z_cost stays as lcoa_zcost
+                                      "lcoa_zcost": rr.get("lcoa_zcost"), "irr": rr.get("irr"), "row": rr}
         return o
     bf = results / f"BAU_AllPlants_{PATHWAY}_CCSNo_{bau_label}.csv"
     bau["base"] = bau_rows(bf) if bf.exists() else {}

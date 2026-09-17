@@ -54,7 +54,7 @@ function finInputsFromRow(r, plant){
   lines.policy_stream = PS ? PS.stream.map(x => x.credit * tpy) : null; lines.policy_info = PS;
   const recon = ann_capex + lines.fixed_opex + lines.ng + lines.carbon + lines.ets + lines.grid_purchase + lines.demand + lines.iso - lines.export_rev;
   lines.residual = (r.lcoa_zcost != null ? r.lcoa_zcost : g('lcoa')) * tpy - recon;   // reconcile to the solved z_cost; the policy credit is its own revenue line
-  return { tpy, crf, capex, capex_abs, ...lines, z: g('lcoa'), nh3_price_run: r.nh3_price, ci: r.target };
+  return { tpy, crf, capex, capex_abs, ...lines, z: (r.lcoa_zcost != null ? r.lcoa_zcost : g('lcoa')), lcoa_shown: g('lcoa'), nh3_price_run: r.nh3_price, ci: r.target };
 }
 /* ---- the cash-flow model. Periods 1..ncon are construction, then `life` operating years. */
 function runFinance(I, A){
@@ -179,7 +179,7 @@ function buildFinance(){
     ${kpi('Equity payback', K.payback + ' yr', 'from financial close')}
     ${kpi('Merchant power share', finFmt(K.power_share, 'pct'), 'of year-1 revenue; lenders haircut this' + (I.policy_credit ? ' · policy credit $' + finFmt(I.policy_credit, 'm') + '/yr' : ''), K.power_share > 0.3)}
     </div>
-    <p class="foot-note">Cost lines are the optimizer's: annualised per-tonne CAPEX de-annualised with the run's CRF, fixed OPEX, gas, grid purchase (electricity cost net of the renewables' own annuity), carbon and ETS, demand and capacity charges, and a reconciliation plug so year-1 cost ties to LCOA ${fmt(I.z)} $/t exactly (plug ${fmt(I.residual / M, 1)} M$/yr). NH₃ price default is the run's market benchmark; the optimizer's own IRR objective used ${fmt(I.nh3_price_run)} $/t.</p></div>`;
+    <p class="foot-note">Cost lines are the optimizer's: annualised per-tonne CAPEX de-annualised with the run's CRF, fixed OPEX, gas, grid purchase (electricity cost net of the renewables' own annuity), carbon and ETS, demand and capacity charges, and a reconciliation plug so year-1 cost ties to the optimizer's objective cost z_cost ${fmt(I.z)} $/t exactly (plug ${fmt(I.residual / M, 1)} M$/yr; the headline ${(typeof lcoaLabel === 'function') ? lcoaLabel() : 'LCOA'} of this run is ${fmt(I.lcoa_shown)} $/t — it values renewable electricity differently and is not a cash-flow line). NH₃ price default is the run's market benchmark; the optimizer's own IRR objective used ${fmt(I.nh3_price_run)} $/t.</p></div>`;
   if (I.policy_info) { const PI = I.policy_info, yrs = PI.stream.map(x => x.year);
     h += `<div class="card"><div class="card-h"><h3>Policy credit by year — ${PI.label}</h3><span class="note">$/t NH₃ · positive = credit${PI.ok ? '' : ' · <b style="color:var(--rust)">stream does not reproduce the published levelised value</b>'}</span></div>
       ${legend([{ c: C.renew, n: 'Credit received (or allowances bought, negative)' }, { c: C.co2, n: 'Levelised equivalent ' + fmt(PI.lev) + ' $/t' }])}

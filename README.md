@@ -39,11 +39,18 @@ docs/                                  design + pipeline notes from the Design e
 3. Commit and push (GitHub Desktop). No code changes needed — the tool reads `data/manifest.json` and
    shows the data version in the globe footer.
 
-**Policy cases and LCOA.** The Sherlock re-pricings (`_ETSlaw`, `_ETSprop`, `_USCred`) change the ammonia-only LCOA columns
-by the levelised credit and leave `z_cost` and IRR as solved. The converter carries that delta onto the headline `lcoa`
-(`lcoa = z_cost + (LCOA_LCOE − LCOA_LCOE_no-policy)`), keeps the solved value as `lcoa_zcost`, and stores the delta as
-`policy_delta`; BAU rows are treated the same. The Finance tab reconciles its cost lines to `lcoa_zcost` and books the
-credit as a revenue line, so nothing is counted twice.
+**Which LCOA the tool shows.** The headline `lcoa` everywhere (sweep charts, KPI tiles, site panel, ★ lowest-cost point,
+Build-page estimate, BAU benchmarks) is **basis A — `LCOA_ammonia_only_LCOE`** (renewable electricity valued at its LCOE,
+the published convention), switchable in the dashboard header / site panel / Build page to **basis B — `LCOA_ammonia_only_EXPORT`**
+(valued at the export price); the choice is remembered in the browser. The optimizer's own objective cost `z_cost $/ton NH3`
+is kept in every row and BAU entry as `lcoa_zcost` (the atlas rewrites `lcoa` from `lcoa_lcoe` / `lcoa_export` on load —
+`applyLcoaBasis()` in atlas/index.html — and falls back to `lcoa_zcost` for rows converted before those columns existed).
+
+**Policy cases and LCOA.** The re-pricings (`_ETSlaw`, `_ETSprop`, `_USCred`) subtract the levelised credit from all three
+ammonia-only LCOA columns and leave `z_cost` and IRR as solved, so a policy row's basis A/B value is already the re-priced one;
+the pre-policy values are carried as `lcoa_lcoe_nopolicy` / `lcoa_export_nopolicy` and the credit as `ets_credit` / `us_credit`.
+BAU rows are treated the same. The Finance tab reconciles its cost lines to `lcoa_zcost` (the cash-flow basis) and books the
+credit as a year-by-year revenue stream (see atlas/policy.js), so nothing is counted twice.
 
 Plant numbering is the HOPS index from `Plants_US_and_Europe.xlsx` (Brunsbüttel = 61, Mannheim/Ludwigshafen = 60,
 Brazoria County TX = 22). `plants.json` carries `amm_idx` to cross-reference the global fleet list drawn on the globe.

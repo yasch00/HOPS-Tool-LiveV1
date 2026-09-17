@@ -303,6 +303,28 @@ window.HOPS_DATA_BASE = window.HOPS_DATA_BASE || '../data/';
 let DATA={hourlyByCI:{}}, SCN=[], AMM=[], BAU={base:{}}, GEO={coast:[],border:[]}, PLANTS=[], PLANT={}, MANIFEST={plants:{},policies:{}};
 // resolution is taken from the first hourly file loaded: 8760 = true hourly, 2190 = every 4th hour
 let HPTS=8760, HSTEP=1;
+/* ---- the LCOA shown everywhere: basis A (LCOA_ammonia_only_LCOE, renewable electricity valued at its LCOE — the published convention)
+   by default, switchable to basis B (LCOA_ammonia_only_EXPORT, valued at the export price). The optimizer's own objective cost
+   (z_cost) stays in every row as lcoa_zcost and is what the finance model reconciles to. Policy rows are re-priced in both bases. */
+const LCOA_BASES={lcoe:{key:'lcoa_lcoe',short:'basis A · LCOE',long:'basis A — renewable electricity valued at its LCOE (LCOA_ammonia_only_LCOE)'},
+                  export:{key:'lcoa_export',short:'basis B · export',long:'basis B — renewable electricity valued at the export price (LCOA_ammonia_only_EXPORT)'}};
+let LCOA_BASIS='lcoe'; try{ if(LCOA_BASES[localStorage.getItem('hops_lcoa_basis')]) LCOA_BASIS=localStorage.getItem('hops_lcoa_basis'); }catch(e){}
+function lcoaBasisKey(){ return LCOA_BASES[LCOA_BASIS].key; }
+function lcoaLabel(){ return 'LCOA · '+LCOA_BASES[LCOA_BASIS].short; }
+function applyLcoaBasis(){
+  const k=lcoaBasisKey(), pick=r=>{ if(r[k]!=null) r.lcoa=r[k]; else if(r.lcoa_zcost!=null) r.lcoa=r.lcoa_zcost; };   // rows converted before the basis columns existed keep z_cost
+  SCN.forEach(s=>s.rows.forEach(pick));
+  Object.values(BAU).forEach(set=>Object.values(set).forEach(pick));
+}
+function setLcoaBasis(b){
+  if(!LCOA_BASES[b]) return; LCOA_BASIS=b; try{ localStorage.setItem('hops_lcoa_basis',b); }catch(e){}
+  applyLcoaBasis();
+  if(document.getElementById('scnSelect') && curScn){ buildScnSelect(); buildCISelect(); renderActiveTab(); }
+  if(typeof siteIdx!=='undefined' && siteIdx!=null && typeof selectRun==='function') selectRun(siteRun.path,siteRun.policy,siteRun.ci);
+  if(typeof BUILD!=='undefined' && BUILD.on && typeof renderBuildPanel==='function') renderBuildPanel();
+  if(typeof FAC!=='undefined' && FAC.on && !FAC.construction && typeof renderFacilityBar==='function') renderFacilityBar(FAC.rec?'ok':'nohourly');
+}
+function lcoaBasisToggle(sm){ return `<span class="ci-bar" style="margin:0;display:inline-flex;gap:4px;align-items:center"><span class="lbl" title="Which levelised cost is shown everywhere">LCOA basis</span>${Object.entries(LCOA_BASES).map(([b,d])=>`<button class="ci-pill ${sm?'sm':''} ${LCOA_BASIS===b?'active':''}" title="${d.long}" onclick="setLcoaBasis('${b}')">${d.short}</button>`).join('')}</span>`; }
 const DATA_BASE = window.HOPS_DATA_BASE || '../data/';
 async function fetchJSON(url){ const r=await fetch(url,{cache:'no-cache'}); if(!r.ok) throw new Error(url+' → HTTP '+r.status); return r.json(); }   // revalidate: results change without the page changing
 async function fetchGz(url){
@@ -316,7 +338,7 @@ async function loadData(){
     fetchJSON(DATA_BASE+'bau.json'),fetchJSON(DATA_BASE+'plants.json'),fetchJSON(DATA_BASE+'manifest.json')]);
   DATA={...st,scenarios:scn,bau,plants,manifest:man,hourlyByCI:{}};
   SCN=scn; AMM=st.ammonia; BAU=bau; GEO=st.geo; PLANTS=plants; MANIFEST=man; PLANT={}; plants.forEach(p=>PLANT[p.idx]=p);
-  postProcessRows();
+  postProcessRows(); applyLcoaBasis();
   const nC=plants.filter(p=>p.custom).length, lg=document.getElementById('legendModeled'); if(lg) lg.textContent=`Modelled (${plants.length-nC} plants · US + EU)`;
   const lc=document.getElementById('legendCustom'); if(lc) lc.textContent=`Requested sites, solved (${nC})`;
   if(mapLoaded && map.getSource('hops')) map.getSource('hops').setData(plantsGeo(PLANTS, p => ({ idx: p.idx, name: p.name, admin: p.admin || '', country: p.country, ktpa: p.ktpa || 0, region: p.region, custom: !!p.custom })));
@@ -387,11 +409,11 @@ function buildLayerList(){
   });
 }
 </script>
-<script src="map.js?v=20260916170446"></script>
-<script src="finance.js?v=20260916170446"></script>
-<script src="policy.js?v=20260916170446"></script>
-<script src="build.js?v=20260916170446"></script>
-<script src="facility.js?v=20260916170446"></script>
+<script src="map.js?v=20260916171336"></script>
+<script src="finance.js?v=20260916171336"></script>
+<script src="policy.js?v=20260916171336"></script>
+<script src="build.js?v=20260916171336"></script>
+<script src="facility.js?v=20260916171336"></script>
 <script>
 /* ============ NAVIGATION ============ */
 let curScn=null, curPlantIdx=null, curCItarget=null;
@@ -553,7 +575,7 @@ function buildScnSelect(){
   host.innerHTML=scns.map(s=>{
     const i=SCN.indexOf(s);
     return `<button class="ci-pill ${s===curScn?'active':''}" onclick="selScn(${i})">${scnShortName(s)}</button>`;
-  }).join('');
+  }).join('')+`<span style="margin-left:auto">${lcoaBasisToggle(true)}</span>`;
   document.getElementById('dashLoc').textContent = plantLabel(curPlantIdx);
 }
 function selScn(i){ curScn=SCN[i]; curCItarget=null; buildScnSelect(); buildCISelect(); renderActiveTab(); syncURL(); }
@@ -613,7 +635,7 @@ function buildOverview(){
     </div></div>`;
 
   // LCOA (z_cost) — headline, with BAU comparison bar
-  h+=`<div class="card"><div class="card-h"><h3>Levelized cost of ammonia (LCOA)</h3><span class="note">$/tNH₃</span></div>
+  h+=`<div class="card"><div class="card-h"><h3>Levelized cost of ammonia — ${LCOA_BASES[LCOA_BASIS].short}</h3><span class="note">$/tNH₃ · ${LCOA_BASES[LCOA_BASIS].long}</span></div>
     ${barChart(rows,[{k:'lcoa',c:C.renew,n:'LCOA'}],{ylab:'$ / tNH₃',h:300,selIdx:sidx,bauBar:{segments:[{v:bau.lcoa,c:C.co2,n:'LCOA'}]}})}</div>`;
 
   // reported operating-cost components (honest: only the variable OPEX the model reports per-tNH3)
@@ -700,7 +722,7 @@ function buildCompare(){
     .map(p=>`<option value="${p.idx}" ${p.idx===cmpPlant?'selected':''}>${p.region} · ${p.name}${p.admin?' ('+p.admin+')':''}</option>`).join('');
   return `<div class="card"><div class="card-h"><h3>Pathway comparison — ${plantLabel(cmpPlant)}</h3>
       <div class="toggle-row"><select class="tg" onchange="cmpPlant=+this.value;renderActiveTab()">${opts}</select></div></div>
-    <p class="section-d" style="margin:2px 0 10px">Every modelled configuration for this plant on one axis — optimizer LCOA across the carbon-intensity sweep. Dashed lines are policy re-pricings of the same designs. BAU benchmarks shown as horizontal references; no point exceeds the BAU carbon intensity.</p>
+    <p class="section-d" style="margin:2px 0 10px">Every modelled configuration for this plant on one axis — LCOA (${LCOA_BASES[LCOA_BASIS].short}) across the carbon-intensity sweep. Dashed lines are policy re-pricings of the same designs. BAU benchmarks shown as horizontal references; no point exceeds the BAU carbon intensity.</p>
     ${legend(seriesList.map(s=>({c:s.c,n:s.n})))}
     ${lineChart(seriesList,{bau:bau.filter(b=>b.v!=null)})}</div>`;
 }
@@ -1018,7 +1040,7 @@ function buildDetail(){
   while(bauCells.length<cols.length) bauCells.push('—');
   h+=`<tr style="background:rgba(164,80,47,.07);font-weight:600">`+bauCells.map(c=>`<td>${c}</td>`).join('')+`</tr>`;
   h+=`</tbody></table></div>
-    <p class="foot-note">BAU = conventional SMR ammonia for ${s.loc}${s.cp?', with the same CO₂ price applied':''}. LCOA is the optimizer's levelized cost. Rows above BAU carbon intensity are excluded.</p></div>`;
+    <p class="foot-note">BAU = conventional SMR ammonia for ${s.loc}${s.cp?', with the same CO₂ price applied':''}. LCOA is ${LCOA_BASES[LCOA_BASIS].long}; the optimizer's objective cost (z_cost) is kept as lcoa_zcost. Rows above BAU carbon intensity are excluded.</p></div>`;
   document.getElementById('tab-detail').innerHTML=h;
 }
 
