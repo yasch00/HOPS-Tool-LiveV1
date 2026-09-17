@@ -49,7 +49,9 @@ function finInputsFromRow(r, plant){
   const ann_capex = CAPEX_KEYS.reduce((a, k) => a + g(k), 0) * tpy;
   const lines = { fixed_opex, ng: g('ng_cost') * tpy, grid_purchase, carbon: g('carbon_price') * tpy, ets: g('ets_cost') * tpy,
                   demand: g('demand_cost') * tpy, iso, export_rev: g('sold') * tpy,
-                  policy_credit: (g('ets_credit') + g('us_credit')) * tpy };   // policy cases only; 0 in base runs
+                  policy_credit: (g('ets_credit') + g('us_credit')) * tpy };   // policy cases only; 0 in base runs (levelised, $/yr)
+  const PS = (typeof policyStream === 'function') ? policyStream(r, curScn, plant) : null;   // the year-by-year stream behind that levelised number
+  lines.policy_stream = PS ? PS.stream.map(x => x.credit * tpy) : null; lines.policy_info = PS;
   const recon = ann_capex + lines.fixed_opex + lines.ng + lines.carbon + lines.ets + lines.grid_purchase + lines.demand + lines.iso - lines.export_rev;
   lines.residual = (r.lcoa_zcost != null ? r.lcoa_zcost : g('lcoa')) * tpy - recon;   // reconcile to the solved z_cost; the policy credit is its own revenue line
   return { tpy, crf, capex, capex_abs, ...lines, z: g('lcoa'), nh3_price_run: r.nh3_price, ci: r.target };
@@ -71,7 +73,7 @@ function runFinance(I, A){
   let dopen = senior;
   for (let t = 1; t <= A.life; t++) {
     const er = Math.pow(1 + A.rev_esc, t - 1), cr = Math.pow(1 + A.cost_esc, t - 1);
-    const price = (A.price + A.adder) * er, rev_nh3 = I.tpy * price, rev_grid = I.export_rev * er, rev_policy = (I.policy_credit || 0), rev = rev_nh3 + rev_grid + rev_policy;
+    const price = (A.price + A.adder) * er, rev_nh3 = I.tpy * price, rev_grid = I.export_rev * er, rev_policy = I.policy_stream ? (I.policy_stream[t - 1] || 0) : (I.policy_credit || 0), rev = rev_nh3 + rev_grid + rev_policy;   // per-year policy stream (45V/45Q terms, ETS phase-out), not a flat levelised credit
     const opx = (I.fixed_opex + I.ng + I.grid_purchase + I.carbon + I.ets + (I.demand + I.iso + I.residual)) * cr;
     const ebitda = rev - opx, dep = t <= A.dep_years ? total_cost / A.dep_years : 0, ebit = ebitda - dep;
     const interest = A.debt_rate * dopen, pay = t <= A.tenor ? senior * annuity : 0, principal = Math.min(pay - interest, dopen), dclose = dopen - principal;
@@ -178,6 +180,11 @@ function buildFinance(){
     ${kpi('Merchant power share', finFmt(K.power_share, 'pct'), 'of year-1 revenue; lenders haircut this' + (I.policy_credit ? ' · policy credit $' + finFmt(I.policy_credit, 'm') + '/yr' : ''), K.power_share > 0.3)}
     </div>
     <p class="foot-note">Cost lines are the optimizer's: annualised per-tonne CAPEX de-annualised with the run's CRF, fixed OPEX, gas, grid purchase (electricity cost net of the renewables' own annuity), carbon and ETS, demand and capacity charges, and a reconciliation plug so year-1 cost ties to LCOA ${fmt(I.z)} $/t exactly (plug ${fmt(I.residual / M, 1)} M$/yr). NH₃ price default is the run's market benchmark; the optimizer's own IRR objective used ${fmt(I.nh3_price_run)} $/t.</p></div>`;
+  if (I.policy_info) { const PI = I.policy_info, yrs = PI.stream.map(x => x.year);
+    h += `<div class="card"><div class="card-h"><h3>Policy credit by year — ${PI.label}</h3><span class="note">$/t NH₃ · positive = credit${PI.ok ? '' : ' · <b style="color:var(--rust)">stream does not reproduce the published levelised value</b>'}</span></div>
+      ${legend([{ c: C.renew, n: 'Credit received (or allowances bought, negative)' }, { c: C.co2, n: 'Levelised equivalent ' + fmt(PI.lev) + ' $/t' }])}
+      ${tsChart([{ n: PI.label, c: C.renew, v: PI.stream.map(x => x.credit) }, { n: 'levelised', c: C.co2, dash: true, v: PI.stream.map(() => PI.lev) }], { ylab: '$ / t NH₃', xlab: 'Operating year (' + yrs[0] + ' – ' + yrs[yrs.length - 1] + ')', fmt: v => fmt(v) })}
+      <p class="foot-note">${PI.detail}. Levelised at the run's ${(PI.rate * 100).toFixed(1)}% over ${PI.life} years: ${fmt(PI.lev)} $/t (published ${fmt(PI.published)} $/t). The cash-flow model above books this stream year by year; the headline LCOA uses the levelised value. Re-priced, not re-optimised: the design is the base solve's.</p></div>`; }
   h += `<div class="grid2">
     <div class="card"><div class="card-h"><h3>Annual cash flows</h3><span class="note">M$/yr</span></div>${legend([{ c: C.renew, n: 'EBITDA' }, { c: C.co2, n: 'Debt service' }, { c: C.grid, n: 'CFADS' }, { c: C.mut, n: 'CFADS banking case' }])}
       ${tsChart([{ n: 'EBITDA', c: C.renew, v: R.P.map(x => x.ebitda == null ? null : x.ebitda / M) }, { n: 'Debt service', c: C.co2, v: R.P.map(x => x.pay == null ? null : x.pay / M) }, { n: 'CFADS', c: C.grid, v: R.P.map(x => x.cfads == null ? null : x.cfads / M) }, { n: 'CFADS banking', c: C.mut, dash: true, v: R.P.map(x => x.cfads_b == null ? null : x.cfads_b / M) }], { ylab: 'M$ / yr', ncon: A.ncon })}</div>

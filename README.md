@@ -174,6 +174,16 @@ through construction + 30 years of operations (IDC, annuity debt, straight-line 
 haircut on merchant power). All assumptions are editable in the panel; the plant design is not re-optimised.
 For the ETS / 45V-45Q policy scenarios the levelised credit enters as a revenue line.
 
+**Policy cases in the finance model (atlas/policy.js).** The published policy rows carry the *levelised* credit that the
+re-pricing scripts (`ets_policy_cases.py` = `ets_lcoa_from_results.py` for every EU plant, `us_credit_cases.py` = `us_credits.py`
+for every US plant; verified identical on plant 61, FX 1.1306 instead of the 1.08 placeholder) subtract from the LCOA. The
+finance tab rebuilds the year-by-year stream behind it in the browser — EU ETS: statutory benchmark path, free-allocation
+phase-out (law → 0 in 2034, COM(2026) 616 → 0 in 2039), log-linear EUA anchors flat after 2038, obligation = direct NG
+emissions net of stored CO₂ (Art. 12(3a)); US: 45V $3.00/kg × tier for 10 years or 45Q $85/t for 12 years, larger elected —
+books it year by year in the cash flows, plots it ("Policy credit by year"), and checks that it levelises back to the published
+number at the run's annuity rate. The data carries `ci_direct` / `ci_gridem` (gross NG and grid emissions per tonne) for this;
+rows converted before those columns existed fall back to `ci_noccs − e_imp·grid_ci/tpy`.
+
 ## Updating the tool's code
 
 `atlas/index.html` is the tool; the map, plant, finance and build flows are `atlas/*.js`. Edit them directly and run

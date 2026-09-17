@@ -139,12 +139,20 @@ jobs:
               for f in glob.glob(d + "CI_Range_*.csv"): rows["Yes" if "_CCSYes_" in f else "No"].append(pd.read_csv(f))
               for f in glob.glob(d + "BAU_AllPlants_*.csv"): bau = pd.read_csv(f)
               for f in glob.glob(d + "hourly/*.parquet"): shutil.copy(f, "site_runs/hourly/")
-              if os.path.exists(d + "sites.json"): sites.update(json.load(open(d + "sites.json")))
+              if os.path.exists(d + "sites.json"):
+                  for k, v in json.load(open(d + "sites.json")).items():        # merge the per-job registers: skipped/errors per CCS state accumulate
+                      e = sites.setdefault(k, {}); sk, er = e.get("skipped", {}), e.get("errors", {}); e.update(v)
+                      for ccs, m in (v.get("skipped") or {}).items(): sk.setdefault(ccs, {}).update(m)
+                      for ccs, m in (v.get("errors") or {}).items(): er.setdefault(ccs, {}).update(m)
+                      e["skipped"], e["errors"] = sk, er
           for ccs, lst in rows.items():
               if lst: pd.concat(lst, ignore_index=True).sort_values("Target_NH3_CO2_intensity_kgCO2_per_kgNH3").to_csv(f"site_runs/CI_Range_SMR_INT_ASU_plant{site}_CCS{ccs}_{L}.csv", index=False)
           if bau is not None: bau.to_csv(f"site_runs/BAU_AllPlants_SMR_INT_ASU_CCSNo_{L}.csv", index=False)
           json.dump(sites, open("site_runs/sites.json", "w"), indent=1)
           print(os.listdir("site_runs"), {k: sum(len(x) for x in v) for k, v in rows.items()}, "BAU:", bau is not None)
+          sk = (sites.get(site) or {}).get("skipped") or {}
+          note = "; ".join(f"{'SMR+CCS' if c == 'Yes' else 'SMR'} CI " + ", ".join(sorted(m)) for c, m in sk.items() if m)
+          open("skipped_note.txt", "w").write(("Points without a positive return at the NH3 price (skipped, as in the fleet runs): " + note) if note else "")
           EOF
       - name: Policy re-pricings (EU ETS law/proposal, US 45V/45Q — whichever applies to the region)
         env:
@@ -169,7 +177,8 @@ jobs:
           script: |
             const n = Number('${{ needs.check.outputs.issue }}'), site = '${{ needs.check.outputs.site }}';
             const url = `https://yasch00.github.io/HOPS-Tool-LiveV1/atlas/#plant=${site}&view=site`;
-            await github.rest.issues.createComment({ ...context.repo, issue_number: n, body: `<!-- hops-cloud --> Solved and published as site **${site}**: ${url}\n\nBoth pathways, CI 0 – 1.75, BAU reference and the policy cases for its region. The page updates a minute or two after this comment; the renewable siting layers follow in a separate step (~20–40 min).` });
+            const note = require('fs').existsSync('skipped_note.txt') ? require('fs').readFileSync('skipped_note.txt', 'utf8').trim() : '';
+            await github.rest.issues.createComment({ ...context.repo, issue_number: n, body: `<!-- hops-cloud --> Solved and published as site **${site}**: ${url}\n\nBoth pathways, CI 0 – 1.75, BAU reference and the policy cases for its region.${note ? '\n\n' + note : ''} The page updates a minute or two after this comment; the renewable siting layers follow in a separate step (~10–40 min).` });
             await github.rest.issues.update({ ...context.repo, issue_number: n, state: 'closed' });
   siting:
     needs: [check, publish]

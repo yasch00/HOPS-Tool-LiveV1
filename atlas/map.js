@@ -145,6 +145,7 @@ async function openSite(idx, instant){
   renderSitePanel(p, null, 'loading');
   try {
     if (!window.__sitingIndex) { try { window.__sitingIndex = await fetchJSON(SITING_BASE + 'index.json'); } catch (e) { window.__sitingIndex = null; } }
+    if (window.__sitingIndex && !window.__sitingIndex.plants.includes(idx) && p.custom) { try { window.__sitingIndex = await fetchJSON(SITING_BASE + 'index.json'); } catch (e) {} }   // a requested site's layers arrive minutes after its results: re-read the index
     if (window.__sitingIndex && !window.__sitingIndex.plants.includes(idx)) throw new Error('no siting layers');   // known absent: no probing request
     const r = await fetch(`${SITING_BASE}plant${idx}/site.json`);
     if (!r.ok) throw new Error(String(r.status));
@@ -236,6 +237,7 @@ function renderSitePanel(p, l, state){
         .map(([id, n, c, on]) => `<label class="legend-row" style="cursor:pointer"><input type="checkbox" ${(map.getLayer(id) && map.getLayoutProperty(id, 'visibility') !== 'none') ? 'checked' : ''} onchange="toggleSiteLayer('${id}',this.checked);if('${id}'==='turbine-dots')turbineLayer.visible=this.checked;map.triggerRepaint()"><span class="dot" style="background:${c}"></span>${n}</label>`).join('')}
       <div class="sub" style="margin-top:6px">Exclusions: <span style="color:#D55E00">■</span> structures · <span style="color:#8A8F94">■</span> roads · <span style="color:#4C5B6E">■</span> rail · <span style="color:#0072B2">■</span> water · <span style="color:#009E73">■</span> forest/land use · <span style="color:#CC79A7">■</span> Natura 2000 — each buffered by the wind setback.</div></div>`;
   h += `<div class="sp-actions"><button class="btn" onclick="openDashboard(${p.idx})">Technical results →</button><button class="btn ghost" onclick="FAC.on?hideFacility():selectRun(siteRun.path,siteRun.policy,siteRun.ci)">${(typeof FAC !== 'undefined' && FAC.on) ? 'Hide plant' : 'Show plant'}</button>${state !== 'none' ? `<button class="btn ghost" onclick="siteRenewables(${!renewOn})">${renewOn ? 'Hide renewables' : 'Show renewables'}</button>` : ''}</div>`;
+  if (p.custom && p.skipped && Object.values(p.skipped).some(m => Object.keys(m).length)) h += `<div class="sub" style="margin-top:8px;color:var(--rust)">Not solvable at the NH₃ price (no design earns a positive return, so the IRR objective has no solution — these points are absent, as in the fleet runs): ${Object.entries(p.skipped).filter(([, m]) => Object.keys(m).length).map(([c, m]) => (c === 'Yes' ? 'SMR +CCS' : 'SMR') + ' CI ' + Object.keys(m).sort().join(', ')).join(' · ')}.</div>`;
   if (p.custom) h += `<div class="sub" style="margin-top:8px">Solved from a run request${p.spec && p.spec.requested ? ' of ' + p.spec.requested : ''}${p.spec && p.spec.technical_changed && Object.keys(p.spec.technical_changed).length ? ' · changed assumptions: ' + Object.entries(p.spec.technical_changed).map(([k, v]) => k + '=' + v).join(', ') : ' · model default assumptions'}. <a href="${removeIssueURL(p)}" target="_blank" rel="noopener">Remove this site</a> (owner only: the request is executed automatically).</div>`;
   h += `<div class="sub" style="margin-top:10px;font-size:11px">Imagery Esri World Imagery · terrain Mapzen/AWS · buildings OpenStreetMap via OpenFreeMap · siting: HOPS land model (OSM + Natura 2000 exclusions)</div>`;
   host.innerHTML = h;
@@ -304,7 +306,7 @@ function makeTurbineLayer(){
 }
 
 /* ---------------------------------------------------------------- requested sites: open "Run request" issues = plants under construction
-   Read from the public GitHub API (no token: 60 requests/h per visitor, which the 60 s polling stays well under). A request appears on the
+   Read from the public GitHub API (no token: 60 requests/h per visitor — hence one request per 2-minute poll). A request appears on the
    globe the moment its issue exists, its site view shows the construction scene, and the progress comes from the Actions run that the
    cloud solver links in its first comment (per-job status = which CI points are already solved). When the run is published the
    site is reloaded and it opens as a normal (requested, solved) plant. */
@@ -341,7 +343,7 @@ async function openPending(issue){
   renderPendingPanel(r, null);
   if (typeof showConstruction === 'function') showConstruction(r, 0.02);
   await refreshPendingProgress();
-  clearInterval(PENDING.timer); PENDING.timer = setInterval(refreshPendingProgress, 60000);
+  clearInterval(PENDING.timer); PENDING.timer = setInterval(refreshPendingProgress, 120000);   // 1 API call per poll → 30/h, under the anonymous limit of 60/h
   if (typeof syncURL === 'function') syncURL();
 }
 function leaveSiteQuiet(){ const f = map.flyTo; map.flyTo = () => {}; try { if (PENDING.open) closePending(false); else leaveSite(); } finally { map.flyTo = f; } }
@@ -357,17 +359,22 @@ async function refreshPendingProgress(){
   const r = PENDING.open; if (!r) return;
   let run = null;
   try {
-    const comments = await gh(`/issues/${r.issue}/comments?per_page=50`);
-    const link = comments.map(c => (c.body || '').match(/actions\/runs\/(\d+)/)).filter(Boolean).pop();
-    const published = comments.some(c => /Solved and published/.test(c.body || ''));
-    if (published) { run = { state: 'published' }; }
-    else if (link) {
-      const [meta, jobs] = await Promise.all([gh(`/actions/runs/${link[1]}`), gh(`/actions/runs/${link[1]}/jobs?per_page=100`)]);
-      const J = jobs.jobs.map(j => ({ name: j.name, status: j.status, conclusion: j.conclusion }));
+    if (!r.runId) {                                                          // once: find the run the solver linked on the issue
+      const comments = await gh(`/issues/${r.issue}/comments?per_page=50`);
+      const link = comments.map(c => (c.body || '').match(/actions\/runs\/(\d+)/)).filter(Boolean).pop();
+      if (comments.some(c => /Solved and published/.test(c.body || ''))) r.published = true;
+      if (link) r.runId = link[1];
+    }
+    if (r.published) run = { state: 'published' };
+    else if (r.runId) {                                                      // then one request per poll: the jobs carry everything
+      const jobs = (await gh(`/actions/runs/${r.runId}/jobs?per_page=100`)).jobs;
+      const J = jobs.map(j => ({ name: j.name, status: j.status, conclusion: j.conclusion, started: j.started_at }));
       const solves = J.filter(j => /^solve/.test(j.name)), done = solves.filter(j => j.status === 'completed' && j.conclusion === 'success').length;
-      const failed = J.filter(j => j.conclusion === 'failure').length;
-      const stage = J.find(j => /^siting/.test(j.name) && j.status !== 'queued') ? 'siting' : J.find(j => /^publish/.test(j.name) && j.status !== 'queued') ? 'publish' : solves.some(j => j.status !== 'queued') ? 'solve' : 'queued';
-      run = { state: meta.status === 'completed' ? (meta.conclusion === 'success' ? 'done' : 'failed') : 'running', id: link[1], url: meta.html_url, started: meta.run_started_at, done, total: solves.length || 17, failed, jobs: solves, stage,
+      const failed = J.filter(j => j.conclusion === 'failure').length, allDone = J.length && J.every(j => j.status === 'completed');
+      const pub = J.find(j => /^publish/.test(j.name)), sit = J.find(j => /^siting/.test(j.name));
+      const stage = sit && sit.status !== 'queued' ? 'siting' : pub && pub.status !== 'queued' ? 'publish' : solves.some(j => j.status !== 'queued') ? 'solve' : 'queued';
+      const started = J.map(j => j.started).filter(Boolean).sort()[0];
+      run = { state: allDone ? ((pub && pub.conclusion === 'success') ? 'done' : 'failed') : (pub && pub.conclusion === 'success') ? 'done' : 'running', id: r.runId, url: `https://github.com/yasch00/HOPS-Tool-LiveV1/actions/runs/${r.runId}`, started, done, total: solves.length || 17, failed, jobs: solves, stage,
               progress: Math.min(0.97, 0.03 + 0.85 * (solves.length ? done / solves.length : 0) + (stage === 'publish' ? 0.05 : stage === 'siting' ? 0.09 : 0)) };
     } else run = { state: 'waiting' };
   } catch (e) { run = { state: 'unknown', error: String(e.message || e) }; }

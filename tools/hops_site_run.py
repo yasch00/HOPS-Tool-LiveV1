@@ -130,7 +130,12 @@ def import_site_core(attrs: dict):
     return hc
 
 # ----------------------------------------------------------------- 3. run one site
-def run_site(spec: dict, out: Path, label: str, site_id: int, ci_targets):
+NO_RETURN = "no positive return"      # hops_finance_objective: AnnualCF <= 0 — the design cannot earn any return at the NH3 price
+
+def run_site(spec: dict, out: Path, label: str, site_id: int, ci_targets, fallback_lcoa: bool = False):
+    """Solve the CI targets. A target whose IRR solve has no positive return is SKIPPED and recorded (sites.json →
+    skipped[CCS][ci]) — the same convention as the fleet runs, where such points are simply absent — unless
+    fallback_lcoa is set, in which case it is re-solved on the LCOA (cost-minimising) objective and tagged so."""
     import numpy as np, pandas as pd
     from shapely.geometry import Point
     attrs = apply_env(spec)
@@ -145,15 +150,26 @@ def run_site(spec: dict, out: Path, label: str, site_id: int, ci_targets):
     P, C = os.environ["HOPS_PATHWAY"], os.environ["HOPS_CCS"]
     tags = dict(plant_idx=site_id, lat=lat, lon=lon, country=spec.get("country", ""), RUN_MODE="CI", PATHWAY=P,
                 OBJECTIVE=os.environ["HOPS_OBJECTIVE"], CCS=C, LABEL=label, site_name=spec.get("name", ""))
-    rows = []
+    rows = []; skipped = {}; errors = {}
     for ci in ci_targets:
-        t0 = time.time(); print(f"\n--- CI {ci} ---")
+        t0 = time.time(); print(f"\n--- CI {ci} ---"); fell_back = False
         try:
-            dd, dfop = hc.run_optimization_for_point(lat, lon, solar, wind, tpd, NH3_intensity_target=ci, ci_series_override=None)
+            try:
+                dd, dfop = hc.run_optimization_for_point(lat, lon, solar, wind, tpd, NH3_intensity_target=ci, ci_series_override=None)
+            except ValueError as e:
+                if NO_RETURN not in str(e): raise
+                if not fallback_lcoa:
+                    skipped[f"{ci:.2f}"] = f"no design earns a positive return at the NH3 price ({getattr(hc, 'NH3_PRICE_US' if region == 'US' else 'NH3_PRICE_EUROPE', 'model')} $/t) — skipped, as in the fleet runs"
+                    print(f"[SKIP] CI={ci}: {skipped[f'{ci:.2f}']}"); continue
+                print(f"[FALLBACK] CI={ci}: no positive return on the IRR objective → re-solving on LCOA (cost minimum)")
+                os.environ["HOPS_OBJECTIVE"] = "LCOA"; hc = import_site_core(attrs); fell_back = True
+                try: dd, dfop = hc.run_optimization_for_point(lat, lon, solar, wind, tpd, NH3_intensity_target=ci, ci_series_override=None)
+                finally: os.environ["HOPS_OBJECTIVE"] = spec.get("objective", "IRR"); hc = import_site_core(attrs)
         except Exception as e:
-            print(f"[WARN] CI={ci} failed: {type(e).__name__}: {e}"); continue
-        if dd is None: print(f"[WARN] CI={ci} no optimal solution"); continue
+            import traceback; print(f"[WARN] CI={ci} failed: {type(e).__name__}: {e}"); traceback.print_exc(); errors[f"{ci:.2f}"] = f"{type(e).__name__}: {e}"[:300]; continue
+        if dd is None: print(f"[WARN] CI={ci} no optimal solution"); errors[f"{ci:.2f}"] = "no optimal solution"; continue
         dd.update(tags); dd["CI_target"] = ci; dd["overrides"] = json.dumps(spec.get("overrides") or {})
+        if fell_back: dd["OBJECTIVE"] = "LCOA (fallback: no positive return on IRR)"
         rows.append(dd)
         if dfop is not None and not dfop.empty:
             df = dfop.copy(); df.attrs = {}
@@ -163,9 +179,13 @@ def run_site(spec: dict, out: Path, label: str, site_id: int, ci_targets):
         pd.DataFrame(rows).to_csv(out / f"CI_Range_{P}_plant{site_id}_CCS{C}_{label}.csv", index=False)
         print(f"done {time.time()-t0:.0f}s  z_cost={dd.get('z_cost $/ton NH3'):.1f} $/t   [{len(rows)}/{len(ci_targets)}]")
     reg = out / "sites.json"; sites = json.loads(reg.read_text()) if reg.exists() else {}
-    sites[str(site_id)] = {"id": site_id, "name": spec.get("name", ""), "lat": lat, "lon": lon, "tNH3_day": tpd, "country": spec.get("country", ""),
-                           "region": region, "spec": spec, "label": label, "n_ci": len(rows)}
-    reg.write_text(json.dumps(sites, indent=1))
+    ent = sites.get(str(site_id)) or {}
+    ent.update({"id": site_id, "name": spec.get("name", ""), "lat": lat, "lon": lon, "tNH3_day": tpd, "country": spec.get("country", ""),
+                "region": region, "spec": spec, "label": label, "n_ci": ent.get("n_ci", 0) + len(rows)})
+    ent.setdefault("skipped", {}).setdefault(C, {}).update(skipped); ent.setdefault("errors", {}).setdefault(C, {}).update(errors)   # per CCS state, merged across jobs by the publish step
+    sites[str(site_id)] = ent; reg.write_text(json.dumps(sites, indent=1))
+    if errors and not rows: sys.exit(f"[FAIL] site {site_id} CCS={C}: {errors}")   # a real failure goes red; skipped-for-no-return points do not
+    if skipped and not rows: print(f"[DONE] site {site_id} CCS={C}: every requested CI target skipped — {skipped}")
     return rows
 
 def run_bau(spec: dict, out: Path, bau_label: str, site_id: int):
@@ -228,6 +248,7 @@ def main():
     ap.add_argument("--only-ccs", choices=["Yes", "No"], help="solve only this CCS state (cloud matrix jobs)")
     ap.add_argument("--bau", action="store_true", help="solve the BAU reference for the spec's site instead of the CI sweep")
     ap.add_argument("--bau-label", default=None, help="label for the BAU file (default: same as --label)")
+    ap.add_argument("--fallback-lcoa", action="store_true", help="re-solve a CI point on the LCOA objective when the IRR objective finds no positive return (default: skip it like the fleet runs)")
     a = ap.parse_args()
     if a.validate is not None:
         validate(a.validate, a.ccs, float(a.ci or 0.5), Path(a.results), a.ref_label); return
@@ -251,7 +272,7 @@ def main():
         if a.only_ccs and (('Yes' if sp['ccs'] else 'No') != a.only_ccs): continue
         cis = [float(x) for x in a.ci.split(",")] if a.ci else (cis_spec or [i * 0.25 for i in range(8)])
         print(f"\n===== site {site_id} · CCS={'Yes' if sp['ccs'] else 'No'} · {len(cis)} CI targets =====")
-        run_site(sp, out, a.label, site_id, cis)
+        run_site(sp, out, a.label, site_id, cis, fallback_lcoa=a.fallback_lcoa)
 
 if __name__ == "__main__":
     main()
