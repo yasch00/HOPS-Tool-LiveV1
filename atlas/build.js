@@ -10,6 +10,9 @@
 const BUILD = { on: false, lat: null, lon: null, name: '', tpd: 1000, path: 'SMR+CCS', near: [], T: {} };
 const RHO_WIND = 5.0, RHO_PV = 50.0;             // MW/km², same central values as the siting model
 const REPO_ISSUES = 'https://github.com/yasch00/HOPS-Tool-LiveV1/issues/new';
+/* Optional request endpoint (tools/request_worker/worker.js on Cloudflare): the page POSTs the spec, the worker opens the issue with
+   a token that never reaches the browser, and the construction view opens at once — no GitHub account needed. Set in index.html. */
+const REQUEST_ENDPOINT = (typeof window !== 'undefined' && window.HOPS_REQUEST_ENDPOINT) || '';
 /* the optimizer's inputs (keys = tools/hops_site_run.py OVERRIDES). Defaults are hops_core.py's; `us`/`eu` where the model's default
    depends on the sales region. Field: [key, label, unit, min, max, step, default, decimals] */
 const TECH_FIELDS = [
@@ -58,7 +61,7 @@ function enterBuild(){
   if (typeof syncURL === 'function') syncURL();
 }
 function leaveBuild(){
-  BUILD.on = false; document.body.classList.remove('build-mode'); map.off('click', onBuildClick); map.getCanvas().style.cursor = '';
+  BUILD.on = false; clearInterval(BUILD.watch); BUILD.status = ''; document.body.classList.remove('build-mode'); map.off('click', onBuildClick); map.getCanvas().style.cursor = '';
   if (map.getSource('build-site')) map.getSource('build-site').setData({ type: 'FeatureCollection', features: [] });
   document.getElementById('buildPanel').hidden = true;
   if (typeof syncURL === 'function') syncURL();
@@ -137,7 +140,8 @@ function renderBuildPanel(){
   // 5 request
   h += `<div class="fin-group"><div class="fp-h">5 · Exact run</div>
     <p class="sub">Queue HOPS for these coordinates: the site's own hourly weather and local market data are used, the plant is co-sized and dispatched hourly for every CI target and both pathways with the assumptions above, and the results are published here with a link back. Runs are solved in batches and take about an hour of compute each.</p>
-    <div class="sp-actions"><a class="btn" target="_blank" rel="noopener" href="${buildIssueURL(E)}">Request the run on GitHub →</a><button class="btn ghost" onclick="buildDownloadSpec()">Download spec (JSON)</button></div></div>`;
+    <div class="sp-actions">${REQUEST_ENDPOINT ? `<button class="btn" id="buildSubmitBtn" onclick="buildSubmit()">Request the run →</button>` : `<a class="btn" target="_blank" rel="noopener" href="${buildIssueURL(E)}" onclick="buildWatchForIssue()">Request the run on GitHub →</a>`}<button class="btn ghost" onclick="buildDownloadSpec()">Download spec (JSON)</button></div>
+    <div class="sub" id="buildStatus" style="margin-top:8px">${BUILD.status || (REQUEST_ENDPOINT ? 'One click: the request is registered and the site opens under construction while HOPS solves it.' : 'Opens a prefilled GitHub issue in a new tab (a GitHub account is needed to submit it). This page keeps watching and opens the construction site as soon as the request is registered — no reload.')}</div></div>`;
   host.innerHTML = h;
 }
 function buildSpec(E){
@@ -157,4 +161,29 @@ function buildIssueURL(E){
 function buildDownloadSpec(){
   const a = document.createElement('a'); a.href = URL.createObjectURL(new Blob([JSON.stringify(buildSpec(buildEstimate()), null, 1)], { type: 'application/json' }));
   a.download = `hops_run_request_${BUILD.lat}_${BUILD.lon}.json`; a.click();
+}
+
+/* ---- submission: through the endpoint (one click), or by watching the issues list after the GitHub tab was used */
+function buildStatus(t){ BUILD.status = t; const el = document.getElementById('buildStatus'); if (el) el.innerHTML = t; }
+async function buildSubmit(){
+  const E = buildEstimate(), spec = buildSpec(E), btn = document.getElementById('buildSubmitBtn'); if (btn) btn.disabled = true;
+  buildStatus('Registering the request …');
+  try {
+    const r = await fetch(REQUEST_ENDPOINT, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(spec) });
+    const j = await r.json().catch(() => ({})); if (!r.ok || !j.issue) throw new Error(j.error || ('HTTP ' + r.status));
+    buildStatus(`Registered as request #${j.issue} — opening the site …`);
+    await loadPending(); const rq = PENDING.list.find(x => x.issue === j.issue);
+    BUILD.status = ''; leaveBuild(); if (rq) openPending(j.issue); else setTimeout(async () => { await loadPending(); openPending(j.issue); }, 3000);
+  } catch (e) { if (btn) btn.disabled = false; buildStatus(`Could not register the request (${e.message}). <a href="${buildIssueURL(E)}" target="_blank" rel="noopener">Open it on GitHub instead →</a>`); }
+}
+function buildWatchForIssue(){
+  const known = new Set(PENDING.list.map(x => x.issue)), lat = BUILD.lat, lon = BUILD.lon, t0 = Date.now();
+  buildStatus('Waiting for the issue to be submitted in the GitHub tab … this page opens the construction site as soon as it appears (checking every 15 s).');
+  clearInterval(BUILD.watch);
+  BUILD.watch = setInterval(async () => {
+    if (!BUILD.on || Date.now() - t0 > 15 * 60000) { clearInterval(BUILD.watch); return; }
+    try { await loadPending(); } catch (e) { return; }
+    const rq = PENDING.list.find(x => !known.has(x.issue) && Math.abs(x.lat - lat) < 2e-3 && Math.abs(x.lon - lon) < 2e-3);
+    if (rq) { clearInterval(BUILD.watch); BUILD.status = ''; leaveBuild(); openPending(rq.issue); }
+  }, 15000);
 }

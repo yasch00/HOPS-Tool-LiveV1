@@ -123,6 +123,15 @@ both pathways, full CI sweep, every optimizer input resolved). From that moment 
 "under construction" marker (read live from the public issues API); its site view shows a construction scene — cranes,
 trucks, an excavator, foundations poured as CI points get solved — with the solver's progress. Three ways to solve it:
 
+**Submitting without GitHub (tools/request_worker/).** By default "Request the run" opens a prefilled GitHub issue in a new tab
+(the visitor needs a GitHub account to click *Submit*); the page keeps polling the issue list and opens the construction site as
+soon as the request appears — no reload. To make it one click for anyone, deploy `tools/request_worker/worker.js` as a Cloudflare
+Worker (free): dash.cloudflare.com → Workers & Pages → Create → paste the file → Deploy; Settings → Variables: secret
+`GITHUB_TOKEN` (fine-grained, HOPS-Tool-LiveV1 only, *Issues: read & write*), variables `REPO=yasch00/HOPS-Tool-LiveV1`,
+`ALLOW_ORIGIN=https://yasch00.github.io`; optionally a rate-limiting rule on its route. Then put the worker URL into
+`window.HOPS_REQUEST_ENDPOINT` at the top of `atlas/index.html`. The page POSTs the spec, the worker opens the issue with the
+token (which never reaches the browser), and the construction view opens immediately; everything downstream is unchanged.
+
 **Level 2 — in the cloud (recommended, hands-off).** `.github/workflows/solve.yml` runs on every new issue: it solves each CI
 point of both pathways as its own parallel job on Gurobi WLS (17 jobs incl. BAU, `SOLVE_PARALLEL` repository variable caps
 the concurrency, default 6), merges them, runs the policy re-pricings (`ets_policy_cases.py` / `us_credit_cases.py` for the
