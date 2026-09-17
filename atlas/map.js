@@ -143,23 +143,39 @@ async function openSite(idx, instant){
   const view = { center: [p.lon + (fo.x * 0.6) / mLon, p.lat - (fo.z * 0.6) / 110574], zoom: siteZoomFor(p.lat), pitch: 60, bearing: -25 };   // between the real plant and the new units
   if (instant) map.jumpTo(view); else map.flyTo({ ...view, duration: 3200, essential: true });
   renderSitePanel(p, null, 'loading');
-  try {
-    if (!window.__sitingIndex) { try { window.__sitingIndex = await fetchJSON(SITING_BASE + 'index.json'); } catch (e) { window.__sitingIndex = null; } }
-    if (window.__sitingIndex && !window.__sitingIndex.plants.includes(idx) && p.custom) { try { window.__sitingIndex = await fetchJSON(SITING_BASE + 'index.json'); } catch (e) {} }   // a requested site's layers arrive minutes after its results: re-read the index
-    if (window.__sitingIndex && !window.__sitingIndex.plants.includes(idx)) throw new Error('no siting layers');   // known absent: no probing request
-    const r = await fetch(`${SITING_BASE}plant${idx}/site.json`);
-    if (!r.ok) throw new Error(String(r.status));
-    siteInfo = await r.json();
-    if (siteIdx !== idx) return;
-    const [dev, excl] = await Promise.all([fetch(`${SITING_BASE}plant${idx}/developable.geojson`).then(r => r.json()), fetch(`${SITING_BASE}plant${idx}/exclusions.geojson`).then(r => r.json())]);
-    if (siteIdx !== idx) return;
-    map.getSource('dev').setData(dev); map.getSource('excl').setData(excl);
-  } catch (e) { siteInfo = null; }
+  const got = await loadSitingLayers(idx);
   if (siteIdx !== idx) return;
+  if (!got && p.custom) watchSitingFor(idx);                                                  // a requested site's layers arrive 10–20 min after its results
   const pref = (curScn && curScn.plant === idx) ? { path: scnPathwayLabel(curScn), policy: curScn.policy || null, ci: curCItarget } : { path: 'SMR', policy: null, ci: null };
   siteLayoutKey = null; selectRun(pref.path, pref.policy, pref.ci);
   if (!renewOn) siteRenewables(false);
   if (typeof syncURL === 'function') syncURL();
+}
+/* ---- siting layers of a site: index check (re-read for requested sites), then site.json + developable + exclusions */
+async function loadSitingLayers(idx){
+  const p = PLANT[idx];
+  try {
+    if (!window.__sitingIndex) { try { window.__sitingIndex = await fetchJSON(SITING_BASE + 'index.json'); } catch (e) { window.__sitingIndex = null; } }
+    if (window.__sitingIndex && !window.__sitingIndex.plants.includes(idx) && p && p.custom) { try { window.__sitingIndex = await fetchJSON(SITING_BASE + 'index.json'); } catch (e) {} }
+    if (window.__sitingIndex && !window.__sitingIndex.plants.includes(idx)) throw new Error('no siting layers');   // known absent: no probing request
+    const r = await fetch(`${SITING_BASE}plant${idx}/site.json`, { cache: 'no-cache' });
+    if (!r.ok) throw new Error(String(r.status));
+    const info = await r.json();
+    if (siteIdx !== idx) return false;
+    const [dev, excl] = await Promise.all([fetch(`${SITING_BASE}plant${idx}/developable.geojson`).then(r => r.json()), fetch(`${SITING_BASE}plant${idx}/exclusions.geojson`).then(r => r.json())]);
+    if (siteIdx !== idx) return false;
+    siteInfo = info; map.getSource('dev').setData(dev); map.getSource('excl').setData(excl);
+    return true;
+  } catch (e) { siteInfo = null; return false; }
+}
+/* a requested site opened before its siting job finished: re-check every 2 minutes (up to an hour) and draw the footprint when it lands */
+let __sitingWatch = null;
+function watchSitingFor(idx){
+  clearInterval(__sitingWatch); const t0 = Date.now();
+  __sitingWatch = setInterval(async () => {
+    if (siteIdx !== idx || Date.now() - t0 > 60 * 60000) { clearInterval(__sitingWatch); __sitingWatch = null; return; }
+    if (await loadSitingLayers(idx) && siteIdx === idx) { clearInterval(__sitingWatch); __sitingWatch = null; siteLayoutKey = null; selectRun(siteRun.path, siteRun.policy, siteRun.ci); if (!renewOn) siteRenewables(false); }
+  }, 120000);
 }
 /* ---- the run shown at a site: pathway × policy × CI (independent of whether siting layers exist) */
 let siteRun = { path: 'SMR', policy: null, ci: null }, siteLayoutGeo = null, renewOn = true;
@@ -228,7 +244,7 @@ function renderSitePanel(p, l, state){
     </div>`;
   }
   // siting
-  if (state === 'none') h += `<p class="sub" style="margin:4px 0 8px">Siting layers have not been computed for this plant yet — the catchment, terrain and buildings are shown; the renewable footprint appears once the fleet siting job has run for plant ${p.idx}.</p>`;
+  if (state === 'none') h += `<p class="sub" style="margin:4px 0 8px">${p.custom ? 'The renewable siting layers for this requested site are being computed (OpenStreetMap download and land model, 10–20 minutes after the results) — this view checks every two minutes and draws the footprint when it lands.' : `Siting layers have not been computed for this plant yet — the catchment, terrain and buildings are shown; the renewable footprint appears once the fleet siting job has run for plant ${p.idx}.`}</p>`;
   else if (l) h += `<div class="fin-group"><div class="fp-h">Renewable footprint · ${info.setback_scenario} setbacks</div><div class="site-kpis">
       <div><div class="l">Wind placed</div><div class="v">${fmt(l.wind_mw_placed)}<small> MW</small></div><div class="d">${l.turbines} × ${info.turbine_mw} MW · hub ${info.hub_m} m · rotor ${info.rotor_m} m${l.wind_short ? ' · <b style="color:var(--rust)">short of ' + fmt(l.wind_mw_target) + ' MW</b>' : ''}</div></div>
       <div><div class="l">Solar placed</div><div class="v">${fmt(l.pv_mw_placed)}<small> MW</small></div><div class="d">${l.pv_km2} km² at ${info.rho_pv_mw_km2} MW/km²${l.pv_short ? ' · <b style="color:var(--rust)">short of ' + fmt(l.pv_mw_target) + ' MW</b>' : ''}</div></div>
@@ -246,6 +262,7 @@ function renderSitePanel(p, l, state){
 }
 function leaveSite(){
   if (typeof hideFacility === 'function') hideFacility();
+  clearInterval(__sitingWatch); __sitingWatch = null;
   if (PENDING.open) closePending(false);
   siteIdx = null; siteInfo = null; document.getElementById('sitePanel').hidden = true; document.body.classList.remove('site-mode');
   if (turbineLayer) turbineLayer.setTurbines([], null);
