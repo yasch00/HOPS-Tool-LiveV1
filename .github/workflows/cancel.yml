@@ -1,0 +1,27 @@
+name: cancel run request
+# A "Run request" issue closed as NOT PLANNED (by the owner on GitHub, or by the requester through the request worker) stops
+# its cloud solve: every in-progress run linked from the issue's comments is cancelled. Issues the solver closes itself on
+# success carry state_reason "completed", so the siting job that follows publication is not touched.
+on:
+  issues:
+    types: [closed]
+permissions:
+  actions: write
+  issues: write
+jobs:
+  cancel:
+    if: ${{ startsWith(github.event.issue.title, 'Run request') && github.event.issue.state_reason == 'not_planned' }}
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/github-script@v7
+        with:
+          script: |
+            const n = context.payload.issue.number;
+            const comments = await github.paginate(github.rest.issues.listComments, { ...context.repo, issue_number: n, per_page: 100 });
+            const ids = [...new Set(comments.flatMap(c => [...(c.body || '').matchAll(/actions\/runs\/(\d+)/g)].map(m => m[1])))];
+            const stopped = [];
+            for (const id of ids) {
+              try { const { data: run } = await github.rest.actions.getWorkflowRun({ ...context.repo, run_id: Number(id) });
+                if (run.status !== 'completed') { await github.rest.actions.cancelWorkflowRun({ ...context.repo, run_id: Number(id) }); stopped.push(id); } } catch (e) {}
+            }
+            await github.rest.issues.createComment({ ...context.repo, issue_number: n, body: `<!-- hops-cloud --> Request cancelled${stopped.length ? ' — stopped run(s) ' + stopped.join(', ') : ' (no run was in progress)'}. Nothing was published.` });

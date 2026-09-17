@@ -239,7 +239,7 @@ function renderSitePanel(p, l, state){
       <div class="sub" style="margin-top:6px">Exclusions: <span style="color:#D55E00">■</span> structures · <span style="color:#8A8F94">■</span> roads · <span style="color:#4C5B6E">■</span> rail · <span style="color:#0072B2">■</span> water · <span style="color:#009E73">■</span> forest/land use · <span style="color:#CC79A7">■</span> Natura 2000 — each buffered by the wind setback.</div></div>`;
   h += `<div class="sp-actions"><button class="btn" onclick="openDashboard(${p.idx})">Technical results →</button><button class="btn ghost" onclick="FAC.on?hideFacility():selectRun(siteRun.path,siteRun.policy,siteRun.ci)">${(typeof FAC !== 'undefined' && FAC.on) ? 'Hide plant' : 'Show plant'}</button>${state !== 'none' ? `<button class="btn ghost" onclick="siteRenewables(${!renewOn})">${renewOn ? 'Hide renewables' : 'Show renewables'}</button>` : ''}</div>`;
   if (p.custom && p.skipped && Object.values(p.skipped).some(m => Object.keys(m).length)) h += `<div class="sub" style="margin-top:8px;color:var(--rust)">Not solvable at the NH₃ price (no design earns a positive return, so the IRR objective has no solution — these points are absent, as in the fleet runs): ${Object.entries(p.skipped).filter(([, m]) => Object.keys(m).length).map(([c, m]) => (c === 'Yes' ? 'SMR +CCS' : 'SMR') + ' CI ' + Object.keys(m).sort().join(', ')).join(' · ')}.</div>`;
-  if (p.custom) h += `<div class="sub" style="margin-top:8px">Solved from a run request${p.spec && p.spec.requested ? ' of ' + p.spec.requested : ''}${p.spec && p.spec.technical_changed && Object.keys(p.spec.technical_changed).length ? ' · changed assumptions: ' + Object.entries(p.spec.technical_changed).map(([k, v]) => k + '=' + v).join(', ') : ' · model default assumptions'}. <a href="${removeIssueURL(p)}" target="_blank" rel="noopener">Remove this site</a> (owner only: the request is executed automatically).</div>`;
+  if (p.custom) h += `<div class="sub" style="margin-top:8px">Solved from a run request${p.spec && p.spec.requested ? ' of ' + p.spec.requested : ''}${p.spec && p.spec.technical_changed && Object.keys(p.spec.technical_changed).length ? ' · changed assumptions: ' + Object.entries(p.spec.technical_changed).map(([k, v]) => k + '=' + v).join(', ') : ' · model default assumptions'}. ${reqToken(p.idx - 1000) ? `<button class="btn ghost sm" style="color:var(--rust)" onclick="removeSite(${p.idx})">Remove this site</button> (you requested it from this browser; removal takes ~2 minutes)` : `<a href="${removeIssueURL(p)}" target="_blank" rel="noopener">Remove this site</a> (repository owner only; requesters can remove their own sites from the browser they used).`}</div>`;
   h += `<div class="sub" style="margin-top:10px;font-size:11px">Imagery Esri World Imagery · terrain Mapzen/AWS · buildings OpenStreetMap via OpenFreeMap · siting: HOPS land model (OSM + Natura 2000 exclusions)</div>`;
   host.innerHTML = h;
 }
@@ -323,7 +323,9 @@ function parseRequest(it){
 async function loadPending(){
   try {
     const items = await gh('/issues?state=open&per_page=50');
-    PENDING.list = items.filter(it => !it.pull_request && /^run request/i.test(it.title || '')).map(parseRequest).filter(Boolean).filter(r => !PLANT[r.idx]);   // already published → shown as a plant
+    const fresh = items.filter(it => !it.pull_request && /^run request/i.test(it.title || '')).map(parseRequest).filter(Boolean).filter(r => !PLANT[r.idx]);   // already published → shown as a plant
+    const keep = PENDING.list.filter(r => r.local && Date.now() - r.local < 10 * 60000 && !fresh.some(f => f.issue === r.issue) && !PLANT[r.idx]);   // just submitted here, not yet in GitHub's cached list
+    PENDING.list = fresh.concat(keep);
   } catch (e) { PENDING.list = []; }
   if (map.getSource('pending')) map.getSource('pending').setData(plantsGeo(PENDING.list, r => ({ issue: r.issue, name: r.name, tpd: r.tpd })));
   const el = document.getElementById('legendPending'); if (el) el.textContent = `Under construction (${PENDING.list.length} request${PENDING.list.length === 1 ? '' : 's'})`;
@@ -408,11 +410,43 @@ function renderPendingPanel(r, run){
         return `<span class="ci-pill sm" style="cursor:default;${ok ? 'background:' + PENDING_COLOR + ';color:#15181B;border-color:' + PENDING_COLOR : bad ? 'border-color:var(--rust);color:var(--rust)' : on ? 'border-color:' + PENDING_COLOR : 'opacity:.55'}" title="${j.name} · ${j.status}${j.conclusion ? ' · ' + j.conclusion : ''}">${c ? (c.ci === 'BAU' ? 'BAU' : c.ci + (c.ccs === 'Yes' ? ' +CCS' : '')) : j.name}</span>`; }).join('')}</div>
       <div class="sub" style="margin-top:6px">Every CI point is its own parallel job, so the whole sweep finishes in about the time of one solve; the results are published together once BAU and the policy cases are done.</div></div>`;
   }
-  h += `<div class="sp-actions"><button class="btn ghost" onclick="refreshPendingProgress()">Refresh</button><button class="btn ghost" onclick="map.easeTo({pitch:0,bearing:0,duration:900})">Top</button><button class="btn ghost" onclick="map.easeTo({pitch:60,bearing:map.getBearing()+45,duration:900})">↻</button></div>
+  h += `<div class="sp-actions"><button class="btn ghost" onclick="refreshPendingProgress()">Refresh</button><button class="btn ghost" onclick="map.easeTo({pitch:0,bearing:0,duration:900})">Top</button><button class="btn ghost" onclick="map.easeTo({pitch:60,bearing:map.getBearing()+45,duration:900})">↻</button>${reqToken(r.issue) ? `<button class="btn ghost" style="color:var(--rust)" onclick="cancelRequest(${r.issue})">Stop &amp; cancel</button>` : ''}</div>
+    <div class="sub" id="pendingMsg" style="margin-top:6px">${reqToken(r.issue) ? 'You requested this site from this browser: "Stop &amp; cancel" ends the solve and removes the construction site.' : `Requested from another browser — only its requester, or the repository owner (close <a href="${r.url}" target="_blank" rel="noopener">#${r.issue}</a> as "not planned"), can stop it.`}</div>
     <div class="sub" style="margin-top:10px;font-size:11px">The construction scene stands where the plant will: foundations are poured as CI points are solved; cranes, trucks and the excavator keep working while the solver runs.</div>`;
   host.innerHTML = h;
 }
 function removeIssueURL(p){
   const title = `Remove request: site ${p.idx}`, body = `Remove requested site **${p.idx}** (${p.name}, ${p.lat}, ${p.lon}) from the atlas — data, runs and siting layers.\n\n_Executed by .github/workflows/remove.yml when opened by the repository owner._`;
   return `https://github.com/yasch00/HOPS-Tool-LiveV1/issues/new?title=${encodeURIComponent(title)}&body=${encodeURIComponent(body)}`;
+}
+
+/* ---------------------------------------------------------------- the requester's own control over a request: tokens from the request worker
+   (kept in this browser only) let the person who submitted a site stop its solve or remove it after publication. */
+function reqTokens(){ try { return JSON.parse(localStorage.getItem('hops_req_tokens') || '{}'); } catch (e) { return {}; } }
+function reqToken(issue){ return reqTokens()[issue] || null; }
+function saveReqToken(issue, token){ try { const t = reqTokens(); t[issue] = token; localStorage.setItem('hops_req_tokens', JSON.stringify(t)); } catch (e) {} }
+async function workerCall(payload){
+  const ep = (typeof REQUEST_ENDPOINT !== 'undefined' && REQUEST_ENDPOINT) || window.HOPS_REQUEST_ENDPOINT; if (!ep) throw new Error('no request endpoint configured');
+  const r = await fetch(ep, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
+  const j = await r.json().catch(() => ({})); if (!r.ok || j.error) throw new Error(j.error || ('HTTP ' + r.status)); return j;
+}
+async function cancelRequest(issue){
+  if (!confirm(`Stop the solve for request #${issue} and remove the construction site?`)) return;
+  const msg = document.getElementById('pendingMsg'); if (msg) msg.textContent = 'Cancelling …';
+  try {
+    await workerCall({ action: 'cancel', issue, token: reqToken(issue) });
+    PENDING.list = PENDING.list.filter(x => x.issue !== issue);
+    if (map.getSource('pending')) map.getSource('pending').setData(plantsGeo(PENDING.list, r => ({ issue: r.issue, name: r.name, tpd: r.tpd })));
+    const el = document.getElementById('legendPending'); if (el) el.textContent = `Under construction (${PENDING.list.length} request${PENDING.list.length === 1 ? '' : 's'})`;
+    closePending(true);
+  } catch (e) { if (msg) msg.innerHTML = `Could not cancel: ${e.message}. The repository owner can close <a href="https://github.com/yasch00/HOPS-Tool-LiveV1/issues/${issue}" target="_blank" rel="noopener">#${issue}</a> as "not planned".`; }
+}
+async function removeSite(idx){
+  if (!confirm(`Remove site ${idx} — its results, runs and siting layers — from the atlas? This cannot be undone.`)) return;
+  const host = document.getElementById('sitePanel');
+  try {
+    const j = await workerCall({ action: 'remove', site: idx, token: reqToken(idx - 1000) });
+    leaveSite();
+    alert(`Removal queued (#${j.issue}). Site ${idx} disappears from the globe in about two minutes; reload the page afterwards.`);
+  } catch (e) { alert(`Could not remove: ${e.message}`); }
 }

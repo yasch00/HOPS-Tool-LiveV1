@@ -3,7 +3,7 @@ name: solve run request
 # plus the BAU reference → the policy re-pricings (EU ETS law/proposal or US 45V/45Q) → converted into data/ (merged with
 # the fleet), committed, the issue gets the live link and is closed → then the siting layers for the new coordinates.
 # Secrets: MODEL_REPO_TOKEN (read access to the private model repo), GRB_WLSACCESSID, GRB_WLSSECRET, GRB_LICENSEID.
-# Repository variable SOLVE_PARALLEL (default 6) caps concurrent solves — set it to what your WLS licence allows.
+# Repository variable SOLVE_PARALLEL (default 4) caps concurrent solves — set it to what your WLS licence allows; solves retry on licence errors.
 on:
   issues:
     types: [opened, reopened]
@@ -15,6 +15,7 @@ on:
 permissions:
   contents: write
   issues: write
+  actions: read
 concurrency:
   group: solve-${{ github.event.issue.number || inputs.issue }}
   cancel-in-progress: false
@@ -53,7 +54,7 @@ jobs:
     timeout-minutes: 120
     strategy:
       fail-fast: false
-      max-parallel: ${{ fromJSON(vars.SOLVE_PARALLEL || '6') }}
+      max-parallel: ${{ fromJSON(vars.SOLVE_PARALLEL || '4') }}
       matrix:
         ccs: ['No', 'Yes']
         ci: ['0', '0.25', '0.5', '0.75', '1.0', '1.25', '1.5', '1.75']
@@ -221,4 +222,12 @@ jobs:
       - uses: actions/github-script@v7
         with:
           script: |
-            await github.rest.issues.createComment({ ...context.repo, issue_number: Number('${{ needs.check.outputs.issue }}'), body: `<!-- hops-cloud --> A step of the cloud solve failed — see ${context.serverUrl}/${context.repo.owner}/${context.repo.repo}/actions/runs/${context.runId}. Left open for a manual look.` });
+            // pull the failing jobs' logs and quote the error lines, so the issue says WHAT failed without opening the log
+            const jobs = await github.paginate(github.rest.actions.listJobsForWorkflowRun, { ...context.repo, run_id: context.runId, per_page: 100 });
+            const lines = [];
+            for (const j of jobs.filter(j => j.conclusion === 'failure')) {
+              try { const log = String((await github.rest.actions.downloadJobLogsForWorkflowRun({ ...context.repo, job_id: j.id })).data);
+                const hits = log.split('\n').filter(l => /Error|Traceback|\[FAIL\]|\[WARN\]|\[RETRY\]|licen[cs]e|WLS/i.test(l)).map(l => l.replace(/^\S+\s/, '').slice(0, 220));
+                lines.push(`**${j.name}**\n` + '```\n' + (hits.slice(-6).join('\n') || '(no error line found)') + '\n```'); } catch (e) { lines.push(`**${j.name}**: log unavailable (${e.message})`); }
+            }
+            await github.rest.issues.createComment({ ...context.repo, issue_number: Number('${{ needs.check.outputs.issue }}'), body: `<!-- hops-cloud --> A step of the cloud solve failed — ${context.serverUrl}/${context.repo.owner}/${context.repo.repo}/actions/runs/${context.runId}. Left open for a manual look (re-run: Actions → solve run request → Run workflow with this issue number).\n\n${lines.join('\n\n')}` });

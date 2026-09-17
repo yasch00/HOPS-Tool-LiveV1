@@ -169,11 +169,15 @@ async function buildSubmit(){
   const E = buildEstimate(), spec = buildSpec(E), btn = document.getElementById('buildSubmitBtn'); if (btn) btn.disabled = true;
   buildStatus('Registering the request …');
   try {
-    const r = await fetch(REQUEST_ENDPOINT, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(spec) });
+    const r = await fetch(REQUEST_ENDPOINT, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ action: 'request', spec }) });
     const j = await r.json().catch(() => ({})); if (!r.ok || !j.issue) throw new Error(j.error || ('HTTP ' + r.status));
+    if (j.token && typeof saveReqToken === 'function') saveReqToken(j.issue, j.token);   // lets this browser cancel or remove what it requested
     buildStatus(`Registered as request #${j.issue} — opening the site …`);
-    await loadPending(); const rq = PENDING.list.find(x => x.issue === j.issue);
-    BUILD.status = ''; leaveBuild(); if (rq) openPending(j.issue); else setTimeout(async () => { await loadPending(); openPending(j.issue); }, 3000);
+    // GitHub's public issue list lags a minute behind: register the request locally from the worker's answer and open it now
+    const rq = { issue: j.issue, idx: 1000 + j.issue, name: spec.site.name || `Site ${1000 + j.issue}`, lat: +spec.site.lat, lon: +spec.site.lon, country: spec.site.country || '', tpd: +spec.plant.tNH3_day, ktpa: +spec.plant.tNH3_day * 365 / 1000, spec, opened: new Date().toISOString(), url: j.url, custom: true, pending: true, local: Date.now() };
+    if (!PENDING.list.some(x => x.issue === j.issue)) PENDING.list.push(rq);
+    if (map.getSource('pending')) map.getSource('pending').setData(plantsGeo(PENDING.list, r => ({ issue: r.issue, name: r.name, tpd: r.tpd })));
+    BUILD.status = ''; leaveBuild(); openPending(j.issue);
   } catch (e) { if (btn) btn.disabled = false; buildStatus(`Could not register the request (${e.message}). <a href="${buildIssueURL(E)}" target="_blank" rel="noopener">Open it on GitHub instead →</a>`); }
 }
 function buildWatchForIssue(){

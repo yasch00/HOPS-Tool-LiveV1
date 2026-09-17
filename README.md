@@ -165,9 +165,20 @@ then commit + push in GitHub Desktop; the new site appears in the atlas as `#pla
 uses 1000 + issue number). Requested sites are drawn in a distinct colour on the globe (Okabe-Ito purple; modelled fleet
 green; under construction yellow) and their site panel says "requested site" with the changed assumptions.
 
-**Removing a requested site.** `python3 tools/remove_site.py 1002` then commit + push — or click "Remove this site" in its
-panel, which opens a `Remove request: site 1002` issue; `.github/workflows/remove.yml` executes it when the issue author is
-the repository owner (anyone else gets a comment and nothing happens). Fleet plants (idx < 1000) are refused.
+**Stopping and removing.** Whoever submitted a request through the worker holds a per-request token in their browser
+(`localStorage` `hops_req_tokens`; its SHA-256 sits in the issue body as `<!-- rt:… -->`). With it the construction view offers
+**Stop & cancel** (the worker closes the issue as *not planned* → `.github/workflows/cancel.yml` cancels the running solve,
+nothing is published) and a published requested site offers **Remove this site** (the worker opens a `Remove request: site N`
+issue as the token's owner → `remove.yml` deletes it from data/, runs/ and siting/ and the globe). Requests made from another
+browser show the GitHub links instead. The owner can always do the same by hand: close the request issue as *not planned*, or
+open `Remove request: site 1002` (any other author gets a comment and nothing happens), or locally
+`python3 tools/remove_site.py 1002` then commit + push. Fleet plants (idx < 1000) are refused everywhere.
+
+**When a solve fails.** Each solve job writes its skipped and failed CI points to the job summary, and the `failed` job quotes
+the error lines of every failed job into the issue comment. Gurobi WLS licence/session errors are retried inside the job
+(6 attempts, 90 s apart); keep the repository variable `SOLVE_PARALLEL` at or below the licence's concurrent-session limit
+(default 4). Points with no positive return at the NH₃ price are skipped and listed in the site panel, as in the fleet runs.
+Re-run: Actions → *solve run request* → Run workflow with the issue number.
 
 **Why no partial results before the sweep is done?** Every CI point is its own job, so the whole sweep takes about as long as
 the slowest single solve (typically 15–40 min); the BAU reference and policy cases need all points anyway, and the finance

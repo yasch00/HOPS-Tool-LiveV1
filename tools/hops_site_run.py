@@ -131,6 +131,24 @@ def import_site_core(attrs: dict):
 
 # ----------------------------------------------------------------- 3. run one site
 NO_RETURN = "no positive return"      # hops_finance_objective: AnnualCF <= 0 — the design cannot earn any return at the NH3 price
+LICENCE_PAT = ("licen", "wls", "session", "token", "grb_license", "10009", "10032")   # transient Gurobi WLS errors → wait and retry
+
+def solve_retrying(fn, what, attempts=6, wait=90):
+    """Run a solve; on a Gurobi licence/WLS error (concurrent-session limit, token refresh) wait and try again."""
+    for k in range(1, attempts + 1):
+        try:
+            return fn()
+        except Exception as e:
+            msg = f"{type(e).__name__}: {e}"
+            if type(e).__name__ == "GurobiError" and any(t in msg.lower() for t in LICENCE_PAT) and k < attempts:
+                print(f"[RETRY] {what}: Gurobi licence/WLS error ({msg[:160]}) — attempt {k}/{attempts}, waiting {wait}s", flush=True); time.sleep(wait); continue
+            raise
+
+def step_summary(text):
+    """Append to the GitHub Actions job summary (no-op elsewhere) so failures are readable without opening the log."""
+    p = os.environ.get("GITHUB_STEP_SUMMARY")
+    if p:
+        with open(p, "a") as f: f.write(text + "\n")
 
 def run_site(spec: dict, out: Path, label: str, site_id: int, ci_targets, fallback_lcoa: bool = False):
     """Solve the CI targets. A target whose IRR solve has no positive return is SKIPPED and recorded (sites.json →
@@ -155,7 +173,7 @@ def run_site(spec: dict, out: Path, label: str, site_id: int, ci_targets, fallba
         t0 = time.time(); print(f"\n--- CI {ci} ---"); fell_back = False
         try:
             try:
-                dd, dfop = hc.run_optimization_for_point(lat, lon, solar, wind, tpd, NH3_intensity_target=ci, ci_series_override=None)
+                dd, dfop = solve_retrying(lambda: hc.run_optimization_for_point(lat, lon, solar, wind, tpd, NH3_intensity_target=ci, ci_series_override=None), f"CI {ci}")
             except ValueError as e:
                 if NO_RETURN not in str(e): raise
                 if not fallback_lcoa:
@@ -184,6 +202,8 @@ def run_site(spec: dict, out: Path, label: str, site_id: int, ci_targets, fallba
                 "region": region, "spec": spec, "label": label, "n_ci": ent.get("n_ci", 0) + len(rows)})
     ent.setdefault("skipped", {}).setdefault(C, {}).update(skipped); ent.setdefault("errors", {}).setdefault(C, {}).update(errors)   # per CCS state, merged across jobs by the publish step
     sites[str(site_id)] = ent; reg.write_text(json.dumps(sites, indent=1))
+    for ci_s, why in skipped.items(): step_summary(f"- CCS={C} CI {ci_s}: skipped — {why}")
+    for ci_s, why in errors.items(): step_summary(f"- **CCS={C} CI {ci_s}: FAILED** — `{why}`")
     if errors and not rows: sys.exit(f"[FAIL] site {site_id} CCS={C}: {errors}")   # a real failure goes red; skipped-for-no-return points do not
     if skipped and not rows: print(f"[DONE] site {site_id} CCS={C}: every requested CI target skipped — {skipped}")
     return rows
@@ -199,8 +219,10 @@ def run_bau(spec: dict, out: Path, bau_label: str, site_id: int):
     region = hc.get_region(Point(lon, lat), hc.countries, hc.us_states, sovereignt_override=spec.get("country"))
     solar, wind = load_cf_timeseries(lat, lon, T=8760, region=region)
     out.mkdir(parents=True, exist_ok=True); (out / "hourly").mkdir(exist_ok=True); P = os.environ["HOPS_PATHWAY"]
-    t0 = time.time(); dd, dfop = hc.run_optimization_for_point(lat, lon, solar, wind, tpd, NH3_intensity_target=None, ci_series_override=None)
-    if dd is None: sys.exit("BAU returned no optimal solution")
+    t0 = time.time()
+    try: dd, dfop = solve_retrying(lambda: hc.run_optimization_for_point(lat, lon, solar, wind, tpd, NH3_intensity_target=None, ci_series_override=None), "BAU")
+    except Exception as e: step_summary(f"- **BAU: FAILED** — `{type(e).__name__}: {e}`"[:600]); raise
+    if dd is None: step_summary("- **BAU: FAILED** — no optimal solution"); sys.exit("BAU returned no optimal solution")
     tags = dict(plant_idx=site_id, lat=lat, lon=lon, country=spec.get("country", ""), RUN_MODE="BAU", PATHWAY=P, OBJECTIVE="LCOA", CCS="No", LABEL=bau_label, site_name=spec.get("name", ""))
     dd.update(tags)
     fp = out / f"BAU_AllPlants_{P}_CCSNo_{bau_label}.csv"
