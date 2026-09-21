@@ -209,7 +209,10 @@ async function buildSubmit(){
     if (!PENDING.list.some(x => x.issue === j.issue)) PENDING.list.push(rq);
     if (map.getSource('pending')) map.getSource('pending').setData(plantsGeo(PENDING.list, r => ({ issue: r.issue, name: r.name, tpd: r.tpd })));
     BUILD.status = ''; leaveBuild(); openPending(j.issue);
-  } catch (e) { if (btn) btn.disabled = false; buildStatus(`Could not register the request (${e.message}). <a href="${buildIssueURL(E)}" target="_blank" rel="noopener">Open it on GitHub instead →</a>`); }
+  } catch (e) { if (btn) btn.disabled = false;
+    const local = /^(localhost|127\.0\.0\.1)$/.test(location.hostname) && /Failed to fetch|NetworkError/.test(e.message);
+    buildStatus(local ? `The request service only accepts submissions from the published site, not from a local preview. <a href="https://yasch00.github.io/HOPS-Tool-LiveV1/atlas/#build" target="_blank" rel="noopener">Open the live tool →</a> or <a href="${buildIssueURL(E)}" target="_blank" rel="noopener">open the request on GitHub →</a>`
+                      : `Could not register the request (${e.message}). <a href="${buildIssueURL(E)}" target="_blank" rel="noopener">Open it on GitHub instead →</a>`); }
 }
 function buildWatchForIssue(){
   const known = new Set(PENDING.list.map(x => x.issue)), lat = BUILD.lat, lon = BUILD.lon, t0 = Date.now();

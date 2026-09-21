@@ -14,6 +14,7 @@
      GITHUB_TOKEN   fine-grained token, repository HOPS-Tool-LiveV1 only, permission Issues: Read and write   (secret)
      REPO           yasch00/HOPS-Tool-LiveV1                                                                  (variable)
      ALLOW_ORIGIN   https://yasch00.github.io                                                                 (variable)
+                    comma-separated list allowed, e.g. https://yasch00.github.io,http://localhost:8765 to also submit from a local preview
    Abuse: add a Cloudflare rate-limiting rule on the worker's route (e.g. 5 requests / 10 min per IP). */
 
 const GH = 'https://api.github.com';
@@ -23,7 +24,8 @@ function fmtInt(n){ return Math.round(n).toLocaleString('en-US'); }
 
 export default {
   async fetch(req, env) {
-    const cors = { 'Access-Control-Allow-Origin': env.ALLOW_ORIGIN || '*', 'Access-Control-Allow-Methods': 'POST, OPTIONS', 'Access-Control-Allow-Headers': 'Content-Type', 'Content-Type': 'application/json' };
+    const allowed = (env.ALLOW_ORIGIN || '*').split(',').map(s => s.trim()).filter(Boolean), origin = req.headers.get('Origin') || '';   // comma-separated list; the matching origin is echoed back
+    const cors = { 'Access-Control-Allow-Origin': allowed.includes('*') ? '*' : (allowed.includes(origin) ? origin : allowed[0]), 'Vary': 'Origin', 'Access-Control-Allow-Methods': 'POST, OPTIONS', 'Access-Control-Allow-Headers': 'Content-Type', 'Content-Type': 'application/json' };
     const json = (o, status = 200) => new Response(JSON.stringify(o), { status, headers: cors });
     const gh = (path, init = {}) => fetch(GH + path, { ...init, headers: { Authorization: `Bearer ${env.GITHUB_TOKEN}`, Accept: 'application/vnd.github+json', 'User-Agent': 'hops-request-worker', 'Content-Type': 'application/json', ...(init.headers || {}) } });
     if (req.method === 'OPTIONS') return new Response(null, { headers: cors });
