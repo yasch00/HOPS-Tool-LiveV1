@@ -6,7 +6,7 @@
 <title>HOPS — Results</title>
 <meta name="description" content="Curated findings from HOPS runs: thresholds across the fleet, cost composition, and hourly dispatch behaviour, each with a plain-language readout.">
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,300;0,6..72,400;0,6..72,500;1,6..72,400&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="tokens.css"><link rel="stylesheet" href="components.css"><style>
 .finding{padding:var(--s8) 0;border-bottom:1px solid var(--rule)}
 .finding-grid{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.25fr);gap:var(--s7);align-items:start}
@@ -23,16 +23,16 @@
 <nav class="links" id="nav-links"><a href="index.html">Home</a><a href="method.html">Method</a><a href="results.html" aria-current="page">Results</a><a href="data.html">Data &amp; assumptions</a><a href="watch.html">Watch</a><a href="team.html">Team</a><a href="about.html">About</a></nav>
 <a class="btn" href="atlas/">Open the tool →</a>
 </div></header><main id="main">
-<div class="wrap"><div style="padding:var(--s8) 0 var(--s7);border-bottom:1px solid var(--rule)">
-<span class="eyebrow">Results</span>
-<h1 style="font-size:clamp(32px,4.2vw,52px);margin:var(--s4) 0 var(--s5);max-width:24ch">What the runs say so far.</h1>
-<p class="lede">Each finding below is one figure, one plain-language readout, and a link that reproduces it in the tool. Figures are regenerated with every model version; the stamp in the footer says when.</p>
-</div></div>
+<div class="page-hero"><div class="orb o1"></div><div class="orb o2"></div><div class="orb o3"></div><div class="wrap"><div class="in" data-reveal>
+<span class="eyebrow rv">Results</span>
+<h1 class="rv">What the runs say so far.</h1>
+<p class="lede rv">Each finding below is one figure, one plain-language readout, and a link that reproduces it in the tool. Figures are regenerated with every model version; the stamp in the footer says when.</p>
+</div></div></div>
 <div class="wrap">
 
 <div class="finding"><div class="finding-grid">
 <div><div class="num">Finding 01</div><h2>The threshold is geographic, not global.</h2>
-<p>Ranking the fleet by its Economic Decarbonization Threshold spreads plants across roughly [VALUE] kg CO₂e/kg NH₃, driven mainly by local renewable resource quality and delivered gas price rather than by technology cost, which is common across sites.</p>
+<p>Ranking the fleet by its Economic Decarbonization Threshold spreads plants across roughly 1.5–1.75 kg CO₂e/kg NH₃ on the LCOE basis in the current run (only 9 of 69 plants reach the conventional cost inside the sweep; the rest stay above it at every target), driven mainly by local renewable resource quality and delivered gas price rather than by technology cost, which is common across sites.</p>
 <p class="small" style="color:var(--ink-3)">Readout to be finalised against the published run. No numbers on this page are placeholders for values that will not be sourced.</p>
 <a class="explore" href="atlas/">Explore this in the tool →</a></div>
 <figure data-reveal><div class="fig-frame">
@@ -45,7 +45,7 @@
 <text class="axlabel" x="60" y="300">Plants, ordered by threshold  →</text>
 <g transform="translate(24,155) rotate(-90)"><text class="axlabel" x="0" y="0" text-anchor="middle">EDT  →</text></g>
 </svg></div>
-<figcaption><b>Fig. 1</b>EDT by plant. Bar heights are illustrative of shape only; axis values populate from run output.<a class="cite" href="about.html#cite" tabindex="0">[1]<span class="card"><i>Source</i>HOPS run [RUN ID], [YYYY-MM-DD], model v[0.0.0].<span class="badge todo" style="margin-top:8px">Awaiting run</span></span></a></figcaption></figure>
+<figcaption><b>Fig. 1</b>EDT by plant. Bar heights are illustrative of shape only; axis values populate from run output.<a class="cite" href="about.html#cite" tabindex="0">[1]<span class="card"><i>Source</i>HOPS run IRR_v7, 2026-09-16, model v[0.0.0].<span class="badge todo" style="margin-top:8px">Awaiting run</span></span></a></figcaption></figure>
 </div></div>
 
 <div class="finding"><div class="finding-grid">
@@ -61,7 +61,7 @@
 <text class="axlabel" x="72" y="292">deep reduction  ←  carbon intensity target  →  business as usual</text>
 <g transform="translate(30,155) rotate(-90)"><text class="axlabel" x="0" y="0" text-anchor="middle">LCOA  →</text></g>
 </svg></div>
-<figcaption><b>Fig. 2</b>Cost composition along the frontier. Segment heights illustrate the qualitative inversion; values populate from run output.<a class="cite" href="about.html#cite" tabindex="0">[2]<span class="card"><i>Source</i>HOPS run [RUN ID], [YYYY-MM-DD].<span class="badge todo" style="margin-top:8px">Awaiting run</span></span></a></figcaption></figure>
+<figcaption><b>Fig. 2</b>Cost composition along the frontier. Segment heights illustrate the qualitative inversion; values populate from run output.<a class="cite" href="about.html#cite" tabindex="0">[2]<span class="card"><i>Source</i>HOPS run IRR_v7, 2026-09-16.<span class="badge todo" style="margin-top:8px">Awaiting run</span></span></a></figcaption></figure>
 </div></div>
 
 <div class="finding"><div class="finding-grid">
@@ -78,7 +78,7 @@
 <text x="72" y="26" fill="var(--ink-3)">supply</text><text x="72" y="288" fill="var(--ink-3)">demand</text>
 <text class="axlabel" x="66" y="306">One representative week  →</text>
 </svg></div>
-<figcaption><b>Fig. 3</b>Mirror-axis hourly dispatch, one week. Shape illustrative; the tool renders the real 8,760-hour series per plant.<a class="cite" href="about.html#cite" tabindex="0">[3]<span class="card"><i>Source</i>HOPS run [RUN ID], [YYYY-MM-DD].<span class="badge todo" style="margin-top:8px">Awaiting run</span></span></a></figcaption></figure>
+<figcaption><b>Fig. 3</b>Mirror-axis hourly dispatch, one week. Shape illustrative; the tool renders the real 8,760-hour series per plant.<a class="cite" href="about.html#cite" tabindex="0">[3]<span class="card"><i>Source</i>HOPS run IRR_v7, 2026-09-16.<span class="badge todo" style="margin-top:8px">Awaiting run</span></span></a></figcaption></figure>
 </div></div>
 
 <div style="padding:var(--s8) 0">
@@ -94,7 +94,7 @@
 <div><h4>Project</h4><ul><li><a href="team.html">Team</a></li><li><a href="about.html#cite">How to cite</a></li><li><a href="about.html#licence">Licence</a></li><li><a href="about.html#contact">Contact</a></li></ul></div>
 <div><h4>Affiliation</h4><ul><li>Stanford University</li><li>STEER program</li></ul></div>
 </div>
-<div class="stamp"><span>Model v[0.0.0] · site v[0.0.0]</span><span>Content last updated [YYYY-MM-DD] · figures regenerated [YYYY-MM-DD]</span></div>
+<div class="stamp"><span>Model IRR_v7 · data 2026-09-16 · site 2026-09-21</span><span>Content last updated 2026-09-21 · figures regenerated 2026-09-16</span></div>
 </div></footer>
 <script src="site.js"></script>
 </body>

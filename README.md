@@ -56,6 +56,47 @@ Plant numbering is the HOPS index from `Plants_US_and_Europe.xlsx` (Brunsbüttel
 Brazoria County TX = 22). `plants.json` carries `amm_idx` to cross-reference the global fleet list drawn on the globe.
 Town names come from `tools/plant_names.json` (OpenStreetMap reverse geocoding) — edit that file to rename a plant.
 
+## The resource data layer (data/grid/, atlas/lib/griddata.js)
+
+`tools/build_grid_layers.py` turns the optimizer's own capacity-factor grids (`HOPS_DATA/{solar,wind}_cf_2025_{Region}.npz`,
+hourly, 0.25°) into two products. **In the repo:** `data/grid/{Region}.json` — per cell the annual mean solar and wind CF,
+the combined CF at the variance-minimising mix and at 50/50, the optimal PV share, the wind–solar correlation, the variability
+(CV) and the share of low-output hours, plus a land flag (Natural Earth) — drawn on the globe under *Renewable resource*
+(onshore by default, offshore toggle). **In object storage:** `--cells DIR` writes one file per cell
+(`{Region}/{i}_{j}.u16.gz`, Uint16 CF×10000, 8760 solar then 8760 wind, ~20 KB; 50k files, ~1 GB for both regions) to
+upload to a Cloudflare R2 bucket whose public URL goes into `window.HOPS_CF_BASE` in `atlas/index.html`. `griddata.js` is the
+one door to both (`gridCellAt(lat, lon)`, `cfSeries(cell)`, `combineSeries`, `optShare`, `seriesStats`); the Build page's
+Site step shows the cell's metrics and, with the hourly files, its monthly profile with an adjustable PV share.
+
+**Combined CF.** For a PV capacity share s the combined hourly CF is c(t) = s·pv(t) + (1−s)·w(t); its mean is the
+capacity-weighted mean, so the number only means something with the mix fixed. The literature fixes it as (a) an assumed
+ratio (often 1:1), (b) the variance-minimising mix s* = (var_w − cov)/(var_pv + var_w − 2cov) from the complementarity
+literature, or (c) the cost-optimal mix of an optimiser. The map carries (a) and (b) precomputed; the browser computes any
+share from the hourly series; (c) is the nearest solved plant's design. Nothing is re-modelled: the NPZ files are the source.
+
+**Adding a region** (e.g. a new continent extracted with the same atlite pipeline): save `{solar,wind}_cf_2025_{Region}.npz`
+with the same layout (`data` (8760, nlat, nlon, 1), `lats`, `lons`) into HOPS_DATA, add its box to `REGIONS` in
+`weather_loading_2025_atlite.py` (model side, for runs there), then `python3 tools/build_grid_layers.py --region {Region}
+--cells …` and upload the cell folder to R2. For cloud runs the NPZ also goes into the HOPS-model data release (a new tag, and
+`DATA_TAG` in solve.yml).
+
+**Upload to R2:** Cloudflare → R2 → Create bucket `hops-cf` → Settings → Public access → allow (r2.dev subdomain) → copy the
+URL. Upload with rclone (`brew install rclone`; `rclone config` → new remote, type `s3`, provider `Cloudflare`, the bucket's
+API token; then `rclone copy ~/Documents/Stanford/PhD/HOPS/cloud/cf r2:hops-cf --transfers 32`). CORS: bucket → Settings →
+CORS policy → allow GET from `https://yasch00.github.io`.
+
+## Design system (tokens.css, components.css, site.js)
+
+The public pages and the atlas share one design system, delivered from Claude Design on 2026-09-21: cool neutrals, deep-teal
+anchor (`--anchor`), green accent, Manrope for everything and IBM Plex Mono for data; Okabe–Ito for data series only. The
+pages (`index`, `method`, `results`, `data`, `watch`, `team`, `about`; `components.html` is the living style guide) use only
+those tokens; the atlas keeps its own stylesheet inside `atlas/index.html` but its `:root` variables are mapped onto the same
+tokens, so a colour or font change in `tokens.css` is mirrored there by hand (search for "tokens" in the atlas `<style>`).
+Landing-page images live in `img/` and are captures of the tool itself (globe with the fleet, resource layer, plant on the map,
+hourly and finance tabs); regenerate them after visual changes — open the atlas with `?shot=1` (enables canvas read-back),
+capture `map.getCanvas().toDataURL()` for map views and html2canvas for dashboard panes (see the session notes in docs/).
+Every "Open the tool" button points at `atlas/`; the suite cards deep-link into the tool with URL hashes.
+
 ## The map (atlas/map.js)
 
 One MapLibre map from globe to site, no API keys: Esri World Imagery, Mapzen/AWS terrain tiles, OpenStreetMap buildings

@@ -1,41 +1,43 @@
 /* HOPS design tokens — single source of truth. Port as-is into Astro (global.css). */
 :root{
-/* ---- colour: neutral ramp ---- */
---paper:#FBFAF8;--paper-2:#F4F1EB;--paper-3:#EDE9E1;
---rule:#E3DFD8;--rule-2:#CFC9BF;
---ink-3:#6B7379;--ink-2:#3D444B;--ink:#15181B;
+/* ---- colour: neutral ramp (cool, no cream) ---- */
+--paper:#FFFFFF;--paper-2:#EEF4F7;--paper-3:#E2ECF1;--mist-green:#E9F4EE;--mist-green-2:#D8EBE0;
+--rule:#DCE4E9;--rule-2:#C3CFD7;
+--ink-3:#66717B;--ink-2:#39444D;--ink:#121A20;
 --panel:#FFFFFF;
+/* ---- colour: dark surfaces (deep teal) ---- */
+--navy:#123542;--navy-2:#1A4656;--navy-line:#2C5A6A;--navy-text:#C9DBE0;
 /* ---- colour: anchor + accent (UI only, never data) ---- */
---anchor:#1B3A5C;--anchor-hover:#14293F;--anchor-tint:#EAEFF5;
---accent:#A6392A;--accent-tint:#F7EBE8;
-/* ---- colour: data series (Okabe–Ito, colourblind-safe, 6 series) ---- */
+--anchor:#1B6F8E;--anchor-hover:#155A74;--anchor-tint:#E3F0F5;--anchor-lt:#8CC5D8;
+--accent:#1E9A6E;--accent-tint:#E4F5EC;--accent-2:#D9822B;
+/* ---- colour: data series (Okabe–Ito, colourblind-safe) ---- */
 --d1:#0072B2;--d2:#D55E00;--d3:#009E73;--d4:#CC79A7;--d5:#E69F00;--d6:#56B4E9;
 --band:color-mix(in oklab,var(--d1) 14%,transparent);
 /* ---- semantic status ---- */
 --ok:#0F7A5A;--ok-tint:#E7F3EE;
 --warn:#8A5A00;--warn-tint:#FBF1DF;
---todo:#6B7379;--todo-tint:#F1EFEA;
-/* ---- type ---- */
---serif:"Newsreader",Georgia,"Times New Roman",serif;
---sans:"IBM Plex Sans",system-ui,-apple-system,sans-serif;
+--todo:#66717E;--todo-tint:#F1F3F6;
+/* ---- type: one sans family, mono for data ---- */
+--sans:"Manrope",system-ui,-apple-system,"Segoe UI",sans-serif;
+--serif:var(--sans);
 --mono:"IBM Plex Mono",ui-monospace,SFMono-Regular,monospace;
---t-display:clamp(38px,5.4vw,66px);
---t-h2:clamp(26px,3vw,38px);
+--t-display:clamp(40px,5.6vw,72px);
+--t-h2:clamp(28px,3.2vw,44px);
 --t-h3:21px;
---t-lede:clamp(19px,1.9vw,23px);
+--t-lede:clamp(18px,1.7vw,21px);
 --t-body:17px;
 --t-small:14.5px;
 --t-caption:13.5px;
 --t-label:11.5px;
---lh-tight:1.05;--lh-head:1.16;--lh-body:1.6;
+--lh-tight:1.02;--lh-head:1.12;--lh-body:1.6;
 --measure:66ch;--measure-tight:58ch;
 /* ---- spacing (4px base) ---- */
 --s1:4px;--s2:8px;--s3:12px;--s4:16px;--s5:24px;--s6:32px;--s7:48px;--s8:72px;--s9:112px;
 /* ---- radii / shadow / motion ---- */
---r-sm:2px;--r-md:4px;--r-lg:6px;
---shadow-1:0 1px 2px rgba(21,24,27,.06);
---shadow-2:0 1px 2px rgba(21,24,27,.06),0 8px 24px -12px rgba(21,24,27,.18);
+--r-sm:6px;--r-md:12px;--r-lg:20px;--r-xl:28px;
+--shadow-1:0 1px 2px rgba(14,19,25,.05),0 2px 8px rgba(14,19,25,.04);
+--shadow-2:0 2px 6px rgba(14,19,25,.06),0 18px 40px -18px rgba(14,19,25,.22);
 --ease:cubic-bezier(.4,0,.2,1);--dur:.18s;--dur-draw:1.8s;
---maxw:1160px;--maxw-prose:760px;
+--maxw:1200px;--maxw-prose:760px;
 }
 @media(prefers-reduced-motion:reduce){:root{--dur:0s;--dur-draw:0s}}

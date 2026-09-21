@@ -6,7 +6,7 @@
 <title>HOPS — Watch</title>
 <meta name="description" content="A daily-updated feed of publications, project announcements, cost data and policy changes relevant to low-carbon ammonia.">
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,300;0,6..72,400;0,6..72,500;1,6..72,400&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="tokens.css"><link rel="stylesheet" href="components.css">
 </head>
 <body>
@@ -16,11 +16,11 @@
 <nav class="links" id="nav-links"><a href="index.html">Home</a><a href="method.html">Method</a><a href="results.html">Results</a><a href="data.html">Data &amp; assumptions</a><a href="watch.html" aria-current="page">Watch</a><a href="team.html">Team</a><a href="about.html">About</a></nav>
 <a class="btn" href="atlas/">Open the tool →</a>
 </div></header><main id="main">
-<div class="wrap"><div style="padding:var(--s8) 0 var(--s7);border-bottom:1px solid var(--rule)">
-<span class="eyebrow">Watch</span>
-<h1 style="font-size:clamp(32px,4.2vw,52px);margin:var(--s4) 0 var(--s5);max-width:24ch">What moved this week.</h1>
-<p class="lede">Publications, project announcements, cost data releases and policy changes, collected daily and grouped by category. Every item links to its primary source.</p>
-</div></div>
+<div class="page-hero"><div class="orb o1"></div><div class="orb o2"></div><div class="orb o3"></div><div class="wrap"><div class="in" data-reveal>
+<span class="eyebrow rv">Watch</span>
+<h1 class="rv">What moved this week.</h1>
+<p class="lede rv">Publications, project announcements, cost data releases and policy changes, collected daily and grouped by category. Every item links to its primary source.</p>
+</div></div></div>
 <div class="wrap" id="watch-scope">
 <div class="filterbar" role="search">
 <label class="search"><svg width="14" height="14" viewBox="0 0 16 16" fill="none" aria-hidden="true"><circle cx="7" cy="7" r="4.5" stroke="currentColor" stroke-width="1.4"/><path d="M10.5 10.5L14 14" stroke="currentColor" stroke-width="1.4"/></svg><input type="search" placeholder="Search the feed…" aria-label="Search the feed"></label>
@@ -32,7 +32,7 @@
 </div>
 <div id="wstatus" style="margin-top:var(--s5)"></div>
 <div id="wfeed" style="margin-top:var(--s5)"></div>
-<p class="small mono" style="color:var(--ink-3);margin-top:var(--s7)">Feed generated <span id="watchStamp" data-build="">not yet — the daily screen has not run</span><a href="data/watch.json">download JSON</a></p>
+<p class="small mono" style="color:var(--ink-3);margin-top:var(--s7)">Feed generated <span id="watchStamp">—</span> · <a href="data/watch.json">download JSON</a></p>
 </div>
 </main><footer class="site"><div class="wrap">
 <div class="foot-grid">
@@ -41,7 +41,7 @@
 <div><h4>Project</h4><ul><li><a href="team.html">Team</a></li><li><a href="about.html#cite">How to cite</a></li><li><a href="about.html#licence">Licence</a></li><li><a href="about.html#contact">Contact</a></li></ul></div>
 <div><h4>Affiliation</h4><ul><li>Stanford University</li><li>STEER program</li></ul></div>
 </div>
-<div class="stamp"><span>Model v[0.0.0] · site v[0.0.0]</span><span>Content last updated [YYYY-MM-DD] · figures regenerated [YYYY-MM-DD]</span></div>
+<div class="stamp"><span>Model IRR_v7 · data 2026-09-16 · site 2026-09-21</span><span>Content last updated 2026-09-21 · figures regenerated 2026-09-16</span></div>
 </div></footer>
 <script src="site.js"></script>
 <script>

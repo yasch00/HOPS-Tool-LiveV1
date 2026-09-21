@@ -14,7 +14,7 @@ reads data/watch.json. Rules baked in:
 State: data/watch/seen.json (hashes), data/watch/archive/YYYY-MM.json, data/watch/status.json.
 """
 from __future__ import annotations
-import argparse, hashlib, json, os, re, sys, time
+import argparse, time, hashlib, json, os, re, sys, time
 from datetime import date, datetime, timedelta, timezone
 from pathlib import Path
 
@@ -23,7 +23,13 @@ import requests, feedparser, yaml
 ROOT = Path(__file__).resolve().parent.parent
 DATA = ROOT / "data"; STATE = DATA / "watch"; ARCHIVE = STATE / "archive"
 UA = {"User-Agent": "HOPS-watch/1.0 (Stanford research; https://github.com/yasch00/HOPS-Tool-LiveV1)"}
-MODEL = os.environ.get("WATCH_MODEL", "claude-opus-5")
+MODEL = os.environ.get("WATCH_MODEL", "github:openai/gpt-4o-mini")
+# Providers, chosen by the WATCH_MODEL prefix — all give the same structured verdicts:
+#   github:<publisher>/<model>   GitHub Models, FREE with the Actions GITHUB_TOKEN (permission models: read); rate-limited
+#                                (low tier ≈150 requests/day, 8k input tokens each) — plenty for one daily screen. Default.
+#   openai:<model>               any OpenAI-compatible endpoint: WATCH_ENDPOINT (e.g. Groq / Gemini free tiers) + WATCH_API_KEY
+#   claude-…                     Anthropic (ANTHROPIC_API_KEY, paid)
+#   none                         keyword mode, no model at all
 LOOKBACK_DAYS = int(os.environ.get("WATCH_LOOKBACK_DAYS", "3"))     # window per run; seen.json prevents repeats
 MAX_ITEMS = int(os.environ.get("WATCH_MAX_ITEMS", "150"))          # hard cap on model input per run
 FEED_DAYS, FEED_MAX = 120, 300                                     # what the site shows
@@ -150,9 +156,49 @@ def screen_keywords(items):
                          "summary": (" ".join(summ) if it["text"] else "No abstract in the source feed — title only.")[:400], "relevance": min(1.0, 0.4 + 0.15 * strong) if rel else 0.0, "params_touched": []}
     return out
 
+def screen_openai_compatible(items, params, endpoint, key, model, batch_n=8):
+    """One JSON object per batch via the chat-completions API (GitHub Models, Groq, Gemini's OpenAI endpoint …)."""
+    import urllib.request
+    out = {}
+    for i in range(0, len(items), batch_n):
+        batch = items[i:i + batch_n]
+        payload = [{"id": it["id"], "source": it["source"], "date": it["date"], "category_hint": it["category_hint"], "region_hint": it["region_hint"],
+                    "title": it["title"], "text": it["text"][:700]} for it in batch]
+        body = {"model": model, "temperature": 0, "max_tokens": 3000, "response_format": {"type": "json_object"},
+                "messages": [{"role": "system", "content": system_prompt(params) + "\n\nAnswer with ONE JSON object of the form " + json.dumps({"items": [{"id": "…", "relevant": True, "category": "…", "region": "…", "summary": "…", "relevance": 0.0, "params_touched": []}]}) + " — one entry per input id, nothing else."},
+                             {"role": "user", "content": "Screen these items:\n" + json.dumps(payload, ensure_ascii=False)}]}
+        req = urllib.request.Request(endpoint, data=json.dumps(body).encode(), method="POST",
+                                     headers={"Authorization": f"Bearer {key}", "Content-Type": "application/json", "Accept": "application/json", "User-Agent": "hops-watch"})
+        for attempt in range(3):
+            try:
+                with urllib.request.urlopen(req, timeout=120) as r: resp = json.load(r)
+                text = resp["choices"][0]["message"]["content"].strip()
+                if text.startswith("```"): text = text.strip("`").split("\n", 1)[1] if "\n" in text else text
+                parsed = json.loads(text); rows = parsed.get("items", parsed if isinstance(parsed, list) else [])
+                for row in rows:
+                    if isinstance(row, dict) and row.get("id"): out[row["id"]] = row
+                u = resp.get("usage", {}); log(f"  screened {len(batch)} · tokens in {u.get('prompt_tokens', '?')} out {u.get('completion_tokens', '?')}")
+                break
+            except urllib.error.HTTPError as e:
+                msg = e.read().decode(errors="replace")[:200]; log(f"  screen batch failed: HTTP {e.code} {msg}")
+                if e.code == 429 and attempt < 2: time.sleep(65); continue           # per-minute rate limit: wait it out
+                if e.code < 500: return out                                          # daily cap or bad request: keep what we have
+                break
+            except Exception as e:
+                log(f"  screen batch failed: {e}"); break
+    return out
+
 def screen(items, params, dry):
     if dry: return {}
     if MODEL.lower() in ("none", "keywords", "off"): return screen_keywords(items)
+    if MODEL.startswith("github:"):
+        key = os.environ.get("GITHUB_TOKEN") or os.environ.get("GH_TOKEN")
+        if not key: log("  no GITHUB_TOKEN — falling back to keyword mode"); return screen_keywords(items)
+        return screen_openai_compatible(items, params, "https://models.github.ai/inference/chat/completions", key, MODEL.split(":", 1)[1])
+    if MODEL.startswith("openai:"):
+        ep, key = os.environ.get("WATCH_ENDPOINT"), os.environ.get("WATCH_API_KEY")
+        if not (ep and key): log("  WATCH_ENDPOINT/WATCH_API_KEY missing — falling back to keyword mode"); return screen_keywords(items)
+        return screen_openai_compatible(items, params, ep, key, MODEL.split(":", 1)[1])
     import anthropic
     client = anthropic.Anthropic()
     out = {}

@@ -1,0 +1,34 @@
+{
+ "regions": [
+  {
+   "region": "Europe",
+   "lat": [
+    35.0,
+    62.0
+   ],
+   "lon": [
+    -10.5,
+    30.0
+   ],
+   "nlat": 109,
+   "nlon": 163,
+   "n_valid": 17767
+  },
+  {
+   "region": "NorthAmerica",
+   "lat": [
+    24.0,
+    55.0
+   ],
+   "lon": [
+    -130.0,
+    -65.0
+   ],
+   "nlat": 125,
+   "nlon": 261,
+   "n_valid": 32625
+  }
+ ],
+ "year": 2025,
+ "cell_format": "u16.gz: 8760 solar then 8760 wind, CF\u00d710000, little-endian"
+}

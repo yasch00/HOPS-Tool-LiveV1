@@ -26,14 +26,16 @@ function initGlobe(){
              sources: MAP_SOURCES, layers: [{ id: 'sat', type: 'raster', source: 'sat' }],
              sky: { 'atmosphere-blend': ['interpolate', ['linear'], ['zoom'], 0, 1, 5, 1, 7, 0] },
              projection: { type: 'globe' } },
-    center: [-20, 38], zoom: GLOBE_ZOOM, minZoom: 1, maxZoom: 18, attributionControl: { compact: true }, maxPitch: 75
+    center: [-20, 38], zoom: GLOBE_ZOOM, minZoom: 1, maxZoom: 18, attributionControl: { compact: true }, maxPitch: 75,
+    canvasContextAttributes: { preserveDrawingBuffer: /[?&]shot=1/.test(location.search) }   // lets toDataURL() read the frame (tools: landing-page screenshots)
   });
   map.addControl(new maplibregl.NavigationControl({ visualizePitch: true }), 'bottom-right');
   map.addControl(new maplibregl.ScaleControl({ maxWidth: 140 }), 'bottom-left');
   map.on('load', () => {
     mapLoaded = true;
-    addPlantLayers();
+    addPlantLayers(); addLabelLayers();
     if (typeof buildLayerList === 'function') buildLayerList();
+    if (typeof renderResourceControls === 'function') renderResourceControls();
     map.on('mousemove', 'hops-pts', e => showTip(e, true));
     map.on('mousemove', 'amm-pts', e => showTip(e, false));
     map.on('mouseleave', 'hops-pts', hideTip); map.on('mouseleave', 'amm-pts', hideTip);
@@ -468,4 +470,51 @@ async function removeSite(idx){
     leaveSite();
     alert(`Removal queued (#${j.issue}). Site ${idx} disappears from the globe in about two minutes; reload the page afterwards.`);
   } catch (e) { alert(`Could not remove: ${e.message}`); }
+}
+
+/* ---------------------------------------------------------------- place labels: countries and cities from the OpenFreeMap vector tiles */
+function addLabelLayers(){
+  const halo = { 'text-color': 'rgba(251,250,248,.9)', 'text-halo-color': 'rgba(21,24,27,.75)', 'text-halo-width': 1.3 };
+  map.addLayer({ id: 'place-country', type: 'symbol', source: 'ofm', 'source-layer': 'place', maxzoom: 7.5, filter: ['==', ['get', 'class'], 'country'],
+    layout: { 'text-field': ['coalesce', ['get', 'name:en'], ['get', 'name']], 'text-font': ['Noto Sans Bold'], 'text-size': ['interpolate', ['linear'], ['zoom'], 1, 8.5, 3, 11, 6, 14], 'text-transform': 'uppercase', 'text-letter-spacing': 0.12, 'text-max-width': 7, 'text-padding': 6 },
+    paint: { ...halo, 'text-color': 'rgba(251,250,248,.72)' } }, 'amm-pts');
+  map.addLayer({ id: 'place-city-major', type: 'symbol', source: 'ofm', 'source-layer': 'place', minzoom: 2.8, maxzoom: 13, filter: ['all', ['==', ['get', 'class'], 'city'], ['<=', ['coalesce', ['get', 'rank'], 99], 6]],
+    layout: { 'text-field': ['coalesce', ['get', 'name:en'], ['get', 'name']], 'text-font': ['Noto Sans Regular'], 'text-size': ['interpolate', ['linear'], ['zoom'], 3, 10, 8, 13], 'text-optional': true, 'text-padding': 4 }, paint: halo }, 'amm-pts');
+  map.addLayer({ id: 'place-city', type: 'symbol', source: 'ofm', 'source-layer': 'place', minzoom: 5.5, maxzoom: 14, filter: ['any', ['all', ['==', ['get', 'class'], 'city'], ['>', ['coalesce', ['get', 'rank'], 99], 6]], ['==', ['get', 'class'], 'town']],
+    layout: { 'text-field': ['coalesce', ['get', 'name:en'], ['get', 'name']], 'text-font': ['Noto Sans Regular'], 'text-size': ['interpolate', ['linear'], ['zoom'], 5.5, 9.5, 10, 12], 'text-optional': true, 'text-padding': 3 }, paint: { ...halo, 'text-color': 'rgba(251,250,248,.8)' } }, 'amm-pts');
+}
+
+/* ---------------------------------------------------------------- resource layers: the optimizer's CF grids on the globe (atlas/lib/griddata.js) */
+const RES = { metric: null, built: {}, features: [] };
+async function ensureResourceGrid(){
+  if (map.getSource('resgrid')) return;
+  const ix = await gridIndex(); const feats = [];
+  for (const r of ix.regions) {
+    const R = await gridRegion(r.region), hl = R.dlat / 2, hn = R.dlon / 2;
+    for (let i = 0; i < R.nlat; i++) for (let j = 0; j < R.nlon; j++) { const k = i * R.nlon + j; if (R.metrics.solar[k] == null) continue;
+      const la = R.lats[i], lo = R.lons[j], props = { region: r.region, i, j, lat: la, lon: lo, land: R.land ? R.land[k] : 1 };
+      for (const m in R.metrics) props[m] = R.metrics[m][k];
+      feats.push({ type: 'Feature', geometry: { type: 'Polygon', coordinates: [[[lo - hn, la - hl], [lo + hn, la - hl], [lo + hn, la + hl], [lo - hn, la + hl], [lo - hn, la - hl]]] }, properties: props }); }
+  }
+  RES.features = feats;
+  map.addSource('resgrid', { type: 'geojson', data: { type: 'FeatureCollection', features: feats } });
+  map.addLayer({ id: 'resgrid-fill', type: 'fill', source: 'resgrid', layout: { visibility: 'none' }, filter: ['==', ['get', 'land'], 1], paint: { 'fill-color': '#000', 'fill-antialias': false, 'fill-opacity': ['interpolate', ['linear'], ['zoom'], 2, .62, 8, .45, 11, .2] } }, 'hops-halo');
+  map.on('mousemove', 'resgrid-fill', e => { if (!RES.metric) return; const p = e.features[0].properties, tip = document.getElementById('tip'); tip.style.opacity = 1; tip.style.left = (e.originalEvent.clientX + 14) + 'px'; tip.style.top = (e.originalEvent.clientY + 14) + 'px';
+    tip.innerHTML = `<div class="t-n">${p.lat.toFixed(2)}°, ${p.lon.toFixed(2)}° · ${p.region}</div><div class="t-m">solar ${gridFmt('solar', p.solar)} · wind ${gridFmt('wind', p.wind)} · combined ${gridFmt('comb', p.comb)} (PV ${(p.share * 100).toFixed(0)} %) · corr ${gridFmt('corr', p.corr)}</div><div class="t-cta">${(typeof BUILD !== 'undefined' && BUILD.on) ? 'click to build here' : 'Build a plant → to use this cell'}</div>`; });
+  map.on('mouseleave', 'resgrid-fill', () => { if (RES.metric && !(siteIdx != null)) hideTip(); });
+}
+function resourceRamp(metric){ const M = GRID_METRICS[metric], n = M.ramp.length; return ['interpolate', ['linear'], ['coalesce', ['get', metric], M.lo], ...M.ramp.flatMap((c, k) => [M.lo + (M.hi - M.lo) * k / (n - 1), c])]; }
+async function setResourceLayer(metric){
+  RES.metric = metric || null; renderResourceControls();
+  if (!metric) { if (map.getLayer('resgrid-fill')) map.setLayoutProperty('resgrid-fill', 'visibility', 'none'); return; }
+  await ensureResourceGrid();
+  map.setPaintProperty('resgrid-fill', 'fill-color', resourceRamp(metric)); map.setLayoutProperty('resgrid-fill', 'visibility', 'visible');
+  renderResourceControls();
+}
+function setResourceOffshore(on){ RES.offshore = on; if (map.getLayer('resgrid-fill')) map.setFilter('resgrid-fill', on ? null : ['==', ['get', 'land'], 1]); renderResourceControls(); }
+function renderResourceControls(){
+  const host = document.getElementById('resourceLayers'); if (!host) return;
+  const M = RES.metric ? GRID_METRICS[RES.metric] : null;
+  host.innerHTML = `<div class="ci-bar" style="margin:0 0 6px;flex-wrap:wrap"><button class="ci-pill sm ${!RES.metric ? 'active' : ''}" onclick="setResourceLayer(null)">Off</button>${Object.entries(GRID_METRICS).map(([k, m]) => `<button class="ci-pill sm ${RES.metric === k ? 'active' : ''}" title="${m.d}" onclick="setResourceLayer('${k}')">${m.n}</button>`).join('')}</div>` +
+    (M ? `<div style="height:8px;border-radius:4px;background:linear-gradient(90deg,${M.ramp.join(',')})"></div><div class="sub" style="display:flex;justify-content:space-between;font-size:10.5px"><span>${gridFmt(RES.metric, M.lo)}</span><span>${M.d}</span><span>${gridFmt(RES.metric, M.hi)}</span></div><label class="legend-row" style="cursor:pointer;margin-top:4px"><input type="checkbox" ${RES.offshore ? 'checked' : ''} onchange="setResourceOffshore(this.checked)"> include offshore cells</label><div class="sub" style="font-size:10.5px;margin-top:2px">0.25° cells, hourly 2025 (atlite / ERA5) — the optimizer's own input. Hover a cell for its numbers; in Build mode click one to site a plant on it.</div>` : `<div class="sub" style="font-size:10.5px">Annual capacity factors and wind–solar complementarity of every 0.25° cell of the modelled regions — the same series the optimizer runs on.</div>`);
 }

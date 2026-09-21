@@ -4,8 +4,10 @@
 var t=document.querySelector('.nav-toggle'),l=document.querySelector('nav.links');
 if(t&&l)t.addEventListener('click',function(){var o=l.classList.toggle('open');t.setAttribute('aria-expanded',o)});
 // scroll reveal for figures
-var io=new IntersectionObserver(function(es){es.forEach(function(e){if(e.isIntersecting){e.target.classList.add('on');io.unobserve(e.target)}})},{threshold:.2});
-document.querySelectorAll('[data-reveal]').forEach(function(el){io.observe(el)});
+// elements already in view at load are revealed at once (a tall hero on a phone never reaches a 20% threshold otherwise)
+var io=new IntersectionObserver(function(es){es.forEach(function(e){if(e.isIntersecting){e.target.classList.add('on');io.unobserve(e.target)}})},{threshold:[0,.1]});
+document.querySelectorAll('[data-reveal]').forEach(function(el){var r=el.getBoundingClientRect();if(r.top<window.innerHeight&&r.bottom>0)el.classList.add('on');else io.observe(el)});
+setTimeout(function(){document.querySelectorAll('[data-reveal]:not(.on)').forEach(function(el){var r=el.getBoundingClientRect();if(r.top<window.innerHeight&&r.bottom>0)el.classList.add('on')})},1500);
 // TOC active state
 var links=[].slice.call(document.querySelectorAll('.toc a'));
 if(links.length){

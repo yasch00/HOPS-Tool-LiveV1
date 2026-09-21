@@ -3,31 +3,84 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>HOPS — Where cutting ammonia emissions stops costing extra</title>
-<meta name="description" content="HOPS co-sizes and hourly-dispatches ammonia plants against any carbon-intensity target and reports the Economic Decarbonization Threshold: the point where a hybrid clean-and-fossil plant becomes cost-competitive without subsidies.">
+<title>HOPS — Decarbonize without paying a green premium</title>
+<meta name="description" content="HOPS co-sizes and hourly-dispatches industrial energy systems against any carbon-intensity target and reports where a hybrid clean-and-fossil plant stops being the expensive option — with no subsidies applied.">
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,300;0,6..72,400;0,6..72,500;1,6..72,400&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="tokens.css"><link rel="stylesheet" href="components.css">
 <style>
-.hero{padding:var(--s9) 0 var(--s8);border-bottom:1px solid var(--rule)}
-.hero-grid{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.12fr);gap:var(--s8);align-items:start}
-.hero h1{margin:var(--s4) 0 var(--s5);max-width:21ch}
-.hero h1 em{font-style:italic;color:var(--anchor)}
+.hero{background:linear-gradient(135deg,#F4F9FB 0%,#E9F2F6 50%,#E6F3EC 100%);color:var(--ink);position:relative;overflow:hidden}
+.hero-glow{display:none}
+.globe{animation:float 9s ease-in-out infinite}
+@keyframes float{50%{transform:translateY(-14px)}}
+.hero .rv{transition-duration:.9s}
+@media(prefers-reduced-motion:reduce){.orb,.globe{animation:none}}
+.hero-in{position:relative;display:grid;grid-template-columns:minmax(0,1.05fr) minmax(0,1fr);gap:var(--s7);align-items:center;min-height:640px;padding:var(--s8) 0 var(--s8)}
+.hero .eyebrow{color:var(--accent)}
+.hero h1{margin:var(--s4) 0 var(--s5);max-width:15ch;color:var(--ink)}
+.hero .lede{color:var(--ink-2);max-width:50ch}
 .cta{display:flex;gap:var(--s3);flex-wrap:wrap;margin-top:var(--s6)}
-.hero .readout{margin-top:var(--s8)}
-.do-list{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:var(--s5);margin-top:var(--s6)}
-.do-list .n{font-family:var(--mono);font-size:11.5px;color:var(--ink-3);letter-spacing:.1em}
-.do-list h3{margin:var(--s2) 0 var(--s2);font-size:20px}
-.do-list p{font-size:14.5px;color:var(--ink-2);margin:0;max-width:34ch}
-.atlas{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,2fr);gap:var(--s6);align-items:center}
-.tool-band{background:var(--ink);color:var(--paper);border:0}
-.tool-band h2,.tool-band .eyebrow{color:var(--paper)}
-.tool-band p{color:color-mix(in oklab,var(--paper) 78%,var(--ink))}
-.tool-band .btn{background:var(--paper);border-color:var(--paper);color:var(--ink)}
-.tool-band .btn:hover{background:#fff;border-color:#fff;color:var(--ink)}
-.tool-band .btn.ghost{background:transparent;color:var(--paper);border-color:color-mix(in oklab,var(--paper) 45%,var(--ink))}
-.tool-band .btn.ghost:hover{background:rgba(255,255,255,.08);color:var(--paper)}
-@media(max-width:900px){.hero-grid,.atlas{grid-template-columns:1fr;gap:var(--s6)}.hero{padding:var(--s7) 0 var(--s6)}}
+.globe{position:relative;justify-self:end;width:min(100%,560px);aspect-ratio:1;z-index:1}
+.globe img{width:100%;height:100%;display:block;filter:drop-shadow(0 30px 60px rgba(22,51,63,.35))}
+.globe .tag{position:absolute;background:rgba(255,255,255,.92);backdrop-filter:blur(8px);border:1px solid var(--rule);border-radius:999px;padding:9px 16px;font-size:13.5px;font-weight:700;display:flex;gap:8px;align-items:center;white-space:nowrap;color:var(--ink);text-decoration:none;box-shadow:var(--shadow-2);transition:transform .2s var(--ease)}
+.globe .tag:hover{transform:translateY(-2px);color:var(--anchor)}
+.globe .tag i{width:8px;height:8px;border-radius:50%;background:var(--accent)}
+.globe .t1{left:-2%;top:22%}.globe .t2{right:2%;top:44%}.globe .t2 i{background:var(--accent-2)}.globe .t3{left:14%;bottom:8%}.globe .t3 i{background:var(--anchor)}
+.hero-foot{position:relative;border-top:1px solid var(--rule);padding:var(--s4) 0;display:flex;justify-content:space-between;gap:var(--s5);flex-wrap:wrap;font-size:13.5px;color:var(--ink-2)}
+.hero-foot b{color:var(--ink);font-weight:700}
+.sources{padding:var(--s6) 0;border-bottom:1px solid var(--rule)}
+.sources .wrap{display:flex;align-items:center;gap:var(--s6);flex-wrap:wrap;justify-content:center}
+.sources span{font-size:13px;color:var(--ink-3);font-weight:600}
+.sources b{font-family:var(--mono);font-size:14px;letter-spacing:.06em;color:var(--ink-2);font-weight:500}
+.center{text-align:center;max-width:64ch;margin:0 auto var(--s7)}
+.center h2{margin:var(--s3) 0 var(--s4)}
+.center p{margin:0 auto;color:var(--ink-2)}
+.cards3{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:var(--s5)}
+.icard{background:var(--panel);border:1px solid var(--rule);border-radius:var(--r-lg);padding:var(--s6) var(--s5) var(--s5);text-align:center;box-shadow:var(--shadow-1)}
+.icard .ico{width:72px;height:72px;margin:0 auto var(--s5);border-radius:22px;background:var(--anchor-tint);display:grid;place-items:center;color:var(--anchor)}
+.icard:nth-child(2) .ico{background:var(--accent-tint);color:var(--accent)}
+.icard:nth-child(3) .ico{background:#FBEFE2;color:var(--accent-2)}
+.icard .ico svg{width:34px;height:34px;stroke:currentColor;fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+.icard h3{margin-bottom:var(--s2)}
+.icard p{font-size:var(--t-small);color:var(--ink-2);margin:0;max-width:34ch;margin-inline:auto}
+.suite{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:var(--s4)}
+.scard{position:relative;border-radius:var(--r-lg);overflow:hidden;background:var(--navy-2);color:#fff;min-height:440px;display:flex;flex-direction:column;text-decoration:none;border:0;transition:transform .25s var(--ease),box-shadow .25s var(--ease)}
+.scard:hover{transform:translateY(-4px);box-shadow:var(--shadow-2);color:#fff}
+.scard.light{background:var(--panel);border:1px solid var(--rule);color:var(--ink)}
+.scard.light:hover{color:var(--ink)}
+.scard .txt{padding:var(--s5) var(--s5) 0}
+.scard .k{font-size:12px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:#8CE0BC}
+.scard.light .k{color:var(--anchor)}
+.scard h3{font-size:24px;margin:6px 0 8px}
+.scard p{font-size:14px;margin:0;opacity:.85;max-width:30ch}
+.scard .shot{flex:1;margin:var(--s5) 0 0 var(--s5);border-radius:var(--r-md) 0 0 0;overflow:hidden;position:relative;min-height:220px}
+.scard .shot image-slot{position:absolute;inset:0}
+.steps{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:var(--s6);counter-reset:s}
+.step{border-top:2px solid var(--accent);padding-top:var(--s4)}
+.step .n{font-size:13px;font-weight:700;color:var(--accent);letter-spacing:.08em}
+.step h3{margin:var(--s2) 0 var(--s3)}
+.step p{font-size:var(--t-small);color:var(--ink-2);margin:0}
+.split{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:var(--s8);align-items:center}
+.split .pic{border-radius:var(--r-lg);overflow:hidden;background:var(--paper-3);aspect-ratio:4/3;position:relative}
+.split .pic image-slot{position:absolute;inset:0}
+.quote{font-size:clamp(22px,2.2vw,30px);font-weight:600;line-height:1.3;letter-spacing:-.02em;color:var(--ink);max-width:24ch;margin:0 0 var(--s5)}
+.quote em{font-style:normal;color:var(--anchor)}
+.num{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:var(--s5);margin-top:var(--s7)}
+.num b{display:block;font-size:44px;font-weight:800;letter-spacing:-.03em;line-height:1;color:#fff}
+.num span{display:block;font-size:14px;color:var(--navy-text);margin-top:8px}
+.band{background:linear-gradient(135deg,var(--navy) 0%,#164A4A 100%);color:#fff;position:relative;overflow:hidden}
+.band .orb{opacity:.5}
+.band .o2{background:radial-gradient(circle,rgba(140,224,188,.5),rgba(140,224,188,0) 70%)}
+.band h2{color:#fff}.band .center p{color:var(--navy-text)}.band .eyebrow{color:var(--anchor-lt)}
+.tool{background:linear-gradient(120deg,var(--anchor) 0%,#1E8A7A 100%);color:#fff;text-align:center}
+.tool h2{color:#fff;max-width:20ch;margin:0 auto var(--s4)}
+.tool p{color:#DCE8FB;max-width:48ch;margin:0 auto}
+.tool .btn.on-dark{color:var(--anchor)}
+.tool .cta{justify-content:center}
+.hero .btn.on-dark{background:var(--anchor);border-color:var(--anchor);color:#fff}.hero .btn.on-dark:hover{background:var(--anchor-hover);border-color:var(--anchor-hover)}
+.hero .btn.ghost.on-dark{color:var(--ink);border-color:var(--rule-2)}.hero .btn.ghost.on-dark:hover{background:#fff;color:var(--anchor);border-color:var(--anchor)}
+@media(max-width:1000px){.suite{grid-template-columns:repeat(2,minmax(0,1fr))}.steps{grid-template-columns:1fr}}
+@media(max-width:900px){.hero-in{grid-template-columns:1fr;min-height:0;padding:var(--s7) 0}.globe{justify-self:center;width:min(100%,420px)}.split{grid-template-columns:1fr;gap:var(--s6)}.suite{grid-template-columns:1fr}.globe .t2{right:0}}
 </style>
 </head>
 <body>
@@ -36,124 +89,96 @@
 <a class="brand" href="index.html"><b>HOPS</b><span>Stanford</span></a>
 <button class="nav-toggle" aria-expanded="false" aria-controls="nav-links">Menu</button>
 <nav class="links" id="nav-links"><a href="index.html" aria-current="page">Home</a><a href="method.html">Method</a><a href="results.html">Results</a><a href="data.html">Data &amp; assumptions</a><a href="watch.html">Watch</a><a href="team.html">Team</a><a href="about.html">About</a></nav>
-<a class="btn" href="#tool">Open the tool →</a>
+<a class="btn" href="atlas/">Open the tool</a>
 </div></header>
 
 <main id="main">
-<div class="wrap"><div class="hero"><div class="hero-grid">
+<div class="hero"><div class="orb o1"></div><div class="orb o2"></div><div class="orb o3"></div><div class="wrap">
+<div class="hero-in" data-reveal>
 <div>
-<span class="eyebrow">Economic Decarbonization Threshold</span>
-<h1>How much ammonia carbon can you cut <em>before</em> it costs more?</h1>
-<p class="lede">HOPS co-sizes and hourly-dispatches an ammonia plant against any carbon-intensity target, then reports the point where a hybrid clean-and-fossil plant stops being the expensive option — with no subsidies applied.</p>
-<div class="cta"><a class="btn" href="atlas/">Open the tool</a><a class="btn ghost" href="method.html">Read the method</a></div>
+<span class="eyebrow rv">Hybrid Optimization of Plant Systems</span>
+<h1 class="rv">How far can we decarbonize without paying a green premium?</h1>
+<p class="lede rv">HOPS co-sizes and hourly-dispatches energy systems — renewables, storage, the grid and the process itself — against any carbon-intensity target, then reports the point where a hybrid clean-and-fossil system stops being the expensive option.</p>
+<div class="cta rv"><a class="btn on-dark" href="atlas/">Open the tool</a><a class="btn ghost on-dark" href="method.html">How it works</a></div>
 </div>
-<figure data-reveal>
-<div class="fig-frame">
-<svg viewBox="0 0 620 400" width="100%" role="img" aria-label="Levelized cost of ammonia against carbon intensity of the product. The cost-optimal hybrid curve falls as the allowed carbon intensity rises and crosses the flat conventional fossil baseline at the Economic Decarbonization Threshold.">
-<g class="grid"><line x1="70" y1="60" x2="600" y2="60"/><line x1="70" y1="130" x2="600" y2="130"/><line x1="70" y1="200" x2="600" y2="200"/><line x1="70" y1="270" x2="600" y2="270"/></g>
-<line class="axis" x1="70" y1="340" x2="600" y2="340"/><line class="axis" x1="70" y1="40" x2="70" y2="340"/>
-<path class="fade" d="M100 96 C 210 148, 330 214, 480 258 L 590 288 L 590 322 L 480 292 C 330 250, 210 190, 100 140 Z" fill="var(--d1)" fill-opacity=".14"/>
-<path class="draw" d="M100 118 C 210 169, 330 232, 480 275 L 590 305" fill="none" stroke="var(--d1)" stroke-width="2.4" stroke-linecap="round"/>
-<line class="fade" x1="100" y1="270" x2="590" y2="270" stroke="var(--d2)" stroke-width="1.8" stroke-dasharray="7 5"/>
-<g class="fade" style="transition-delay:1.2s"><line x1="466" y1="270" x2="466" y2="340" stroke="var(--ink)" stroke-width="1" stroke-dasharray="3 3"/><circle cx="466" cy="270" r="5" fill="var(--paper)" stroke="var(--ink)" stroke-width="2"/><text x="466" y="358" text-anchor="middle" fill="var(--ink)">EDT</text></g>
-<text class="serieslabel" x="112" y="106" fill="var(--d1)">Hybrid plant, cost-optimal</text>
-<text class="serieslabel" x="112" y="262" fill="var(--d2)">Conventional fossil baseline</text>
-<text class="axlabel" x="70" y="388">Carbon intensity of product  →</text>
-<g transform="translate(28,200) rotate(-90)"><text class="axlabel" x="0" y="0" text-anchor="middle">Levelized cost of ammonia  →</text></g>
-</svg>
+<div class="globe rv">
+<img src="img/globe-fleet.png" alt="Globe showing modelled sites and the global industrial fleet across North America, Europe and Africa">
+<a class="tag t1" href="atlas/"><i></i>Explore modelled sites →</a>
+<a class="tag t2" href="atlas/#view=build"><i></i>Model your own site →</a>
+<a class="tag t3" href="data.html"><i></i>Real hourly data →</a>
 </div>
-<figcaption><b>Fig. 1</b>Schematic of the EDT. Axis ticks are unpopulated pending model output; the shaded band is the cost range across the modelled fleet. Early runs suggest a 20–40% emissions reduction may be reachable at or below business-as-usual cost without subsidy.<a class="cite" href="about.html#cite" tabindex="0">[1]<span class="card"><i>Source</i>[WORKING PAPER TITLE], [AUTHORS], [YEAR]. Preliminary; figure to be replaced with published output.<span class="badge est" style="margin-top:8px">Preliminary</span></span></a></figcaption>
-</figure>
 </div>
-<div class="readout">
-<div><span class="eyebrow">Plants modelled</span><b>[VALUE]</b><small>US + Europe</small></div>
-<div><span class="eyebrow">Dispatch resolution</span><b>8,760 h</b><small>per plant, per run</small></div>
-<div><span class="eyebrow">Sourced parameters</span><b>[VALUE]</b><small>each with citation + status</small></div>
-<div><span class="eyebrow">Subsidies applied</span><b>None</b><small>45V / 45Q / ETS off by default</small></div>
-</div>
+<div class="hero-foot"><span><b>Any end use.</b> Ammonia, hydrogen, steel, cement, process heat, households, data centres, the grid.</span><span>Stanford University · STEER</span></div>
 </div></div>
 
-<section>
-<div class="wrap"><div class="sec-head">
-<span class="eyebrow">01 — The question</span>
-<div>
-<h2>Subsidy independence, not subsidy optimisation.</h2>
-<p>Most ammonia decarbonisation pathways are priced with 45V, 45Q or EU ETS support baked in, which makes the result a function of policy rather than of engineering. Strip the support out and a sharper question appears: for a given plant, in a given place, where do the unsubsidised cost curves actually cross?</p>
-<p>Answering it needs hourly resolution. Electrolytic hydrogen is worth what the local wind and solar profile makes it worth in each of 8,760 hours; storage and Haber–Bosch turndown decide how much of that profile is usable. Annual averages hide exactly the effect that sets the threshold.</p>
-<div class="stat">
-<div class="v">[VALUE]<small>kg CO₂e / kg NH₃</small></div>
-<div class="unc"><div class="bar"><i style="left:18%;right:22%"></i><u style="left:44%"></u></div><div class="ticks"><span>[LOW]</span><span>interquartile range</span><span>[HIGH]</span></div></div>
-<p>Fleet-median EDT. The tick marks the median, the bar the interquartile range across modelled plants. Ranges are shown wherever a point estimate would over-claim.<a class="cite" href="results.html" tabindex="0">[2]<span class="card"><i>Source</i>HOPS model output, run [RUN ID], [YYYY-MM-DD]. Method and limitations: <a href="method.html">method page</a>.<span class="badge todo" style="margin-top:8px">Awaiting run</span></span></a></p>
-</div>
-</div>
-</div></div>
-</section>
+<div class="sources"><div class="wrap"><span>Built on public data from</span><b>NREL</b><b>EIA</b><b>ENTSO-E</b><b>IEA</b><b>Global Energy Monitor</b><b>ERA5</b></div></div>
 
-<section>
-<div class="wrap"><div class="sec-head">
-<span class="eyebrow">02 — The method</span>
-<div>
-<h2>One mixed-integer program, sizing and dispatch together.</h2>
-<p>HOPS solves capacity and hourly operation in the same problem: renewables, electrolysis, steam methane reforming, carbon capture, air separation, hydrogen and ammonia storage, and Haber–Bosch synthesis. Capacities are endogenous; resource, price and demand series are exogenous. The carbon-intensity target enters as a constraint, so sweeping it traces the cost-versus-carbon frontier directly.</p>
-<div class="cols" style="margin-top:var(--s6)">
-<span class="eyebrow" style="padding-top:6px">Endogenous</span>
-<p class="small" style="color:var(--ink-2)">Unit capacities, hourly dispatch and ramping, storage state of charge, grid import/export, curtailment, on/off commitment of the reformer and synthesis loop.</p>
+<section><div class="wrap" data-reveal>
+<div class="center rv"><span class="eyebrow">One optimizer</span><h2>Sizing, dispatch and economics in a single solve.</h2><p>Most pathways smooth over the hours that matter. HOPS solves every one of them and lets the engineering set the answer.</p></div>
+<div class="cards3">
+<div class="icard rv"><div class="ico"><svg viewBox="0 0 24 24"><path d="M4 20V10M10 20V4M16 20v-7M22 20H2"/></svg></div><h3>Co-sizing</h3><p>Wind, solar, storage, electrolysis, reforming, capture and the process are sized together — not one after another.</p></div>
+<div class="icard rv"><div class="ico"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3.5 2"/></svg></div><h3>Hourly dispatch</h3><p>Every one of 8,760 hours is solved. Storage and turndown decide how much of the local resource is usable.</p></div>
+<div class="icard rv"><div class="ico"><svg viewBox="0 0 24 24"><path d="M3 17l6-6 4 4 8-8"/><path d="M14 7h7v7"/></svg></div><h3>Sourced economics</h3><p>Every cost, price and performance parameter carries its citation and status. Change one and watch the threshold move.</p></div>
 </div>
-<div class="cols">
-<span class="eyebrow" style="padding-top:6px">Exogenous</span>
-<p class="small" style="color:var(--ink-2)">Hourly wind and solar capacity factors, wholesale electricity and gas prices, plant nameplate and location, technology cost and performance, ammonia demand.</p>
-</div>
-<p style="margin-top:var(--s5)"><a href="method.html">Full formulation, data sources and limitations →</a></p>
-</div>
-</div></div>
-</section>
+</div></section>
 
-<section>
-<div class="wrap"><div class="sec-head">
-<span class="eyebrow">03 — What you can do with it</span>
-<div><h2>Four things the tool answers directly.</h2>
-<div class="do-list">
-<div><div class="n">01</div><h3>Find a plant's threshold</h3><p>Pick any modelled plant and read its EDT, its cost curve, and the technology mix at the crossover.</p></div>
-<div><div class="n">02</div><h3>Test a target</h3><p>Set a carbon-intensity target and see what it costs, what gets built, and how the plant runs hour by hour.</p></div>
-<div><div class="n">03</div><h3>Change an assumption</h3><p>Move electrolyser capex, gas price or capture rate and watch the threshold move. Every default is sourced.</p></div>
-<div><div class="n">04</div><h3>Compare geographies</h3><p>Rank the fleet by threshold to see where unsubsidised hybrid ammonia lands first.</p></div>
+<section class="alt"><div class="wrap" data-reveal>
+<div class="center rv"><span class="eyebrow">The suite</span><h2>Four ways into the same model.</h2><p>Every view reads from one parameter registry and one set of solved runs, so numbers agree wherever you meet them.</p></div>
+<div class="suite">
+<a class="scard rv" href="atlas/"><div class="txt"><div class="k">Global Atlas</div><h3>Every site, one globe</h3><p>Modelled plants, requested sites, the global fleet and the renewable resource of every 0.25° cell, with industry layers beneath.</p></div><div class="shot"><img src="img/suite-atlas.jpg" alt="The atlas globe over Europe with the combined wind and solar capacity-factor layer and the modelled plants"></div></a>
+<a class="scard light rv" href="atlas/#plant=61&view=site"><div class="txt"><div class="k">3D Facility</div><h3>Walk the plant</h3><p>Real terrain and buildings, the optimizer's build placed next to the existing works, live hourly flows of electricity, H₂ and product.</p></div><div class="shot"><img src="img/suite-facility.jpg" alt="The optimized plant rendered next to the existing Brunsbüttel works on satellite imagery"></div></a>
+<a class="scard rv" href="atlas/#plant=61&ccs=0&ci=0.5&tab=hourly"><div class="txt"><div class="k">Hourly Dispatch</div><h3>Every hour of the year</h3><p>Supply, demand, storage and grid exchange for any carbon target, hour by hour across 8,760 hours.</p></div><div class="shot"><img src="img/suite-hourly.jpg" alt="Hourly dispatch charts of a solved run"></div></a>
+<a class="scard light rv" href="atlas/#plant=61&ccs=0&ci=0.5&tab=finance"><div class="txt"><div class="k">Project Finance</div><h3>Bankable, or not</h3><p>Debt, equity, DSCR and policy credits year by year on top of the optimizer's cost lines — every assumption adjustable.</p></div><div class="shot"><img src="img/suite-finance.jpg" alt="Project finance tab with cash-flow charts"></div></a>
 </div>
-</div>
-</div></div>
-</section>
+</div></section>
 
-<section>
-<div class="wrap"><div class="sec-head">
-<span class="eyebrow">04 — The atlas</span>
-<div><h2>Every modelled plant, one view.</h2>
-<div class="atlas">
-<p class="small" style="color:var(--ink-2)">The atlas maps the ~91 modelled plants coloured by threshold, with each plant's resource profile, cost curve and optimal build behind a click. It is the fastest way to see that the answer is geographic, not global.</p>
-<div class="placeholder" style="min-height:260px">[ATLAS PREVIEW — screenshot or embedded map to be supplied]</div>
+<section><div class="wrap">
+<div class="split" data-reveal>
+<div class="rv">
+<span class="eyebrow">The question</span>
+<p class="quote" style="margin-top:var(--s4)">The last tonne is expensive. The first <em>two-thirds</em> may cost nothing extra.</p>
+<p style="color:var(--ink-2)">Forcing carbon intensity to zero is costly. Allow a little firm capacity back in and the cost curve falls steeply — until it crosses the conventional baseline. Early runs put that crossing roughly 30% below business-as-usual carbon intensity. Where exactly it lands is geographic, which is why HOPS solves every site individually.</p>
+<div class="cta" style="margin-top:var(--s5)"><a class="btn" href="results.html">See the results</a><a class="btn ghost" href="method.html">Read the method</a></div>
 </div>
-<p style="margin-top:var(--s5)"><a href="results.html">See curated findings →</a></p>
+<div class="pic rv"><img src="img/question-overview.jpg" alt="Levelized cost of ammonia across the carbon-intensity sweep of a solved plant, against its conventional baseline" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover"></div>
 </div>
-</div></div>
-</section>
+</div></section>
 
-<section class="tool-band" id="tool">
-<div class="wrap"><div class="sec-head" style="margin-bottom:0">
-<span class="eyebrow">The tool</span>
-<div><h2>Run it yourself.</h2>
-<p>The optimizer runs in the browser against precomputed hourly inputs. No account, no upload.</p>
-<div class="cta"><a class="btn" href="atlas/">Open HOPS</a><a class="btn ghost" href="about.html#cite">How to cite</a></div>
+<section class="green"><div class="wrap" data-reveal>
+<div class="center rv"><span class="eyebrow">How it works</span><h2>Three steps from a site to its threshold.</h2></div>
+<div class="steps">
+<div class="step rv"><div class="n">01</div><h3>Pick a site and a target</h3><p>Choose any modelled facility — or request a new one — and set the carbon intensity the product must meet.</p></div>
+<div class="step rv"><div class="n">02</div><h3>Solve capacity and operation together</h3><p>One mixed-integer program sizes every unit and dispatches it across 8,760 hours of local wind, solar, grid and fuel prices.</p></div>
+<div class="step rv"><div class="n">03</div><h3>Read the threshold</h3><p>Sweep the target and the cost-versus-carbon frontier appears. Where it meets the fossil baseline is the answer. Every parameter behind it is sourced.</p></div>
 </div>
-</div></div>
-</section>
+</div></section>
+
+<section class="band"><div class="orb o2"></div><div class="orb o1"></div><div class="wrap" data-reveal style="position:relative">
+<div class="center rv"><span class="eyebrow">In numbers</span><h2>Built to be checked.</h2><p>Every figure on this site carries its source, its status and the date it was last regenerated.</p></div>
+<div class="num">
+<div class="rv"><b data-count="plants">69</b><span>facilities modelled, US + Europe</span></div>
+<div class="rv"><b>8,760</b><span>hours dispatched per site, per run</span></div>
+<div class="rv"><b data-count="params">26</b><span>sourced parameters, each with citation</span></div>
+<div class="rv"><b>2</b><span>pathways per site — reforming and reforming with capture — over a full carbon-intensity sweep</span></div>
+</div>
+</div></section>
+
+<section class="tool" id="tool"><div class="wrap">
+<span class="eyebrow" style="color:#DCE8FB">The tool</span>
+<h2 style="margin-top:var(--s3)">Run it yourself.</h2>
+<p>Every modelled plant with its hourly dispatch, siting and finance in the browser — and any new site solved in the cloud from one click. No account, no upload.</p>
+<div class="cta"><a class="btn on-dark" href="atlas/">Open HOPS</a><a class="btn ghost on-dark" href="about.html#cite">How to cite</a></div>
+</div></section>
 </main>
 
 <footer class="site"><div class="wrap">
 <div class="foot-grid">
-<div><a class="brand" href="index.html" style="margin-bottom:var(--s3)"><b>HOPS</b><span>Stanford</span></a><p class="small" style="color:var(--ink-2);max-width:34ch">Hybrid Optimization of Plant Systems. A research tool for siting and sizing low-carbon ammonia production.</p></div>
+<div><a class="brand" href="index.html" style="margin-bottom:var(--s3)"><b>HOPS</b><span>Stanford</span></a><p class="small" style="color:var(--ink-2);max-width:34ch">Hybrid Optimization of Plant Systems. A research tool for siting, sizing and dispatching low-carbon industrial energy systems.</p></div>
 <div><h4>Pages</h4><ul><li><a href="method.html">Method</a></li><li><a href="results.html">Results</a></li><li><a href="data.html">Data &amp; assumptions</a></li><li><a href="watch.html">Watch</a></li></ul></div>
 <div><h4>Project</h4><ul><li><a href="team.html">Team</a></li><li><a href="about.html#cite">How to cite</a></li><li><a href="about.html#licence">Licence</a></li><li><a href="about.html#contact">Contact</a></li></ul></div>
 <div><h4>Affiliation</h4><ul><li>Stanford University</li><li>STEER program</li></ul></div>
 </div>
-<div class="stamp"><span>Model v[0.0.0] · site v[0.0.0]</span><span>Content last updated [YYYY-MM-DD] · figures regenerated [YYYY-MM-DD]</span></div>
+<div class="stamp"><span>Model IRR_v7 · data 2026-09-16 · site 2026-09-21</span><span>Content last updated 2026-09-21 · figures regenerated 2026-09-16</span></div>
 </div></footer>
 <script src="site.js"></script>
 </body>

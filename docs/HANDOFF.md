@@ -27,6 +27,9 @@ hops-site/
   ARCHITECTURE-notes.md   data structuring, build-a-plant, map/3D stack
   index.html  method.html  results.html  data.html
   watch.html  team.html  about.html
+  image-slot.js           <image-slot> placeholder component (index.html suite cards + question visual)
+  img/globe-fleet.png     hero globe (screenshot crop of the Atlas)
+  img/atlas-globe.png     earlier crop, unused
   data/parameters.json    parameter registry (renders the data page)
   data/watch.json         news feed (renders the watch page)
 ```
@@ -35,19 +38,20 @@ Total weight excluding webfonts: ~24 KB CSS + ~5 KB JS shared across all pages. 
 
 ## Design system — do not re-derive it, read `tokens.css`
 
-Register: national-lab report or serious data journalism (Our World in Data, IEA), not a SaaS landing page.
+Register: contemporary research-institute site — confident, colourful, professional. Consultant polish with academic rigour. Not a national-lab PDF, not a SaaS template.
 
-- **Newsreader** (serif) — headings, lede, large stat values. Italic used once in the hero, nowhere else.
-- **IBM Plex Sans** — body, UI, nav, tables. Body 17px/1.6, measure capped at 66ch.
-- **IBM Plex Mono** with `tabular-nums` — **every** number, unit, date, run ID, axis tick and eyebrow label. This rule is load-bearing.
-- Colour: warm paper `#FBFAF8`, ink `#15181B`, anchor `#1B3A5C` (interaction only), accent `#A6392A` (~1% of surface — citation markers, active nav, stat rule), Okabe–Ito data series `#0072B2 #D55E00 #009E73 #CC79A7 #E69F00 #56B4E9`, separate status colours.
-- **Colour means data or state. If it means neither, it is a neutral.**
-- Charts: inline SVG, no top/right spine, 1px ink left/bottom spines, dashed light y-grid only, series labelled in place, no chartjunk, no gradients.
-- Radii 2–6px, hairline rules instead of shadows, generous whitespace.
+- **Manrope** (single sans) — everything: display 800, headings 700, body 400/500. `--serif` aliases to `--sans`; no serif anywhere.
+- **IBM Plex Mono** with `tabular-nums` — every number, unit, date, run ID, axis tick. This rule is load-bearing.
+- Colour: cool white `--paper #FFF`, light-blue band `--paper-2 #EEF4F7`, mint band `--mist-green #E9F4EE`, ink `#121A20`, deep-teal dark surfaces `--navy #123542`, anchor teal-blue `#1B6F8E` (buttons, links, active nav), accent green `#1E9A6E` (eyebrows, step rules), warm amber `--accent-2 #D9822B` used sparingly. Okabe–Ito for data series.
+- **Colour means data or state in charts. In UI, anchor/accent are the only chromatic colours.**
+- Motion: `.orb` drifting radial blobs (26–32 s, blurred) behind heroes; `[data-reveal]` + `.rv` children fade-up with stagger on scroll (site.js IntersectionObserver); globe floats 9 s. All off under `prefers-reduced-motion`.
+- Surfaces: pill buttons (`border-radius:999px`), cards `--r-lg 20px` with hairline border + soft shadow, section rhythm white → light-blue → white → mint → deep-teal band → teal gradient CTA.
+- Every page opens with `.page-hero` (gradient + 3 orbs + reveal); index.html uses the larger `.hero` variant with the globe and three action pills.
+- Charts: inline SVG, no top/right spine, 1px ink left/bottom spines, dashed light y-grid, series labelled in place, large black axis text.
 
 ## Components available (class names in `components.css`, demoed in `components.html`)
 
-`nav` · `footer.site` · `.cite` (mono superscript + hover/focus card with source, year, link, badge) · `.badge` (ok/est/todo) · `.stat` + `.unc` (point estimate with named interval) · `.readout` · `.fig-frame`/`figcaption` · `.eq` + `dl.defs` · `.filterbar` + `.chip` · `.ptable` (card-stacks on mobile) · `.fcard` (watch card) · `.skeleton` / `.empty` · `.tcard` · `.toc` · `.note` / `.note.warn` · `.panel` / `.card`
+`nav` · `footer.site` · `.page-hero` + `.orb` · `[data-reveal]`/`.rv` · `.cite` (mono superscript + hover/focus card with source, year, link, badge) · `.badge` (ok/est/todo) · `.stat` + `.unc` (point estimate with named interval) · `.readout` · `.fig-frame`/`figcaption` · `.eq` + `dl.defs` · `.filterbar` + `.chip` · `.ptable` (card-stacks on mobile) · `.fcard` (watch card) · `.skeleton` / `.empty` · `.tcard` · `.toc` · `.note` / `.note.warn` · `.panel` / `.card` · `<image-slot>` (image-slot.js, user-fillable placeholders on index.html)
 
 `HOPS.list({url, mount, status, count, render, group, searchText})` in `site.js` drives both the parameter table and the Watch feed: skeleton while fetching, wired search + chips + selects, labelled empty state with clear-filters, and a "data unavailable" fallback.
 
@@ -71,5 +75,5 @@ Each page is plain HTML using shared CSS/JS — lift the markup straight into `.
 ## Open decisions
 
 - **Solve strategy** — precomputed solve grid (instant, offline, limited) vs. server-side solve queue. Changes the build-a-plant UI from a live slider to a submitted form.
-- Hero chart is currently a schematic EDT curve; it should be replaced with real model output geometry once a run is published.
-- Atlas preview on the home page is a labelled placeholder awaiting a screenshot or embed.
+- Home-page suite cards and the question-section visual are `<image-slot>` placeholders — replace with real screenshots (`<img>`) and drop image-slot.js.
+- Hero "threshold" claim (~30% below BAU) is from early runs; wire to published output.

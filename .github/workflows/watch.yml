@@ -15,6 +15,7 @@ on:
         default: '1'
 permissions:
   contents: write
+  models: read                 # GitHub Models inference with the job's own token — the free default screener
 concurrency: watch
 jobs:
   screen:
@@ -30,9 +31,13 @@ jobs:
       - name: Collect and screen
         run: python watch/watch.py
         env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
-          # WATCH_MODEL repo variable: claude-opus-5 (default) · claude-haiku-4-5 (~5x cheaper) · none (keyword mode, free, no key needed)
-          WATCH_MODEL: ${{ vars.WATCH_MODEL || 'claude-opus-5' }}
+          WATCH_ENDPOINT: ${{ vars.WATCH_ENDPOINT }}
+          WATCH_API_KEY: ${{ secrets.WATCH_API_KEY }}
+          # WATCH_MODEL repo variable: github:openai/gpt-4o-mini (default, FREE via GitHub Models) · openai:<model> with WATCH_ENDPOINT/WATCH_API_KEY
+          # (Groq / Gemini free tiers) · claude-haiku-4-5-20251001 (paid) · none (keyword mode, no model)
+          WATCH_MODEL: ${{ vars.WATCH_MODEL || 'github:openai/gpt-4o-mini' }}
           WATCH_LOOKBACK_DAYS: ${{ inputs.lookback_days || '3' }}
           WATCH_MAX_ITEMS: ${{ inputs.max_items || '150' }}
           WATCH_PAGES: ${{ inputs.pages || '1' }}

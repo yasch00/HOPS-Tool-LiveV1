@@ -75,6 +75,8 @@ function onBuildClick(e){
 function setBuildSite(lat, lon, name){
   if (!BUILD.on || !map.getSource('build-site')) { enterBuild(); if (!map.getSource('build-site')) return; }
   BUILD.lat = +lat.toFixed(4); BUILD.lon = +lon.toFixed(4); if (name != null) BUILD.name = name;
+  BUILD.cell = null; BUILD.cf = null; BUILD.share = null;
+  if (typeof gridCellAt === 'function') gridCellAt(BUILD.lat, BUILD.lon).then(async c => { if (c && Math.abs(c.lat - BUILD.lat) < 0.5) { BUILD.cell = c; renderBuildPanel(); const cf = await cfSeries(c); if (cf && BUILD.cell === c) { BUILD.cf = cf; renderBuildPanel(); } } });
   BUILD.near = PLANTS.filter(p => !p.custom).map(p => ({ p, km: haversine(lat, lon, p.lat, p.lon) })).sort((a, b) => a.km - b.km).slice(0, 3);
   map.getSource('build-site').setData({ type: 'FeatureCollection', features: [
     { type: 'Feature', geometry: { type: 'Point', coordinates: [BUILD.lon, BUILD.lat] }, properties: {} }, circlePolygon(BUILD.lon, BUILD.lat, 25)] });
@@ -110,7 +112,8 @@ function renderBuildPanel(){
     <label class="fin-f" style="grid-template-columns:1fr"><span class="fin-l">Name<small>optional</small></span><input class="fin-n" style="width:100%;text-align:left" value="${(BUILD.name || '').replace(/"/g, '&quot;')}" onchange="buildSet('name',this.value)"></label>
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px"><label class="fin-f" style="grid-template-columns:1fr"><span class="fin-l">Latitude</span><input type="number" class="fin-n" style="width:100%" step="0.001" value="${BUILD.lat}" onchange="setBuildSite(+this.value,BUILD.lon,null)"></label>
     <label class="fin-f" style="grid-template-columns:1fr"><span class="fin-l">Longitude</span><input type="number" class="fin-n" style="width:100%" step="0.001" value="${BUILD.lon}" onchange="setBuildSite(BUILD.lat,+this.value,null)"></label></div>
-    <div class="sub">Nearest modelled: ${BUILD.near.map(x => `${x.p.name} ${fmt(x.km)} km`).join(' · ')} · region ${BUILD.near[0].p.region}</div></div>`;
+    <div class="sub">Nearest modelled: ${BUILD.near.map(x => `${x.p.name} ${fmt(x.km)} km`).join(' · ')} · region ${BUILD.near[0].p.region}</div>
+    ${buildResourceHTML()}</div>`;
   // 2 plant
   h += `<div class="fin-group"><div class="fp-h">2 · Plant</div>
     <label class="fin-f"><span class="fin-l">Capacity<small>t NH₃/day</small></span><input type="range" min="100" max="4000" step="50" value="${BUILD.tpd}" oninput="buildSet('tpd',this.value)"><input type="number" class="fin-n" step="50" value="${BUILD.tpd}" onchange="buildSet('tpd',this.value)"></label>
@@ -190,4 +193,29 @@ function buildWatchForIssue(){
     const rq = PENDING.list.find(x => !known.has(x.issue) && Math.abs(x.lat - lat) < 2e-3 && Math.abs(x.lon - lon) < 2e-3);
     if (rq) { clearInterval(BUILD.watch); BUILD.status = ''; leaveBuild(); openPending(rq.issue); }
   }, 15000);
+}
+
+/* ---- the site's renewable resource: the grid cell's annual metrics (always) and, when the hourly files are configured, the
+   monthly profile of solar, wind and the combined output at an adjustable PV share */
+function buildSetShare(v){ BUILD.share = +v; renderBuildPanel(); }
+function buildResourceHTML(){
+  const c = BUILD.cell; if (typeof GRID_METRICS === 'undefined') return '';
+  if (!c) return `<div class="fp-h" style="margin-top:8px">Resource</div><div class="sub">No capacity-factor grid covers this point (modelled regions: Europe, North America) — the exact run would fail here; the estimate still uses the proxy plant.</div>`;
+  const chip = (k) => `<div><div class="l">${GRID_METRICS[k].n}</div><div class="v" style="font-size:18px">${gridFmt(k, c.m[k])}</div><div class="d">${k === 'comb' ? 'PV share ' + (c.m.share * 100).toFixed(0) + ' % · corr ' + gridFmt('corr', c.m.corr) : k === 'solar' ? fmt(c.m.solar * 8760) + ' full-load h' : fmt(c.m.wind * 8760) + ' full-load h'}</div></div>`;
+  let h = `<div class="fp-h" style="margin-top:8px">Resource · cell ${c.lat.toFixed(2)}°, ${c.lon.toFixed(2)}° (${c.region})</div><div class="site-kpis" style="grid-template-columns:repeat(3,1fr)">${chip('solar')}${chip('wind')}${chip('comb')}</div>`;
+  const cf = BUILD.cf;
+  if (cf) {
+    const share = BUILD.share != null ? BUILD.share : c.m.share, comb = combineSeries(cf.solar, cf.wind, share), S = seriesStats(cf.solar), W = seriesStats(cf.wind), Cc = seriesStats(comb);
+    const MN = ['J', 'F', 'M', 'A', 'M', 'J', 'J', 'A', 'S', 'O', 'N', 'D'], w = 300, hgt = 92, ml = 26, pw = w - ml - 6, ph = hgt - 22, ymax = Math.max(0.5, ...S.monthly, ...W.monthly) * 1.05;
+    const y = v => 10 + ph - v / ymax * ph, xs = i => ml + i / 11 * pw, path = a => a.map((v, i) => (i ? 'L' : 'M') + xs(i).toFixed(1) + ' ' + y(v).toFixed(1)).join(' ');
+    h += `<svg viewBox="0 0 ${w} ${hgt}" style="width:100%;margin-top:6px"><line x1="${ml}" y1="${y(0)}" x2="${w - 6}" y2="${y(0)}" stroke="rgba(255,255,255,.25)"/>
+      ${[0.25, 0.5].filter(v => v < ymax).map(v => `<line x1="${ml}" y1="${y(v)}" x2="${w - 6}" y2="${y(v)}" stroke="rgba(255,255,255,.1)"/><text x="${ml - 3}" y="${y(v) + 3}" font-size="8" text-anchor="end" fill="#9aa">${v}</text>`).join('')}
+      <path d="${path(S.monthly)}" fill="none" stroke="#E69F00" stroke-width="1.8"/><path d="${path(W.monthly)}" fill="none" stroke="#56B4E9" stroke-width="1.8"/><path d="${path(Cc.monthly)}" fill="none" stroke="#4fd39a" stroke-width="2.2"/>
+      ${MN.map((m, i) => `<text x="${xs(i)}" y="${hgt - 4}" font-size="8" text-anchor="middle" fill="#9aa">${m}</text>`).join('')}</svg>
+      <div class="chart-legend" style="margin:2px 0 4px"><span><i style="background:#E69F00"></i>Solar ${(S.mean * 100).toFixed(1)} %</span><span><i style="background:#56B4E9"></i>Wind ${(W.mean * 100).toFixed(1)} %</span><span><i style="background:#4fd39a"></i>Combined ${(Cc.mean * 100).toFixed(1)} % · CV ${Cc.cv.toFixed(2)} · ${(Cc.lowh * 100).toFixed(0)} % low hours</span></div>
+      <label class="fin-f" style="grid-template-columns:1fr 84px"><span class="fin-l">PV share of capacity<small>combined output</small></span><input type="range" min="0" max="1" step="0.05" value="${share}" oninput="buildSetShare(this.value)"><span class="fin-n">${(share * 100).toFixed(0)} %</span></label>
+      <div class="sub" style="font-size:10.5px">Monthly mean capacity factors of this cell, hourly 2025. The combined line is the output of 1 MW nameplate split ${(share * 100).toFixed(0)} % PV / ${(100 - share * 100).toFixed(0)} % wind; the variance-minimising split is ${(c.m.share * 100).toFixed(0)} % PV. The optimizer chooses its own mix from cost — see the nearest plant's solved design below.</div>`;
+  } else if (typeof CF_BASE !== 'undefined' && !CF_BASE) h += `<div class="sub" style="font-size:10.5px">Hourly profiles are not published yet (HOPS_CF_BASE unset).</div>`;
+  else h += `<div class="sub" style="font-size:10.5px">Loading the hourly profile …</div>`;
+  return h;
 }
