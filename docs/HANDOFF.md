@@ -27,9 +27,10 @@ hops-site/
   ARCHITECTURE-notes.md   data structuring, build-a-plant, map/3D stack
   index.html  method.html  results.html  data.html
   watch.html  team.html  about.html
-  image-slot.js           <image-slot> placeholder component (index.html suite cards + question visual)
-  img/globe-fleet.png     hero globe (screenshot crop of the Atlas)
-  img/atlas-globe.png     earlier crop, unused
+  img/globe-fleet.png     hero globe (transparent capture of the Atlas)
+  img/suite-*.jpg         suite cards: atlas (solar layer over Europe), facility (Brunsbüttel), hourly + finance chart cards
+                          — captured from the tool itself (atlas/?shot=1 → canvas / html2canvas), 1200 px wide, 190 px card height
+  (the question visual is an inline SVG cost curve in index.html, class .qplot — no image file)
   data/parameters.json    parameter registry (renders the data page)
   data/watch.json         news feed (renders the watch page)
 ```

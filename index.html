@@ -44,7 +44,7 @@
 .icard h3{margin-bottom:var(--s2)}
 .icard p{font-size:var(--t-small);color:var(--ink-2);margin:0;max-width:34ch;margin-inline:auto}
 .suite{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:var(--s4)}
-.scard{position:relative;border-radius:var(--r-lg);overflow:hidden;background:var(--navy-2);color:#fff;min-height:440px;display:flex;flex-direction:column;text-decoration:none;border:0;transition:transform .25s var(--ease),box-shadow .25s var(--ease)}
+.scard{position:relative;border-radius:var(--r-lg);overflow:hidden;background:var(--navy-2);color:#fff;display:flex;flex-direction:column;text-decoration:none;border:0;transition:transform .25s var(--ease),box-shadow .25s var(--ease)}
 .scard:hover{transform:translateY(-4px);box-shadow:var(--shadow-2);color:#fff}
 .scard.light{background:var(--panel);border:1px solid var(--rule);color:var(--ink)}
 .scard.light:hover{color:var(--ink)}
@@ -53,7 +53,7 @@
 .scard.light .k{color:var(--anchor)}
 .scard h3{font-size:24px;margin:6px 0 8px}
 .scard p{font-size:14px;margin:0;opacity:.85;max-width:30ch}
-.scard .shot{flex:1;margin:var(--s5) 0 0 var(--s5);border-radius:var(--r-md) 0 0 0;overflow:hidden;position:relative;min-height:220px}
+.scard .txt{flex:1}.scard .shot{flex:0 0 auto;height:190px;margin:var(--s5) 0 0 var(--s5);border-radius:var(--r-md) 0 0 0;overflow:hidden;position:relative;box-shadow:0 8px 24px rgba(0,0,0,.18)}.scard .shot img{display:block;width:100%;height:100%;object-fit:cover;object-position:center}.scard .shot img.tl{object-position:left top}
 .scard .shot image-slot{position:absolute;inset:0}
 .steps{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:var(--s6);counter-reset:s}
 .step{border-top:2px solid var(--accent);padding-top:var(--s4)}
@@ -61,7 +61,7 @@
 .step h3{margin:var(--s2) 0 var(--s3)}
 .step p{font-size:var(--t-small);color:var(--ink-2);margin:0}
 .split{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:var(--s8);align-items:center}
-.split .pic{border-radius:var(--r-lg);overflow:hidden;background:var(--paper-3);aspect-ratio:4/3;position:relative}
+.split .pic{border-radius:var(--r-lg);overflow:hidden;background:var(--paper-3);aspect-ratio:4/3;position:relative}.split .pic.qplot{background:#fff;border:1px solid var(--rule);aspect-ratio:640/440}.qplot text{font-family:'Manrope',system-ui,sans-serif}.qplot text.mono{font-family:'IBM Plex Mono',ui-monospace,monospace}
 .split .pic image-slot{position:absolute;inset:0}
 .quote{font-size:clamp(22px,2.2vw,30px);font-weight:600;line-height:1.3;letter-spacing:-.02em;color:var(--ink);max-width:24ch;margin:0 0 var(--s5)}
 .quote em{font-style:normal;color:var(--anchor)}
@@ -127,8 +127,8 @@
 <div class="suite">
 <a class="scard rv" href="atlas/"><div class="txt"><div class="k">Global Atlas</div><h3>Every site, one globe</h3><p>Modelled plants, requested sites, the global fleet and the renewable resource of every 0.25° cell, with industry layers beneath.</p></div><div class="shot"><img src="img/suite-atlas.jpg" alt="The atlas globe over Europe with the combined wind and solar capacity-factor layer and the modelled plants"></div></a>
 <a class="scard light rv" href="atlas/#plant=61&view=site"><div class="txt"><div class="k">3D Facility</div><h3>Walk the plant</h3><p>Real terrain and buildings, the optimizer's build placed next to the existing works, live hourly flows of electricity, H₂ and product.</p></div><div class="shot"><img src="img/suite-facility.jpg" alt="The optimized plant rendered next to the existing Brunsbüttel works on satellite imagery"></div></a>
-<a class="scard rv" href="atlas/#plant=61&ccs=0&ci=0.5&tab=hourly"><div class="txt"><div class="k">Hourly Dispatch</div><h3>Every hour of the year</h3><p>Supply, demand, storage and grid exchange for any carbon target, hour by hour across 8,760 hours.</p></div><div class="shot"><img src="img/suite-hourly.jpg" alt="Hourly dispatch charts of a solved run"></div></a>
-<a class="scard light rv" href="atlas/#plant=61&ccs=0&ci=0.5&tab=finance"><div class="txt"><div class="k">Project Finance</div><h3>Bankable, or not</h3><p>Debt, equity, DSCR and policy credits year by year on top of the optimizer's cost lines — every assumption adjustable.</p></div><div class="shot"><img src="img/suite-finance.jpg" alt="Project finance tab with cash-flow charts"></div></a>
+<a class="scard rv" href="atlas/#plant=61&ccs=0&ci=0.5&tab=hourly"><div class="txt"><div class="k">Hourly Dispatch</div><h3>Every hour of the year</h3><p>Supply, demand, storage and grid exchange for any carbon target, hour by hour across 8,760 hours.</p></div><div class="shot"><img class="tl" src="img/suite-hourly.jpg" alt="Hourly dispatch charts of a solved run"></div></a>
+<a class="scard light rv" href="atlas/#plant=61&ccs=0&ci=0.5&tab=finance"><div class="txt"><div class="k">Project Finance</div><h3>Bankable, or not</h3><p>Debt, equity, DSCR and policy credits year by year on top of the optimizer's cost lines — every assumption adjustable.</p></div><div class="shot"><img class="tl" src="img/suite-finance.jpg" alt="Project finance tab with cash-flow charts"></div></a>
 </div>
 </div></section>
 
@@ -140,7 +140,26 @@
 <p style="color:var(--ink-2)">Forcing carbon intensity to zero is costly. Allow a little firm capacity back in and the cost curve falls steeply — until it crosses the conventional baseline. Early runs put that crossing roughly 30% below business-as-usual carbon intensity. Where exactly it lands is geographic, which is why HOPS solves every site individually.</p>
 <div class="cta" style="margin-top:var(--s5)"><a class="btn" href="results.html">See the results</a><a class="btn ghost" href="method.html">Read the method</a></div>
 </div>
-<div class="pic rv"><img src="img/question-overview.jpg" alt="Levelized cost of ammonia across the carbon-intensity sweep of a solved plant, against its conventional baseline" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover"></div>
+<div class="pic rv qplot" role="img" aria-label="Schematic: the cost of ammonia falls steeply as the carbon-intensity target is relaxed from zero, crosses the conventional baseline well before it, and stays below it — the first reductions cost nothing extra">
+<svg viewBox="0 0 640 440" xmlns="http://www.w3.org/2000/svg" style="position:absolute;inset:0;width:100%;height:100%">
+<defs><linearGradient id="qg" x1="0" x2="0" y1="0" y2="1"><stop offset="0" stop-color="#1B6F8E" stop-opacity=".22"/><stop offset="1" stop-color="#1B6F8E" stop-opacity=".04"/></linearGradient><marker id="qa" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0 0L10 5L0 10z" fill="#6B7379"/></marker></defs>
+<g stroke="#E3DFD8" stroke-width="1"><line x1="90" y1="120" x2="580" y2="120"/><line x1="90" y1="200" x2="580" y2="200"/><line x1="90" y1="280" x2="580" y2="280"/></g>
+<line x1="90" y1="360" x2="590" y2="360" stroke="#6B7379" stroke-width="1.5" marker-end="url(#qa)"/><line x1="90" y1="360" x2="90" y2="50" stroke="#6B7379" stroke-width="1.5" marker-end="url(#qa)"/>
+<text x="340" y="398" text-anchor="middle" font-size="15" fill="#4A5158">Carbon intensity of the product →</text>
+<text x="40" y="205" text-anchor="middle" transform="rotate(-90 40 205)" font-size="15" fill="#4A5158">Cost per tonne →</text>
+<path d="M120 90 C 200 160, 270 220, 340 246 S 470 266, 520 262 L 520 360 L 120 360 Z" fill="none"/>
+<clipPath id="qc"><rect x="335" y="0" width="200" height="248"/></clipPath>
+<path d="M120 90 C 200 160, 270 220, 340 246 S 470 266, 520 262 L 520 248 L 120 248 Z" fill="url(#qg)" clip-path="url(#qc)"/>
+<line x1="120" y1="248" x2="560" y2="248" stroke="#6B7379" stroke-width="2" stroke-dasharray="6 6"/>
+<path d="M120 90 C 200 160, 270 220, 340 246 S 470 266, 520 262" fill="none" stroke="#1B3A5C" stroke-width="4" stroke-linecap="round"/>
+<circle cx="120" cy="90" r="14" fill="#1E9A6E"/><text x="144" y="84" font-size="15" font-weight="700" fill="#1E9A6E">Green ammonia</text><text x="144" y="103" font-size="13" fill="#6B7379">zero carbon, highest cost</text>
+<circle cx="560" cy="248" r="14" fill="#8A8F94"/><text x="560" y="228" text-anchor="middle" font-size="15" font-weight="700" fill="#4A5158">Conventional</text>
+<text x="262" y="182" font-size="15" font-weight="700" fill="#1B3A5C">Hybrid plant</text><text x="262" y="200" font-size="13" fill="#6B7379">optimized for each target</text>
+<circle cx="345" cy="247" r="7" fill="#fff" stroke="#A6392A" stroke-width="3"/>
+<line x1="351" y1="254" x2="392" y2="312" stroke="#A6392A" stroke-width="1.5"/><text x="398" y="326" font-size="14" font-weight="700" fill="#A6392A">No green premium</text><text x="398" y="344" font-size="12.5" fill="#A6392A">cheaper than conventional from here</text>
+<text x="500" y="290" text-anchor="middle" font-size="13" fill="#1B6F8E" font-weight="700">below the baseline</text>
+<text class="mono" x="120" y="382" text-anchor="middle" font-size="12" fill="#6B7379">0</text><text class="mono" x="560" y="382" text-anchor="middle" font-size="12" fill="#6B7379">BAU</text>
+</svg></div>
 </div>
 </div></section>
 
