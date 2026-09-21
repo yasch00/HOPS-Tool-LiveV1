@@ -11,7 +11,7 @@ function facOffsetFor(idx){ try { const v = JSON.parse(localStorage.getItem('hop
 function facMoveStart(){ FAC.moving = true; map.getCanvas().style.cursor = 'crosshair'; const b = document.getElementById('facMove'); if (b) b.textContent = 'click the map …'; map.once('click', e => {
   FAC.moving = false; map.getCanvas().style.cursor = ''; const p = FAC.plant; if (!p) return; const mLat = 110574, mLon = 111320 * Math.cos(p.lat * Math.PI / 180);
   FAC_OFFSET = { x: (e.lngLat.lng - p.lon) * mLon, z: -(e.lngLat.lat - p.lat) * mLat }; try { localStorage.setItem('hops_fac_pos_' + p.idx, JSON.stringify(FAC_OFFSET)); } catch (err) {}
-  facilityLayer.setPlant(p, FAC.P); facilityLabels(); if (typeof siteLayoutGeo !== 'undefined' && siteLayoutGeo && map.getSource('layout')) { const shown = clipToPlot(siteLayoutGeo); map.getSource('layout').setData(shown); if (turbineLayer) turbineLayer.setTurbines(shown.features.filter(f => f.properties.kind === 'turbine'), p, siteInfo); } renderFacilityBar(FAC.rec ? 'ok' : 'nohourly'); }); }
+  facilityLayer.setPlant(p, FAC.P); facilityLabels(); facilityMaskBuildings(true); if (typeof siteLayoutGeo !== 'undefined' && siteLayoutGeo && map.getSource('layout')) { const shown = clipToPlot(siteLayoutGeo); map.getSource('layout').setData(shown); if (turbineLayer) turbineLayer.setTurbines(shown.features.filter(f => f.properties.kind === 'turbine'), p, siteInfo); } renderFacilityBar(FAC.rec ? 'ok' : 'nohourly'); }); }
 function facilityLabels(){ const p = FAC.plant, P = FAC.P; if (!p || !P || !map.getSource('fac-labels')) return;
   map.getSource('fac-labels').setData({ type: 'FeatureCollection', features: P.nodes.map(n => { const [x, z] = sceneToLocal(n.topAnchor); return { type: 'Feature', geometry: { type: 'Point', coordinates: facLocal2LngLat(p, x, z) }, properties: { label: `${n.def.num} · ${n.def.title}`, key: n.def.key } }; }) }); }
 let __plantMod = null;
@@ -76,7 +76,7 @@ async function showFacility(plant, s, ci){
   if (newPlant || !FAC.hour) FAC.hour = ((170 * 24 + 12 - Math.round(plant.lon / 15)) % 8760 + 8760) % 8760;   // open at local noon on 20 June (data index is UTC)
   const C = M.capsFromRow({ ...r, __ccs: s.ccs }, plant); const P = M.assemblePlant(C); FAC.P = P;
   facilityLayer.setPlant(plant, P);
-  facilityLabels();
+  facilityLabels(); facilityMaskBuildings(true);
   if (typeof siteLayoutGeo !== 'undefined' && siteLayoutGeo && map.getSource('layout')) { const shown = clipToPlot(siteLayoutGeo); map.getSource('layout').setData(shown); if (turbineLayer) turbineLayer.setTurbines(shown.features.filter(f => f.properties.kind === 'turbine'), plant, siteInfo); }
   renderFacilityBar('loading');
   const rec = await ensureHourly(s, hourlyCIfor(s, ci));
@@ -85,7 +85,7 @@ async function showFacility(plant, s, ci){
   map.once('idle', () => { if (FAC.on && FAC.P === P) facilityLayer.setPlant(plant, P); });
 }
 function hideFacility(){
-  FAC.on = false; facilityPause(); if (facilityLayer) facilityLayer.setPlant(null, null); FAC.P = null;
+  FAC.on = false; facilityPause(); if (facilityLayer) facilityLayer.setPlant(null, null); FAC.P = null; facilityMaskBuildings(false);
   if (map.getSource('fac-labels')) map.getSource('fac-labels').setData({ type: 'FeatureCollection', features: [] });
   const bar = document.getElementById('facilityBar'); if (bar) bar.hidden = true;
   if (map.getLayer('pv-blocks')) map.setPaintProperty('pv-blocks', 'fill-extrusion-color', '#1B3A5C');
@@ -182,6 +182,17 @@ function facilityPlotBBox(){
   const pts = [[-88, -58], [88, -58], [88, 58], [-88, 58]].map(([x, z]) => { const [lx, lz] = sceneToLocal({ x, z }); return facLocal2LngLat(FAC.plant, lx, lz); });
   return [Math.min(...pts.map(p => p[0])), Math.min(...pts.map(p => p[1])), Math.max(...pts.map(p => p[0])), Math.max(...pts.map(p => p[1]))];
 }
+/* OSM buildings under the plot are hidden while the plant stands there (the pad covers the ground, not the map's own 3D buildings) */
+function facilityPlotPolygon(marginM){
+  if (!FAC.plant) return null; const m = (marginM || 0) / FAC_SCALE;
+  const ring = [[-88 - m, -58 - m], [88 + m, -58 - m], [88 + m, 58 + m], [-88 - m, 58 + m], [-88 - m, -58 - m]].map(([x, z]) => { const [lx, lz] = sceneToLocal({ x, z }); return facLocal2LngLat(FAC.plant, lx, lz); });
+  return { type: 'Polygon', coordinates: [ring] };
+}
+function facilityMaskBuildings(on){
+  if (!map.getLayer('buildings')) return;
+  const poly = on ? facilityPlotPolygon(12) : null;
+  map.setFilter('buildings', poly ? ['!', ['within', poly]] : null);
+}
 function clipToPlot(gj){
   const bb = facilityPlotBBox(); if (!bb || !gj || !gj.features) return gj;
   const inside = c => c[0] > bb[0] && c[0] < bb[2] && c[1] > bb[1] && c[1] < bb[3];
@@ -205,7 +216,7 @@ async function showConstruction(site, progress){
   FAC.plant = site; FAC.row = null; FAC.scn = null; FAC.on = true; FAC.rec = null; FAC.sel = null; FAC.construction = true; facilityPause();
   FAC.hour = ((170 * 24 + 12 - Math.round(site.lon / 15)) % 8760 + 8760) % 8760;      // local noon, 20 June
   const P = CM.buildConstruction(progress || 0); FAC.P = P;
-  facilityLayer.setPlant(site, P);
+  facilityLayer.setPlant(site, P); facilityMaskBuildings(true);
   if (map.getSource('fac-labels')) map.getSource('fac-labels').setData({ type: 'FeatureCollection', features: [] });
   map.once('idle', () => { if (FAC.on && FAC.P === P) facilityLayer.setPlant(site, P); });
   return P;
