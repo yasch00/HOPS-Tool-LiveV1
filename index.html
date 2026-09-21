@@ -60,7 +60,7 @@
 .step .n{font-size:13px;font-weight:700;color:var(--accent);letter-spacing:.08em}
 .step h3{margin:var(--s2) 0 var(--s3)}
 .step p{font-size:var(--t-small);color:var(--ink-2);margin:0}
-.split{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:var(--s8);align-items:center}
+.split{display:grid;grid-template-columns:minmax(0,5fr) minmax(0,7fr);gap:var(--s7);align-items:center}
 .split .pic{border-radius:var(--r-lg);overflow:hidden;background:var(--paper-3);aspect-ratio:4/3;position:relative}.split .pic.qplot{background:#fff;border:1px solid var(--rule);aspect-ratio:640/440}.qplot text{font-family:'Manrope',system-ui,sans-serif}.qplot text.mono{font-family:'IBM Plex Mono',ui-monospace,monospace}
 .split .pic image-slot{position:absolute;inset:0}
 .quote{font-size:clamp(22px,2.2vw,30px);font-weight:600;line-height:1.3;letter-spacing:-.02em;color:var(--ink);max-width:24ch;margin:0 0 var(--s5)}
@@ -78,7 +78,7 @@
 .tool .btn.on-dark{color:var(--anchor)}
 .tool .cta{justify-content:center}
 .hero .btn.on-dark{background:var(--anchor);border-color:var(--anchor);color:#fff}.hero .btn.on-dark:hover{background:var(--anchor-hover);border-color:var(--anchor-hover)}
-.hero .btn.ghost.on-dark{color:var(--ink);border-color:var(--rule-2)}.hero .btn.ghost.on-dark:hover{background:#fff;color:var(--anchor);border-color:var(--anchor)}
+.hero .btn.ghost{background:#fff;color:var(--anchor);border-color:var(--rule-2)}.hero .btn.ghost:hover{background:var(--anchor-tint);border-color:var(--anchor)}
 @media(max-width:1000px){.suite{grid-template-columns:repeat(2,minmax(0,1fr))}.steps{grid-template-columns:1fr}}
 @media(max-width:900px){.hero-in{grid-template-columns:1fr;min-height:0;padding:var(--s7) 0}.globe{justify-self:center;width:min(100%,420px)}.split{grid-template-columns:1fr;gap:var(--s6)}.suite{grid-template-columns:1fr}.globe .t2{right:0}}
 </style>
@@ -99,7 +99,7 @@
 <span class="eyebrow rv">Hybrid Optimization of Plant Systems</span>
 <h1 class="rv">How far can we decarbonize without paying a green premium?</h1>
 <p class="lede rv">HOPS co-sizes and hourly-dispatches energy systems — renewables, storage, the grid and the process itself — against any carbon-intensity target, then reports the point where a hybrid clean-and-fossil system stops being the expensive option.</p>
-<div class="cta rv"><a class="btn on-dark" href="atlas/">Open the tool</a><a class="btn ghost on-dark" href="method.html">How it works</a></div>
+<div class="cta rv"><a class="btn on-dark" href="atlas/">Open the tool</a><a class="btn ghost" href="method.html">How it works</a></div>
 </div>
 <div class="globe rv">
 <img src="img/globe-fleet.png" alt="Globe showing modelled sites and the global industrial fleet across North America, Europe and Africa">
@@ -136,29 +136,28 @@
 <div class="split" data-reveal>
 <div class="rv">
 <span class="eyebrow">The question</span>
-<p class="quote" style="margin-top:var(--s4)">The last tonne is expensive. The first <em>two-thirds</em> may cost nothing extra.</p>
-<p style="color:var(--ink-2)">Forcing carbon intensity to zero is costly. Allow a little firm capacity back in and the cost curve falls steeply — until it crosses the conventional baseline. Early runs put that crossing roughly 30% below business-as-usual carbon intensity. Where exactly it lands is geographic, which is why HOPS solves every site individually.</p>
+<p class="quote" style="margin-top:var(--s4)">The last tonne is expensive. The first <em>20 to 40 %</em> may cost nothing extra.</p>
+<p style="color:var(--ink-2)">HOPS optimizes across the entire carbon-intensity spectrum, from fossil business-as-usual down to net zero, rather than solving only for a net- or near-zero endpoint. At each point it finds the least-cost plant configuration. This reveals the <strong>Economic Decarbonization Threshold</strong>: the level of decarbonization at which a hybrid clean-and-fossil plant becomes cheaper than business-as-usual. At the core is a hybrid energy-management optimizer that orchestrates electrons and molecules at hourly resolution across a full year — when to draw or export power, when to charge short- or long-duration storage, when to convert electricity into hydrogen and ammonia, and when to convert them back.</p>
+<p style="color:var(--ink-2)">We look for scenarios where 20 to 40 % of emissions can be eliminated today at or below business-as-usual cost — enough to attract private capital and start driving costs down. Each round of deployment lowers technology costs and makes deeper decarbonization profitable in turn, so plants add clean capacity in stages toward full decarbonization by 2050. The first application is ammonia, in regions with high natural-gas and electricity prices where on-site renewables can both supply the plant and feed surplus power into the grid.</p>
 <div class="cta" style="margin-top:var(--s5)"><a class="btn" href="results.html">See the results</a><a class="btn ghost" href="method.html">Read the method</a></div>
 </div>
-<div class="pic rv qplot" role="img" aria-label="Schematic: the cost of ammonia falls steeply as the carbon-intensity target is relaxed from zero, crosses the conventional baseline well before it, and stays below it — the first reductions cost nothing extra">
+<div class="pic rv qplot" role="img" aria-label="Schematic: the cost of ammonia falls steeply as the carbon-intensity target is relaxed from zero, crosses the business-as-usual baseline well before it, and stays below it — the first reductions cost nothing extra">
 <svg viewBox="0 0 640 440" xmlns="http://www.w3.org/2000/svg" style="position:absolute;inset:0;width:100%;height:100%">
-<defs><linearGradient id="qg" x1="0" x2="0" y1="0" y2="1"><stop offset="0" stop-color="#1B6F8E" stop-opacity=".22"/><stop offset="1" stop-color="#1B6F8E" stop-opacity=".04"/></linearGradient><marker id="qa" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0 0L10 5L0 10z" fill="#6B7379"/></marker></defs>
-<g stroke="#E3DFD8" stroke-width="1"><line x1="90" y1="120" x2="580" y2="120"/><line x1="90" y1="200" x2="580" y2="200"/><line x1="90" y1="280" x2="580" y2="280"/></g>
-<line x1="90" y1="360" x2="590" y2="360" stroke="#6B7379" stroke-width="1.5" marker-end="url(#qa)"/><line x1="90" y1="360" x2="90" y2="50" stroke="#6B7379" stroke-width="1.5" marker-end="url(#qa)"/>
-<text x="340" y="398" text-anchor="middle" font-size="15" fill="#4A5158">Carbon intensity of the product →</text>
-<text x="40" y="205" text-anchor="middle" transform="rotate(-90 40 205)" font-size="15" fill="#4A5158">Cost per tonne →</text>
-<path d="M120 90 C 200 160, 270 220, 340 246 S 470 266, 520 262 L 520 360 L 120 360 Z" fill="none"/>
-<clipPath id="qc"><rect x="335" y="0" width="200" height="248"/></clipPath>
-<path d="M120 90 C 200 160, 270 220, 340 246 S 470 266, 520 262 L 520 248 L 120 248 Z" fill="url(#qg)" clip-path="url(#qc)"/>
-<line x1="120" y1="248" x2="560" y2="248" stroke="#6B7379" stroke-width="2" stroke-dasharray="6 6"/>
-<path d="M120 90 C 200 160, 270 220, 340 246 S 470 266, 520 262" fill="none" stroke="#1B3A5C" stroke-width="4" stroke-linecap="round"/>
-<circle cx="120" cy="90" r="14" fill="#1E9A6E"/><text x="144" y="84" font-size="15" font-weight="700" fill="#1E9A6E">Green ammonia</text><text x="144" y="103" font-size="13" fill="#6B7379">zero carbon, highest cost</text>
-<circle cx="560" cy="248" r="14" fill="#8A8F94"/><text x="560" y="228" text-anchor="middle" font-size="15" font-weight="700" fill="#4A5158">Conventional</text>
-<text x="262" y="182" font-size="15" font-weight="700" fill="#1B3A5C">Hybrid plant</text><text x="262" y="200" font-size="13" fill="#6B7379">optimized for each target</text>
-<circle cx="345" cy="247" r="7" fill="#fff" stroke="#A6392A" stroke-width="3"/>
-<line x1="351" y1="254" x2="392" y2="312" stroke="#A6392A" stroke-width="1.5"/><text x="398" y="326" font-size="14" font-weight="700" fill="#A6392A">No green premium</text><text x="398" y="344" font-size="12.5" fill="#A6392A">cheaper than conventional from here</text>
-<text x="500" y="290" text-anchor="middle" font-size="13" fill="#1B6F8E" font-weight="700">below the baseline</text>
-<text class="mono" x="120" y="382" text-anchor="middle" font-size="12" fill="#6B7379">0</text><text class="mono" x="560" y="382" text-anchor="middle" font-size="12" fill="#6B7379">BAU</text>
+<defs><linearGradient id="qg" x1="0" x2="0" y1="0" y2="1"><stop offset="0" stop-color="#1B6F8E" stop-opacity=".22"/><stop offset="1" stop-color="#1B6F8E" stop-opacity=".04"/></linearGradient><marker id="qa" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0 0L10 5L0 10z" fill="#15181B"/></marker><clipPath id="qc"><rect x="335" y="0" width="230" height="248"/></clipPath></defs>
+<g stroke="#E3DFD8" stroke-width="1"><line x1="62" y1="110" x2="600" y2="110"/><line x1="62" y1="180" x2="600" y2="180"/><line x1="62" y1="320" x2="600" y2="320"/></g>
+<line x1="62" y1="372" x2="618" y2="372" stroke="#15181B" stroke-width="2" marker-end="url(#qa)"/><line x1="62" y1="372" x2="62" y2="26" stroke="#15181B" stroke-width="2" marker-end="url(#qa)"/>
+<text x="340" y="424" text-anchor="middle" font-size="22" font-weight="700" fill="#15181B">Carbon intensity of the product →</text>
+<text x="26" y="200" text-anchor="middle" transform="rotate(-90 26 200)" font-size="22" font-weight="700" fill="#15181B">Cost per tonne →</text>
+<path d="M95 60 C 185 150, 265 230, 345 250 S 490 268, 545 262 L 545 248 L 95 248 Z" fill="url(#qg)" clip-path="url(#qc)"/>
+<line x1="95" y1="250" x2="585" y2="250" stroke="#4A5158" stroke-width="2.5" stroke-dasharray="7 7"/>
+<path d="M95 60 C 185 150, 265 230, 345 250 S 490 268, 545 262" fill="none" stroke="#1B3A5C" stroke-width="5" stroke-linecap="round"/>
+<circle cx="95" cy="60" r="16" fill="#1E9A6E"/><text x="122" y="55" font-size="19" font-weight="700" fill="#1E9A6E">Green ammonia</text><text x="122" y="77" font-size="16" fill="#4A5158">zero carbon, highest cost</text>
+<circle cx="585" cy="250" r="16" fill="#8A8F94"/><text x="585" y="222" text-anchor="middle" font-size="19" font-weight="700" fill="#4A5158">Business-as-usual</text>
+<text x="262" y="160" font-size="19" font-weight="700" fill="#1B3A5C">Hybrid plant</text><text x="262" y="182" font-size="16" fill="#4A5158">optimized for each target</text>
+<circle cx="350" cy="251" r="9" fill="#fff" stroke="#A6392A" stroke-width="3.5"/>
+<line x1="344" y1="260" x2="322" y2="298" stroke="#A6392A" stroke-width="2"/><text x="326" y="318" text-anchor="end" font-size="18" font-weight="700" fill="#A6392A">Economic Decarbonization</text><text x="326" y="340" text-anchor="end" font-size="18" font-weight="700" fill="#A6392A">Threshold</text><text x="326" y="361" text-anchor="end" font-size="15" fill="#A6392A">cheaper than business-as-usual</text>
+<text x="470" y="297" text-anchor="middle" font-size="16" font-weight="700" fill="#1B6F8E">below the baseline</text>
+<text class="mono" x="95" y="396" text-anchor="middle" font-size="16" fill="#15181B">0</text><text class="mono" x="585" y="396" text-anchor="middle" font-size="16" fill="#15181B">BAU</text>
 </svg></div>
 </div>
 </div></section>
