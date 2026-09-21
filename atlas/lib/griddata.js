@@ -7,8 +7,8 @@ const GRID = { index: null, regions: {}, cellCache: new Map() };
 const GRID_BASE = (window.HOPS_DATA_BASE || '../data/') + 'grid/';
 const CF_BASE = window.HOPS_CF_BASE || '';                                   // e.g. https://pub-….r2.dev/cf — empty: hourly series unavailable
 const GRID_METRICS = {
-  solar:  { n: 'Solar CF',            u: '',  d: 'annual mean capacity factor, fixed-tilt PV (atlite / ERA5 2025)', lo: 0.05, hi: 0.25, ramp: ['#2b1d0e', '#8a5a1e', '#e6a532', '#fff2b3'] },
-  wind:   { n: 'Wind CF',             u: '',  d: 'annual mean capacity factor, onshore turbine at hub height', lo: 0.1, hi: 0.5, ramp: ['#0b1f33', '#1f5f8a', '#56b4e9', '#dff3ff'] },
+  solar:  { n: 'Solar CF',            u: '',  d: 'annual mean capacity factor, fixed-tilt PV (atlite / ERA5 2025)', lo: 0.08, hi: 0.24, show: true, ramp: ['#3b0f4a', '#8c2981', '#de4968', '#fe9f6d', '#fcfdbf'] },
+  wind:   { n: 'Wind CF',             u: '',  d: 'annual mean capacity factor, onshore turbine at hub height', lo: 0.12, hi: 0.48, show: true, ramp: ['#0d0887', '#5c01a6', '#9c179e', '#ed7953', '#f0f921'] },
   comb:   { n: 'Combined CF',         u: '',  d: 'mean CF of the variance-minimising wind + solar mix (1 MW total nameplate)', lo: 0.15, hi: 0.4, ramp: ['#0f2a1e', '#1b7f5a', '#4fd39a', '#e4ffef'] },
   comb50: { n: 'Combined CF · 50/50', u: '',  d: 'mean CF at a 1:1 capacity mix', lo: 0.15, hi: 0.4, ramp: ['#0f2a1e', '#1b7f5a', '#4fd39a', '#e4ffef'] },
   share:  { n: 'Optimal PV share',    u: '%', d: 'PV share of capacity that minimises the variance of the combined output', lo: 0, hi: 1, ramp: ['#1f5f8a', '#cfd8dc', '#e6a532'] },

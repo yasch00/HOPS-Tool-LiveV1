@@ -126,44 +126,42 @@ function renderBuildSide(){
   if (typeof renderResourceControls === 'function') renderResourceControls();
 }
 /* ---- the wide assumptions window (bottom of the screen) once a site is chosen */
-function closeBuildWizard(){ const w = document.getElementById('buildWizard'); if (w) w.hidden = true; }
+function closeBuildWizard(){ const w = document.getElementById('buildWizard'); if (w) w.hidden = true; document.body.classList.remove('wizard-open'); }
 function renderBuildPanel(){
   renderBuildSide();
   const host = document.getElementById('buildWizard'); if (!host) return;
-  if (BUILD.lat == null) { host.hidden = true; return; }
-  host.hidden = false;
+  if (BUILD.lat == null) { host.hidden = true; document.body.classList.remove('wizard-open'); return; }
+  host.hidden = false; document.body.classList.add('wizard-open');
   const E = buildEstimate();
   const step = (n, t, done) => `<div class="bstep ${done ? 'done' : ''}"><span class="bnum">${n}</span><span>${t}</span></div>`;
   const head = `<div class="bw-head"><div><div class="fp-h" style="margin-bottom:2px">Build a plant · ${BUILD.name || 'New site'}</div><div class="sub">${BUILD.lat.toFixed(4)}°, ${BUILD.lon.toFixed(4)}° · nearest modelled plant ${BUILD.near[0].p.name} (${fmt(BUILD.near[0].km)} km) · region ${BUILD.near[0].p.region}</div></div>
-    <div class="bsteps" style="margin:0">${step(1, 'Site', true)}${step(2, 'Plant', true)}${step(3, 'Assumptions', true)}${step(4, 'Estimate', !!E)}${step(5, 'Exact run', false)}</div>
+    <div class="bsteps" style="margin:0">${step(1, 'Site', true)}${step(2, 'Economic', true)}${step(3, 'Capital & technical', true)}${step(4, 'Estimate', !!E)}${step(5, 'Exact run', false)}</div>
     <span style="display:flex;gap:6px"><button class="btn ghost sm" onclick="closeBuildWizard()" title="Keep the site, look at the map">Map</button><button class="btn ghost sm" onclick="leaveBuild()">✕</button></span></div>`;
-  // column A — site + resource
-  let colA = `<div class="fin-group"><div class="fp-h">1 · Site</div>
+  // one assumptions group (Economic / Capital cost / Technical) as slider rows
+  const groupHTML = (name) => { const fs = (TECH_FIELDS.find(g => g[0] === name) || [null, []])[1];
+    return fs.map(f => { const [k, n, u, lo, hi, st, , dec] = f, isPct = u === '%', v = techValue(k), changed = BUILD.T[k] != null;
+      return `<label class="fin-f" style="grid-template-columns:1fr 84px${changed ? ';background:var(--anchor-tint,#EAEFF5);border-radius:6px;padding:2px 4px' : ''}"><span class="fin-l">${n}${changed ? ' <b style="color:var(--accent)">·</b>' : ''}<small>${u}</small></span><input type="range" min="${lo}" max="${hi}" step="${st}" value="${v}" oninput="buildSetT('${k}',this.value)"><input type="number" class="fin-n" style="width:84px" step="${isPct ? st * 100 : st}" value="${isPct ? (v * 100).toFixed(dec) : (+v).toFixed(dec)}" onchange="buildSetT('${k}',${isPct ? 'this.value/100' : 'this.value'})"></label>`; }).join(''); };
+  const nT = Object.keys(BUILD.T).length;
+  // column A — site + economic assumptions
+  const colA = `<div class="fin-group"><div class="fp-h">1 · Site</div>
     <label class="fin-f" style="grid-template-columns:1fr"><span class="fin-l">Name<small>optional</small></span><input class="fin-n" style="width:100%;text-align:left" value="${(BUILD.name || '').replace(/"/g, '&quot;')}" onchange="buildSet('name',this.value)"></label>
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px"><label class="fin-f" style="grid-template-columns:1fr"><span class="fin-l">Latitude</span><input type="number" class="fin-n" style="width:100%" step="0.001" value="${BUILD.lat}" onchange="setBuildSite(+this.value,BUILD.lon,null)"></label>
     <label class="fin-f" style="grid-template-columns:1fr"><span class="fin-l">Longitude</span><input type="number" class="fin-n" style="width:100%" step="0.001" value="${BUILD.lon}" onchange="setBuildSite(BUILD.lat,+this.value,null)"></label></div>
-    <div class="sub">Nearest modelled: ${BUILD.near.map(x => `${x.p.name} ${fmt(x.km)} km`).join(' · ')}</div>
-    ${buildResourceHTML()}</div>`;
-  // column B — plant + assumptions
-  let h = `<div class="fin-group"><div class="fp-h">2 · Plant</div>
-    <label class="fin-f"><span class="fin-l">Capacity<small>t NH₃/day</small></span><input type="range" min="100" max="4000" step="50" value="${BUILD.tpd}" oninput="buildSet('tpd',this.value)"><input type="number" class="fin-n" step="50" value="${BUILD.tpd}" onchange="buildSet('tpd',this.value)"></label>
-    <div class="sub" style="margin:-4px 0 6px">${fmt(BUILD.tpd * 365 / 1000)} kt/yr</div>
-    <div class="ci-bar" style="margin:0 0 4px"><span class="lbl">Show</span>${['SMR', 'SMR+CCS'].map(pt => `<button class="ci-pill sm ${BUILD.path === pt ? 'active' : ''}" onclick="buildSet('path','${pt}')">${pt.replace('+CCS', ' +CCS')}</button>`).join('')}</div>
-    <div class="sub">The exact run always solves both pathways over the full carbon-intensity sweep (0 – 1.75 t CO₂/t NH₃ in 0.25 steps), exactly like the published fleet. The toggle only picks which one the estimate shows.</div></div>`;
-  // 3 assumptions — economic + technical, defaults shown
-  const nT = Object.keys(BUILD.T).length;
-  h += `<div class="fin-group"><div class="fp-h">3 · Assumptions <button class="btn ghost sm" style="float:right" onclick="buildResetT()">Reset to defaults</button></div>
-    <div class="sub" style="margin-bottom:6px">Shown with the model's default values (region ${BUILD.near[0].p.region}). Edit any of them; ${nT ? '<b>' + nT + ' changed</b>' : 'none changed'}. Financing (debt, tax, hurdle) is post-optimization and stays in the results' Finance tab.</div>
-    ${TECH_FIELDS.map(([g, fs]) => `<div class="fp-h" style="margin-top:8px">${g}</div>` + fs.map(f => { const [k, n, u, lo, hi, st, , dec] = f, isPct = u === '%', v = techValue(k), changed = BUILD.T[k] != null;
-      return `<label class="fin-f" style="grid-template-columns:1fr 84px${changed ? ';background:var(--anchor-tint,#EAEFF5);border-radius:6px;padding:2px 4px' : ''}"><span class="fin-l">${n}${changed ? ' <b style="color:var(--accent)">·</b>' : ''}<small>${u}</small></span><input type="range" min="${lo}" max="${hi}" step="${st}" value="${v}" oninput="buildSetT('${k}',this.value)"><input type="number" class="fin-n" style="width:84px" step="${isPct ? st * 100 : st}" value="${isPct ? (v * 100).toFixed(dec) : (+v).toFixed(dec)}" onchange="buildSetT('${k}',${isPct ? 'this.value/100' : 'this.value'})"></label>`; }).join('')).join('')}
-  </div>`;
-  const colB = h;
+    <label class="fin-f"><span class="fin-l">Capacity<small>t NH₃/day · ${fmt(BUILD.tpd * 365 / 1000)} kt/yr</small></span><input type="range" min="100" max="4000" step="50" value="${BUILD.tpd}" oninput="buildSet('tpd',this.value)"><input type="number" class="fin-n" step="50" value="${BUILD.tpd}" onchange="buildSet('tpd',this.value)"></label>
+    <div class="sub">Nearest modelled: ${BUILD.near.map(x => `${x.p.name} ${fmt(x.km)} km`).join(' · ')}</div></div>
+    <div class="fin-group"><div class="fp-h">2 · Economic assumptions</div><div class="sub" style="margin-bottom:6px">Model defaults for region ${BUILD.near[0].p.region}; edit any. Financing (debt, tax, hurdle) is post-optimization and lives in the results' Finance tab.</div>${groupHTML('Economic')}</div>
+    <div class="fin-group">${buildResourceHTML()}</div>`;
+  // column B — capital cost + technical assumptions
+  const colB = `<div class="fin-group"><div class="fp-h">3 · Capital cost <button class="btn ghost sm" style="float:right" onclick="buildResetT()">Reset to defaults</button></div>${groupHTML('Capital cost')}</div>
+    <div class="fin-group"><div class="fp-h">Technical</div>${groupHTML('Technical')}<div class="sub" style="margin-top:6px">${nT ? '<b>' + nT + ' changed</b>' : 'No assumption changed'} · the exact run solves both pathways over the full carbon-intensity sweep (0 – 1.75 t CO₂/t NH₃ in 0.25 steps), like the published fleet.</div></div>`;
+  let h = '';
+
   // column C — estimate + request
   h = '';
   // 4 estimate
   if (E) {
     const c = E.cap;
-    h += `<div class="fin-group"><div class="fp-h">4 · Estimate <span class="badge est" style="margin-left:6px">proxy</span></div>
+    h += `<div class="fin-group"><div class="fp-h">4 · Estimate <span class="badge est" style="margin-left:6px">proxy</span><span class="ci-bar" style="float:right;margin:0">${['SMR', 'SMR+CCS'].map(pt => `<button class="ci-pill sm ${BUILD.path === pt ? 'active' : ''}" onclick="buildSet('path','${pt}')">${pt.replace('+CCS', ' +CCS')}</button>`).join('')}</span></div>
       <div class="site-kpis">
         <div><div class="l">${(typeof lcoaLabel === 'function') ? lcoaLabel() : 'LCOA'}, lowest-cost point</div><div class="v">${fmt(E.r.lcoa)}<small> $/t</small></div><div class="d">at CI ${E.r.target.toFixed(2)} · BAU ${fmt(E.bau && E.bau.lcoa)} $/t · sweep ${fmt(Math.min(...E.sweep.map(x => x[1])))}–${fmt(Math.max(...E.sweep.map(x => x[1])))} $/t</div></div>
         <div><div class="l">Design</div><div class="v">${fmt(c.wt)}<small> MW wind</small></div><div class="d">${fmt(c.pv)} MW PV · ${fmt(c.el)} MW electrolysis · ${fmt(c.smr)} t H₂/d reformer · ${fmt(c.b)} MW battery</div></div>
@@ -176,7 +174,7 @@ function renderBuildPanel(){
   // 5 request
   h += `<div class="fin-group"><div class="fp-h">5 · Exact run</div>
     <p class="sub">Queue HOPS for these coordinates: the site's own hourly weather and local market data are used, the plant is co-sized and dispatched hourly for every CI target and both pathways with the assumptions above, and the results are published here with a link back. Runs are solved in batches and take about an hour of compute each.</p>
-    <div class="sp-actions">${REQUEST_ENDPOINT ? `<button class="btn" id="buildSubmitBtn" onclick="buildSubmit()">Request the run →</button>` : `<a class="btn" target="_blank" rel="noopener" href="${buildIssueURL(E)}" onclick="buildWatchForIssue()">Request the run on GitHub →</a>`}<button class="btn ghost" onclick="buildDownloadSpec()">Download spec (JSON)</button></div>
+    <div class="sp-actions">${REQUEST_ENDPOINT ? `<button class="btn" id="buildSubmitBtn" onclick="buildSubmit()">Request the run →</button>` : `<a class="btn" target="_blank" rel="noopener" href="${buildIssueURL(E)}" onclick="buildWatchForIssue()">Request the run on GitHub →</a>`}</div>
     <div class="sub" id="buildStatus" style="margin-top:8px">${BUILD.status || (REQUEST_ENDPOINT ? 'One click: the request is registered and the site opens under construction while HOPS solves it.' : 'Opens a prefilled GitHub issue in a new tab (a GitHub account is needed to submit it). This page keeps watching and opens the construction site as soon as the request is registered — no reload.')}</div></div>`;
   const colC = h;
   host.innerHTML = head + `<div class="bw-cols"><div class="bw-col">${colA}</div><div class="bw-col">${colB}</div><div class="bw-col">${colC}</div></div>`;
@@ -194,10 +192,6 @@ function buildIssueURL(E){
   const changed = Object.keys(BUILD.T).length ? Object.entries(BUILD.T).map(([k, v]) => k + '=' + v).join(', ') : 'none (model defaults)';
   const body = `## HOPS run request\n\n| | |\n|---|---|\n| Site | ${BUILD.name || '—'} (${BUILD.lat}, ${BUILD.lon}) |\n| Capacity | ${fmt(BUILD.tpd)} t NH₃/day |\n| Pathways | SMR and SMR+CCS, full CI sweep |\n| Nearest modelled | ${E ? E.n.p.name + ' · ' + Math.round(E.n.km) + ' km' : '—'} |\n| Changed assumptions | ${changed} |\n\n<details><summary>Spec (JSON)</summary>\n\n\`\`\`json\n${JSON.stringify(spec, null, 1)}\n\`\`\`\n</details>\n\n_Submitted from the atlas · data ${MANIFEST.version}_`;
   return `${REPO_ISSUES}?labels=run-request&title=${encodeURIComponent(title)}&body=${encodeURIComponent(body)}`;
-}
-function buildDownloadSpec(){
-  const a = document.createElement('a'); a.href = URL.createObjectURL(new Blob([JSON.stringify(buildSpec(buildEstimate()), null, 1)], { type: 'application/json' }));
-  a.download = `hops_run_request_${BUILD.lat}_${BUILD.lon}.json`; a.click();
 }
 
 /* ---- submission: through the endpoint (one click), or by watching the issues list after the GitHub tab was used */
@@ -234,22 +228,21 @@ function buildWatchForIssue(){
 function buildSetShare(v){ BUILD.share = +v; renderBuildPanel(); }
 function buildResourceHTML(){
   const c = BUILD.cell; if (typeof GRID_METRICS === 'undefined') return '';
-  if (!c) return `<div class="fp-h" style="margin-top:8px">Resource</div><div class="sub">No capacity-factor grid covers this point (modelled regions: Europe, North America) — the exact run would fail here; the estimate still uses the proxy plant.</div>`;
-  const chip = (k) => `<div><div class="l">${GRID_METRICS[k].n}</div><div class="v" style="font-size:18px">${gridFmt(k, c.m[k])}</div><div class="d">${k === 'comb' ? 'PV share ' + (c.m.share * 100).toFixed(0) + ' % · corr ' + gridFmt('corr', c.m.corr) : k === 'solar' ? fmt(c.m.solar * 8760) + ' full-load h' : fmt(c.m.wind * 8760) + ' full-load h'}</div></div>`;
-  let h = `<div class="fp-h" style="margin-top:8px">Resource · cell ${c.lat.toFixed(2)}°, ${c.lon.toFixed(2)}° (${c.region})</div><div class="site-kpis" style="grid-template-columns:repeat(3,1fr)">${chip('solar')}${chip('wind')}${chip('comb')}</div>`;
+  if (!c) return `<div class="fp-h">Resource</div><div class="sub">No capacity-factor grid covers this point (modelled regions: Europe, North America) — the exact run would fail here; the estimate still uses the proxy plant.</div>`;
+  const chip = (k) => `<div><div class="l">${GRID_METRICS[k].n}</div><div class="v" style="font-size:18px">${gridFmt(k, c.m[k])}</div><div class="d">${fmt(c.m[k] * 8760)} full-load h/yr</div></div>`;
+  let h = `<div class="fp-h">Resource · cell ${c.lat.toFixed(2)}°, ${c.lon.toFixed(2)}° (${c.region})</div><div class="site-kpis" style="grid-template-columns:1fr 1fr">${chip('solar')}${chip('wind')}</div>`;
   const cf = BUILD.cf;
   if (cf) {
-    const share = BUILD.share != null ? BUILD.share : c.m.share, comb = combineSeries(cf.solar, cf.wind, share), S = seriesStats(cf.solar), W = seriesStats(cf.wind), Cc = seriesStats(comb);
+    const S = seriesStats(cf.solar), W = seriesStats(cf.wind);
     const MN = ['J', 'F', 'M', 'A', 'M', 'J', 'J', 'A', 'S', 'O', 'N', 'D'], w = 300, hgt = 92, ml = 26, pw = w - ml - 6, ph = hgt - 22, ymax = Math.max(0.5, ...S.monthly, ...W.monthly) * 1.05;
     const y = v => 10 + ph - v / ymax * ph, xs = i => ml + i / 11 * pw, path = a => a.map((v, i) => (i ? 'L' : 'M') + xs(i).toFixed(1) + ' ' + y(v).toFixed(1)).join(' ');
-    h += `<svg viewBox="0 0 ${w} ${hgt}" style="width:100%;margin-top:6px"><line x1="${ml}" y1="${y(0)}" x2="${w - 6}" y2="${y(0)}" stroke="rgba(255,255,255,.25)"/>
-      ${[0.25, 0.5].filter(v => v < ymax).map(v => `<line x1="${ml}" y1="${y(v)}" x2="${w - 6}" y2="${y(v)}" stroke="rgba(255,255,255,.1)"/><text x="${ml - 3}" y="${y(v) + 3}" font-size="8" text-anchor="end" fill="#9aa">${v}</text>`).join('')}
-      <path d="${path(S.monthly)}" fill="none" stroke="#E69F00" stroke-width="1.8"/><path d="${path(W.monthly)}" fill="none" stroke="#56B4E9" stroke-width="1.8"/><path d="${path(Cc.monthly)}" fill="none" stroke="#4fd39a" stroke-width="2.2"/>
-      ${MN.map((m, i) => `<text x="${xs(i)}" y="${hgt - 4}" font-size="8" text-anchor="middle" fill="#9aa">${m}</text>`).join('')}</svg>
-      <div class="chart-legend" style="margin:2px 0 4px"><span><i style="background:#E69F00"></i>Solar ${(S.mean * 100).toFixed(1)} %</span><span><i style="background:#56B4E9"></i>Wind ${(W.mean * 100).toFixed(1)} %</span><span><i style="background:#4fd39a"></i>Combined ${(Cc.mean * 100).toFixed(1)} % · CV ${Cc.cv.toFixed(2)} · ${(Cc.lowh * 100).toFixed(0)} % low hours</span></div>
-      <label class="fin-f" style="grid-template-columns:1fr 84px"><span class="fin-l">PV share of capacity<small>combined output</small></span><input type="range" min="0" max="1" step="0.05" value="${share}" oninput="buildSetShare(this.value)"><span class="fin-n">${(share * 100).toFixed(0)} %</span></label>
-      <div class="sub" style="font-size:10.5px">Monthly mean capacity factors of this cell, hourly 2025. The combined line is the output of 1 MW nameplate split ${(share * 100).toFixed(0)} % PV / ${(100 - share * 100).toFixed(0)} % wind; the variance-minimising split is ${(c.m.share * 100).toFixed(0)} % PV. The optimizer chooses its own mix from cost — see the nearest plant's solved design below.</div>`;
-  } else if (typeof CF_BASE !== 'undefined' && !CF_BASE) h += `<div class="sub" style="font-size:10.5px">Hourly profiles are not published yet (HOPS_CF_BASE unset).</div>`;
+    h += `<svg viewBox="0 0 ${w} ${hgt}" style="width:100%;margin-top:6px"><line x1="${ml}" y1="${y(0)}" x2="${w - 6}" y2="${y(0)}" stroke="rgba(0,0,0,.25)"/>
+      ${[0.25, 0.5].filter(v => v < ymax).map(v => `<line x1="${ml}" y1="${y(v)}" x2="${w - 6}" y2="${y(v)}" stroke="rgba(0,0,0,.1)"/><text x="${ml - 3}" y="${y(v) + 3}" font-size="8" text-anchor="end" fill="#667">${v}</text>`).join('')}
+      <path d="${path(S.monthly)}" fill="none" stroke="#E69F00" stroke-width="2"/><path d="${path(W.monthly)}" fill="none" stroke="#0072B2" stroke-width="2"/>
+      ${MN.map((m, i) => `<text x="${xs(i)}" y="${hgt - 4}" font-size="8" text-anchor="middle" fill="#667">${m}</text>`).join('')}</svg>
+      <div class="chart-legend" style="margin:2px 0 4px"><span><i style="background:#E69F00"></i>Solar ${(S.mean * 100).toFixed(1)} %</span><span><i style="background:#0072B2"></i>Wind ${(W.mean * 100).toFixed(1)} %</span></div>
+      <div class="sub" style="font-size:10.5px">Monthly mean capacity factors of this cell, hourly 2025 (atlite / ERA5) — the series the exact run uses.</div>`;
+  } else if (typeof CF_BASE !== 'undefined' && !CF_BASE) h += `<div class="sub" style="font-size:10.5px">Annual values from the resource grid; the hourly profile is published once the cell files are on object storage.</div>`;
   else h += `<div class="sub" style="font-size:10.5px">Loading the hourly profile …</div>`;
   return h;
 }

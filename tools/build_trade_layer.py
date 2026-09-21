@@ -41,6 +41,8 @@ def col(d, prefix):
 def main():
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument("--xlsx", required=True); ap.add_argument("-o", "--out", default="data/trade")
+    ap.add_argument("--register", default="atlas/assets/static.json", help="the plant register (the atlas's global fleet with country + ktpa): capacity per country, and the production fallback")
+    ap.add_argument("--countries", default="data/geo/countries.json", help="country polygons with ISO3 (for name → ISO3)")
     a = ap.parse_args()
     wb = openpyxl.load_workbook(a.xlsx, read_only=True, data_only=True)
     summ = rows(wb["Country_summary"], "Country"); prod = rows(wb["Production"], "Country"); imp = rows(wb["Imports"], "Country"); exp = rows(wb["Exports"], "Country"); bil = rows(wb["Bilateral_2025"], "Importer")
@@ -66,6 +68,27 @@ def main():
     for iso, c in C.items():
         if c.get("net_kt") is None and (c.get("imports_kt") or c.get("exports_kt")): c["net_kt"] = (c.get("imports_kt") or 0) - (c.get("exports_kt") or 0)
         if c.get("demand_kt") is None and c.get("production_kt") is not None: c["demand_kt"] = c["production_kt"] + (c.get("net_kt") or 0)
+    # plant register: nameplate capacity per country — the source of truth for "how much ammonia is made here" where USGS has no row
+    try:
+        reg = json.loads(Path(a.register).read_text())["ammonia"]; geo = json.loads(Path(a.countries).read_text())["features"]
+        g2iso = {f["properties"]["name"]: f["properties"]["iso3"] for f in geo}
+        g2iso.update({"USA": "USA", "United States": "USA", "Russia": "RUS", "Iran": "IRN", "Vietnam": "VNM", "North Korea": "PRK", "South Korea": "KOR", "Czech Republic": "CZE", "Czechia": "CZE",
+                      "Bosnia and Herzegovina": "BIH", "Serbia": "SRB", "Trinidad and Tobago": "TTO", "United Kingdom": "GBR", "Turkey": "TUR", "Syria": "SYR", "Libya": "LBY", "Venezuela": "VEN", "Bolivia": "BOL", "Tanzania": "TZA", "Ivory Coast": "CIV", "Bahrain": "BHR", "Qatar": "QAT", "Kuwait": "KWT", "UAE": "ARE", "United Arab Emirates": "ARE", "Bahrein": "BHR"})
+        cap, cnt, unk = {}, {}, set()
+        for pl in reg:
+            iso = g2iso.get(pl.get("country")); 
+            if not iso: unk.add(pl.get("country")); continue
+            cap[iso] = cap.get(iso, 0) + float(pl.get("ktpa") or 0); cnt[iso] = cnt.get(iso, 0) + 1
+        for iso, k in cap.items():
+            c = C.setdefault(iso, {"name": next((f["properties"]["name"] for f in geo if f["properties"]["iso3"] == iso), iso), "basis": {}})
+            c["capacity_ktpa"] = round(k, 1); c["plants"] = cnt[iso]
+            if c.get("production_kt") is None and k > 0:
+                c["production_kt"] = round(k, 1); c["basis"]["production"] = "nameplate capacity (plant register) — no USGS row"
+                c["demand_kt"] = round(k + (c.get("net_kt") or 0), 1); c["basis"]["demand"] = "capacity + net trade"
+            elif c.get("production_kt") is not None: c["basis"]["production"] = "USGS 2025e"
+        print(f"register: {len(reg)} plants → capacity for {len(cap)} countries; unmapped names: {sorted(x for x in unk if x)}")
+    except Exception as e:
+        print(f"[register] skipped ({e})")
     flows, unknown = [], set()
     for r in bil:
         imp_name = str(r["Importer"]).strip(); frm = r.get("ISO3 exporter"); kt = num(col(r, "Quantity"))
@@ -75,7 +98,7 @@ def main():
         if not frm or not kt: continue
         flows.append({"from": frm, "to": to, "kt": round(kt / 1000, 2), "value_kusd": num(col(r, "Value")), "note": (str(r.get("Note")).strip() if r.get("Note") else None)})
     flows.sort(key=lambda f: -f["kt"])
-    meta = {"units": "kt NH3 per year (2025; 2024 where flagged in basis)", "year": 2025,
+    meta = {"units": "kt NH3 per year (2025; 2024 where flagged in basis); production = USGS where reported, else nameplate capacity of the plant register", "year": 2025,
             "sources": ["USGS Mineral Commodity Summaries 2026 — Nitrogen (fixed)—Ammonia, production (kt N × 1.2159)", "UN Comtrade via WITS — HS 2814 anhydrous ammonia, imports/exports 2024–2025", "Bilateral: importer-reported partner tonnages (WITS), 2025"],
             "notes": ["Apparent demand = production + imports − exports; captive production dominates, so it is an upper bound of the merchant market.",
                       "Russia reports no trade; Algeria/Oman/Qatar 2025 exports missing (2024 used where available); Morocco/Turkey 2025 imports value-only (2024 tonnage used).",

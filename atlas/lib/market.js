@@ -5,11 +5,11 @@
 const MARKET = { data: null, geo: null, metric: null, flows: false, focus: null, minKt: 50, loaded: false };
 const MARKET_BASE = (window.HOPS_DATA_BASE || '../data/');
 const MARKET_METRICS = {
-  production_kt: { n: 'Production', d: 'ammonia production 2025e (USGS, kt NH₃)', ramp: ['#EEF4F7', '#8CC5D8', '#1B6F8E', '#123542'] },
-  demand_kt:     { n: 'Apparent demand', d: 'production + imports − exports (kt NH₃) — an upper bound of the merchant market', ramp: ['#EEF4F7', '#9ad9bd', '#1E9A6E', '#0f5c42'] },
-  imports_kt:    { n: 'Imports', d: 'ammonia imports (UN Comtrade, kt NH₃)', ramp: ['#EEF4F7', '#f6c48a', '#D9822B', '#7a4210'] },
-  exports_kt:    { n: 'Exports', d: 'ammonia exports (UN Comtrade, kt NH₃)', ramp: ['#EEF4F7', '#c6b0e6', '#8b5cd6', '#3f2478'] },
-  net_kt:        { n: 'Net trade', d: 'imports − exports: orange = net importer, blue = net exporter (kt NH₃)', diverging: true, ramp: ['#1B6F8E', '#f4f1ea', '#D9822B'] }
+  production_kt: { n: 'Production', d: 'ammonia production 2025e — USGS where reported, else the nameplate capacity of the plant register (kt NH₃)', ramp: ['#bfe3f0', '#56b4e9', '#1B6F8E', '#0b2a3a'] },
+  demand_kt:     { n: 'Apparent demand', d: 'production + imports − exports (kt NH₃) — an upper bound of the merchant market', ramp: ['#c9efd9', '#4fd39a', '#1E9A6E', '#083f2c'] },
+  imports_kt:    { n: 'Imports', d: 'ammonia imports (UN Comtrade, kt NH₃)', ramp: ['#ffe2b8', '#f5a94a', '#D9822B', '#5a2e05'] },
+  exports_kt:    { n: 'Exports', d: 'ammonia exports (UN Comtrade, kt NH₃)', ramp: ['#e2d3f7', '#b48ae8', '#7b3fd1', '#2f1160'] },
+  net_kt:        { n: 'Net trade', d: 'imports − exports: orange = net importer, blue = net exporter (kt NH₃)', diverging: true, ramp: ['#0b4f73', '#56b4e9', '#f7f3ea', '#f5a94a', '#8a3b00'] }
 };
 const FLOW_COLORS = ['#0072B2', '#D55E00', '#009E73', '#CC79A7', '#E69F00', '#56B4E9', '#8b5cd6', '#1E9A6E', '#a6392a', '#4C5B6E'];
 async function marketLoad(){
@@ -23,9 +23,9 @@ async function marketLoad(){
 function marketQuantile(metric){ const v = Object.values(MARKET.data.countries).map(c => c[metric]).filter(x => x != null && isFinite(x)).map(Math.abs).sort((a, b) => a - b); return v.length ? v[Math.floor(v.length * 0.92)] : 1; }
 async function ensureMarketLayers(){
   await marketLoad(); if (map.getSource('countries')) return;
-  const feats = MARKET.geo.features.map(f => { const c = MARKET.data.countries[f.properties.iso3] || {}; return { ...f, properties: { ...f.properties, production_kt: c.production_kt ?? null, demand_kt: c.demand_kt ?? null, imports_kt: c.imports_kt ?? null, exports_kt: c.exports_kt ?? null, net_kt: c.net_kt ?? null, hops: c.hops_plants ?? null } }; });
+  const feats = MARKET.geo.features.map(f => { const c = MARKET.data.countries[f.properties.iso3] || {}; return { ...f, properties: { ...f.properties, production_kt: c.production_kt ?? null, demand_kt: c.demand_kt ?? null, imports_kt: c.imports_kt ?? null, exports_kt: c.exports_kt ?? null, net_kt: c.net_kt ?? null, capacity: c.capacity_ktpa ?? null, plants: c.plants ?? null, pbasis: (c.basis && c.basis.production) || '' } }; });
   map.addSource('countries', { type: 'geojson', data: { type: 'FeatureCollection', features: feats } });
-  map.addLayer({ id: 'country-fill', type: 'fill', source: 'countries', layout: { visibility: 'none' }, paint: { 'fill-color': '#000', 'fill-opacity': ['interpolate', ['linear'], ['zoom'], 1, .68, 6, .45, 9, .15] } }, 'hops-halo');
+  map.addLayer({ id: 'country-fill', type: 'fill', source: 'countries', layout: { visibility: 'none' }, paint: { 'fill-color': '#000', 'fill-opacity': ['interpolate', ['linear'], ['zoom'], 1, .88, 6, .7, 9, .3] } }, 'hops-halo');
   map.addLayer({ id: 'country-line', type: 'line', source: 'countries', layout: { visibility: 'none' }, paint: { 'line-color': 'rgba(255,255,255,.55)', 'line-width': .6 } }, 'hops-halo');
   map.addLayer({ id: 'country-focus', type: 'line', source: 'countries', filter: ['==', ['get', 'iso3'], ''], paint: { 'line-color': '#F0E442', 'line-width': 2.2 } }, 'hops-halo');
   map.addSource('flows', { type: 'geojson', lineMetrics: true, data: { type: 'FeatureCollection', features: [] } });
@@ -42,9 +42,9 @@ function marketHover(e){
   const p = e.features[0].properties, tip = document.getElementById('tip'); if (!tip) return;
   const f = v => v == null || v === 'null' ? '—' : fmt(+v) + ' kt';
   tip.style.opacity = 1; tip.style.left = (e.originalEvent.clientX + 14) + 'px'; tip.style.top = (e.originalEvent.clientY + 14) + 'px';
-  tip.innerHTML = `<div class="t-n">${p.name}</div><div class="t-m">production ${f(p.production_kt)} · demand ${f(p.demand_kt)} · imports ${f(p.imports_kt)} · exports ${f(p.exports_kt)}${p.hops && p.hops !== 'null' ? ' · ' + p.hops + ' plants in the HOPS register' : ''}</div><div class="t-cta">${MARKET.flows ? 'click to show only this country\'s flows' : (typeof BUILD !== 'undefined' && BUILD.on ? 'click the map to site a plant here' : '')}</div>`;
+  tip.innerHTML = `<div class="t-n">${p.name}</div><div class="t-m">production ${f(p.production_kt)}${/register/.test(p.pbasis) ? ' (capacity)' : ''} · demand ${f(p.demand_kt)} · imports ${f(p.imports_kt)} · exports ${f(p.exports_kt)}${p.plants && p.plants !== 'null' ? ' · ' + p.plants + ' plants, ' + f(p.capacity) + '/yr nameplate' : ''}</div><div class="t-cta">${MARKET.flows ? 'click to show only this country\'s flows' : (typeof BUILD !== 'undefined' && BUILD.on ? 'click the map to site a plant here' : '')}</div>`;
 }
-function marketRamp(metric){ const M = MARKET_METRICS[metric]; if (M.diverging) { const q = marketQuantile(metric); return ['interpolate', ['linear'], ['coalesce', ['get', metric], 0], -q, M.ramp[0], 0, M.ramp[1], q, M.ramp[2]]; }
+function marketRamp(metric){ const M = MARKET_METRICS[metric]; if (M.diverging) { const q = marketQuantile(metric); return ['interpolate', ['linear'], ['coalesce', ['get', metric], 0], -q, M.ramp[0], -q / 4, M.ramp[1], 0, M.ramp[2], q / 4, M.ramp[3], q, M.ramp[4]]; }
   const q = marketQuantile(metric), n = M.ramp.length; return ['interpolate', ['linear'], ['sqrt', ['max', 0, ['coalesce', ['get', metric], 0]]], ...M.ramp.flatMap((c, k) => [Math.sqrt(q) * k / (n - 1), c])]; }
 async function setMarketLayer(metric){
   MARKET.metric = metric || null; await ensureMarketLayers();
@@ -67,7 +67,7 @@ function flowFeatures(){
   const exporters = [...new Set(F.map(f => f.from))]; const colorOf = iso => FLOW_COLORS[exporters.indexOf(iso) % FLOW_COLORS.length];
   const maxKt = Math.max(1, ...F.map(f => f.kt)), feats = [];
   for (const f of F) {
-    const pts = arcPoints(MARKET.centroid[f.from], MARKET.centroid[f.to]), w = 1.5 + 7 * Math.sqrt(f.kt / maxKt);
+    const pts = arcPoints(MARKET.centroid[f.from], MARKET.centroid[f.to]), w = 1 + 13 * (f.kt / maxKt);         // width is proportional to the tonnage
     const p1 = pts[pts.length - 2], p2 = pts[pts.length - 1], head = 90 - Math.atan2(p2[1] - p1[1], (p2[0] - p1[0]) * Math.cos(p2[1] * Math.PI / 180)) * 180 / Math.PI;
     const props = { from: f.from, to: f.to, kt: f.kt, w, c: colorOf(f.from), lbl: `${MARKET.name[f.from] || f.from} → ${MARKET.name[f.to] || f.to} · ${fmt(f.kt)} kt`, head };
     feats.push({ type: 'Feature', geometry: { type: 'LineString', coordinates: pts }, properties: props });
@@ -109,10 +109,10 @@ function marketCountryHTML(iso){
   const basis = Object.entries(c.basis || {}).filter(([, v]) => /2024/.test(v)).map(([k]) => k).join(', ');
   const rows = MARKET.flows && MARKET.last ? MARKET.data.flows.filter(x => x.from === iso || x.to === iso).slice(0, 8) : [];
   return `<div class="fp-h" style="margin-top:8px">${c.name}</div><div class="site-kpis" style="grid-template-columns:1fr 1fr">
-    <div><div class="l">Production</div><div class="v" style="font-size:18px">${f(c.production_kt)}</div><div class="d">2025e, USGS</div></div>
+    <div><div class="l">Production</div><div class="v" style="font-size:18px">${f(c.production_kt)}</div><div class="d">${c.basis && c.basis.production ? c.basis.production : '—'}</div></div>
     <div><div class="l">Apparent demand</div><div class="v" style="font-size:18px">${f(c.demand_kt)}</div><div class="d">prod + imp − exp</div></div>
     <div><div class="l">Imports</div><div class="v" style="font-size:18px">${f(c.imports_kt)}</div><div class="d">${c.basis && c.basis.imports || ''}</div></div>
     <div><div class="l">Exports</div><div class="v" style="font-size:18px">${f(c.exports_kt)}</div><div class="d">${c.basis && c.basis.exports || ''}</div></div></div>
-    ${c.hops_plants ? `<div class="sub">${c.hops_plants} plants in the HOPS register · ${fmt(c.hops_capacity_ktpa)} ktpa</div>` : ''}${basis ? `<div class="sub" style="color:var(--rust)">${basis}: 2025 tonnage missing in Comtrade, 2024 shown.</div>` : ''}
+    ${c.plants ? `<div class="sub">${c.plants} plants in the register · ${fmt(c.capacity_ktpa)} ktpa nameplate${c.hops_plants ? ' · ' + c.hops_plants + ' modelled by HOPS' : ''}</div>` : ''}${basis ? `<div class="sub" style="color:var(--rust)">${basis}: 2025 tonnage missing in Comtrade, 2024 shown.</div>` : ''}
     ${rows.length ? `<div class="fp-h" style="margin-top:8px">Bilateral flows 2025</div>` + rows.map(x => `<div class="legend-row" style="justify-content:space-between"><span><span class="dot" style="background:${MARKET.last.colorOf(x.from)}"></span>${MARKET.name[x.from] || x.from} → ${MARKET.name[x.to] || x.to}</span><span class="mono">${fmt(x.kt)} kt</span></div>`).join('') : ''}`;
 }
