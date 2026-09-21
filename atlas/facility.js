@@ -120,7 +120,8 @@ function facilityInfoHTML(){
   return `<div class="fac-info"><div class="fac-info-head"><span class="fac-num" style="background:#${d.color.toString(16).padStart(6, '0')}">${d.num}</span><b>${d.title}</b><span class="sub">${d.cat}</span><button class="btn ghost sm" style="margin-left:auto" onclick="FAC.sel=null;FAC.P.select(null);renderFacilityInfo()">✕</button></div>
     <p class="sub">${d.desc}</p>
     <div class="fac-io">${(d.io || []).map(io => `<span><i style="background:#${(PALETTE_HEX[io.c] || 'ffffff')}"></i>${io.dir === 'in' ? '←' : '→'} ${io.kind}</span>`).join('')}</div>
-    <div class="fac-specs">${real.map(([k, v, u]) => `<div><div class="l">${k}</div><div class="v">${v}<small> ${u}</small></div></div>`).join('')}</div></div>`;
+    <div class="fac-specs">${real.map(([k, v, u]) => `<div><div class="l">${k}</div><div class="v">${v}<small> ${u}</small></div></div>`).join('')}</div>
+    ${['battery', 'h2tank', 'heat'].includes(d.key) ? `<div class="sp-actions" style="margin-top:8px"><button class="btn sm" onclick="openStorageTab(${FAC.plant.idx})">Zoom in: energy storage →</button></div>` : ''}</div>`;
 }
 const PALETTE_HEX = { elec: 'ffb547', h2: '66d9ff', n2: '6be0b6', ng: 'ff8a4c', nh3: 'b691ff', co2: '8b96a2', heat: 'ff6b6b' };
 function renderFacilityInfo(){ const el = document.getElementById('facInfo'); if (el) el.innerHTML = facilityInfoHTML(); }
@@ -240,3 +241,6 @@ async function showConstruction(site, progress){
 function setConstructionProgress(p){ if (FAC.on && FAC.construction && FAC.P && FAC.P.setProgress) { FAC.P.setProgress(p); map.triggerRepaint(); } }
 const __hideFacilityBase = hideFacility;
 hideFacility = function(){ FAC.construction = false; __hideFacilityBase(); };
+
+/* the plant's storage units link into the results' Storage tab (technology sweep + cell lab) */
+function openStorageTab(idx){ openDashboard(idx); const t = document.querySelector('.tab[data-tab="storage"]'); if (t) t.click(); }

@@ -150,10 +150,10 @@ body.build-mode .brand h1,body.build-mode .brand .sub,body.build-mode .globe-foo
 
 /* ---------- DASHBOARD ---------- */
 #dashView{overflow-y:auto;background:var(--paper)}
-.dash-wrap{max-width:1180px;margin:0 auto;padding:0 30px 80px}
+.dash-wrap{max-width:1480px;margin:0 auto;padding:0 30px 80px}
 .dash-head{position:sticky;top:0;z-index:20;background:rgba(238,244,247,.93);backdrop-filter:blur(10px);
   border-bottom:1px solid var(--line);padding:16px 0;margin-bottom:0}
-.dash-head .inner{max-width:1180px;margin:0 auto;padding:0 30px;display:flex;align-items:center;gap:16px}
+.dash-head .inner{max-width:1480px;margin:0 auto;padding:0 30px;display:flex;align-items:center;gap:16px}
 .tabs{display:flex;gap:4px;background:var(--paper2);padding:4px;border-radius:11px;border:1px solid var(--line)}
 .tab{padding:8px 15px;border-radius:999px;font-size:12.5px;font-weight:600;color:var(--mut);transition:.15s}
 .tab.active{background:var(--card);color:var(--accent);box-shadow:var(--shadow)}
@@ -229,8 +229,7 @@ svg.chart{width:100%;display:block;overflow:visible}
 ::-webkit-scrollbar-track{background:transparent}
 @media(max-width:820px){.kpi-grid{grid-template-columns:1fr 1fr}.grid2{grid-template-columns:1fr}.filter-panel{width:210px}}
 /* build wizard: the wide assumptions window across the bottom of the screen */
-.oc-link{display:flex;justify-content:space-between;align-items:center;gap:16px;flex-wrap:wrap;background:var(--paper2);border:1px solid var(--line);border-radius:12px;padding:12px 16px;margin:0 0 14px;font-size:13px}.oc-link span{color:var(--mut)}
-.cl-grid{display:grid;grid-template-columns:minmax(240px,.8fr) minmax(0,1.4fr) minmax(240px,.9fr);gap:16px;align-items:start}.cl-f{display:grid;gap:4px;padding:8px 0;border-bottom:1px dotted var(--line);font-size:13px}.cl-f span small{display:block;font-family:'IBM Plex Mono',monospace;font-size:10.5px;color:var(--mut)}.cl-f input[type=range]{width:100%;accent-color:var(--accent)}.cl-f select{font-family:inherit;font-size:13px;padding:5px 8px;border:1px solid var(--line);border-radius:8px;background:var(--card)}.cl-f b{font-size:12.5px}.cl-grid .ptable{width:100%;border-collapse:collapse;font-size:12.5px}.cl-grid .ptable td,.cl-grid .ptable th{padding:5px 6px;border-bottom:1px solid var(--line);text-align:left}.cl-grid .p-val{font-family:'IBM Plex Mono',monospace;text-align:right!important}.cl-grid .readout{display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:8px}.cl-grid .readout b{display:block;font-size:20px;font-weight:800}.cl-grid .readout small{display:block;font-size:11px;color:var(--mut)}.cl-grid .eyebrow{font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:var(--mut);font-weight:600}.cl-grid .row{display:flex;justify-content:space-between;gap:10px;padding:5px 0;border-bottom:1px dotted var(--line);font-size:12.5px}@media(max-width:1000px){.cl-grid{grid-template-columns:1fr}}
+.oc-link{display:flex;justify-content:space-between;align-items:center;gap:16px;flex-wrap:wrap;background:var(--paper2);border:1px solid var(--line);border-radius:12px;padding:12px 16px;margin:0 0 16px;font-size:13.5px}.oc-link span{color:var(--mut)}.oc-btns{display:flex;gap:8px;flex:none}
 body.wizard-open .hud-left,body.wizard-open .filter-panel,body.wizard-open .globe-foot,body.wizard-open .brand{display:none}
 .build-wizard[hidden]{display:none}
 .build-wizard{position:fixed;left:50%;transform:translateX(-50%);bottom:16px;width:min(1400px,calc(100vw - 32px));max-height:74vh;z-index:30;padding:14px 18px 12px;display:flex;flex-direction:column;gap:10px}
@@ -427,15 +426,14 @@ function buildLayerList(){
   });
 }
 </script>
-<script src="lib/market.js?v=20260921101521"></script>
-<script src="lib/cell.js?v=20260921101521"></script>
-<script src="lib/storagelab.js?v=20260921101521"></script>
-<script src="lib/griddata.js?v=20260921101521"></script>
-<script src="map.js?v=20260921101521"></script>
-<script src="finance.js?v=20260921101521"></script>
-<script src="policy.js?v=20260921101521"></script>
-<script src="build.js?v=20260921101521"></script>
-<script src="facility.js?v=20260921101521"></script>
+<script src="lib/market.js?v=20260921102302"></script>
+<script src="lib/storagelab.js?v=20260921102302"></script>
+<script src="lib/griddata.js?v=20260921102302"></script>
+<script src="map.js?v=20260921102302"></script>
+<script src="finance.js?v=20260921102302"></script>
+<script src="policy.js?v=20260921102302"></script>
+<script src="build.js?v=20260921102302"></script>
+<script src="facility.js?v=20260921102302"></script>
 <script>
 /* ============ NAVIGATION ============ */
 let curScn=null, curPlantIdx=null, curCItarget=null;

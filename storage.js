@@ -94,7 +94,7 @@ async function renderPlant(){
 }
 
 /* the cell lab lives in atlas/lib/cell.js (shared with the tool) */
-function renderCell(){ const r = ST.row, p = ST.plantMap[ST.plant]; renderCellLab($('cellOut'), { batMWh: r ? (r.p_b || 0) * 4 : 0, pMW: r ? r.p_b : 0, plantName: p ? p.name : '', ci: ST.ci, capex_b: r ? r.capex_b : null }); }
+function renderCell(){ /* cell design is linked to STEER OpenCell instead of modelled here */ }
 
 /* ---------------------------------------------------------------- boot */
 window.addEventListener('load', async () => {

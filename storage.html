@@ -11,17 +11,7 @@
 .ctl{display:flex;gap:var(--s4);flex-wrap:wrap;align-items:end;margin:var(--s5) 0}
 .ctl label{display:grid;gap:4px;font-family:var(--mono);font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--ink-3)}
 .ctl select{font-family:var(--sans);font-size:14px;padding:7px 10px;border:1px solid var(--rule-2);border-radius:var(--r-md);background:var(--panel);color:var(--ink);min-width:160px}
-.oc-link{display:flex;justify-content:space-between;align-items:center;gap:16px;flex-wrap:wrap;background:var(--paper-2);border:1px solid var(--rule);border-radius:var(--r-md);padding:12px 16px;margin:0 0 var(--s4);font-size:14px}.oc-link span{color:var(--ink-2)}
-.cl-grid{display:grid;grid-template-columns:minmax(260px,.8fr) minmax(0,1.4fr) minmax(260px,.9fr);gap:var(--s5);align-items:start}
-.cl-f{display:grid;grid-template-columns:1fr;gap:4px;padding:8px 0;border-bottom:1px dotted var(--rule-2);font-size:14px}
-.cl-f span small{display:block;font-family:var(--mono);font-size:11px;color:var(--ink-3)}
-.cl-f input[type=range]{width:100%;accent-color:var(--anchor)}
-.cl-f select{font-family:var(--sans);font-size:14px;padding:6px 8px;border:1px solid var(--rule-2);border-radius:var(--r-md);background:var(--panel)}
-.cl-f b{font-size:13px}
-.card h3{margin-bottom:var(--s2)}
-.card .readout b{font-size:24px}
-.sec-head .ctl{margin-top:var(--s4)}
-@media(max-width:1000px){.cl-grid{grid-template-columns:1fr}}
+
 </style>
 </head>
 <body>
@@ -52,12 +42,11 @@
 </div></section>
 
 <section id="cell"><div class="wrap">
-<div class="sec-head"><span class="eyebrow">03 — Cell lab</span><div><h2>Inside the battery: design one cell, scale it to the plant.</h2>
-<p>A bottom-up Li-ion cell: choose chemistry, format and electrode design; the model builds the electrode stack, winds or stacks it into the cell, and returns capacity, energy density, mass and a materials bill — then multiplies it out to the battery the optimizer sized for the plant above. Simplified after the BatPaC / OpenCell approach; every constant is on screen.</p>
-<div id="cellOut"></div>
-<div class="note" style="margin-top:var(--s6)"><span class="eyebrow">What this is and is not</span><p class="small" style="margin:0">Areal capacity = loading × specific capacity; electrode thickness from loading, composite density and porosity; the stack fills the format's inner volume; electrolyte fills the pores. It reproduces commercial cells to within roughly 10 % (a 21700 NMC 811 at 18–20 mg/cm² lands near 4.8–5 Ah and 260–280 Wh/kg). Not modelled: rate capability, cycle life, thermal limits, formation losses, manufacturing cost — the optimizer's installed $/kWh covers those empirically.</p></div>
+<div class="sec-head"><span class="eyebrow">03 — Inside the battery</span><div><h2>Cell design is STEER's domain.</h2>
+<p>Chemistry, format, electrode loadings, materials and cost of a single cell — everything behind the optimizer's installed-battery number — is modelled in STEER OpenCell, Stanford Energy and SLAC's platform for battery design, cost intelligence and technology roadmapping.</p>
+<div class="cta"><a class="btn" href="https://dash.steerproject.org/opencell-beta/" target="_blank" rel="noopener">Open OpenCell →</a><a class="btn ghost" href="https://steer.stanford.edu/open-cell" target="_blank" rel="noopener">About OpenCell</a></div>
 </div></div>
-</section>
+</div></section>
 <footer class="site"><div class="wrap">
 <div class="foot-grid">
 <div><a class="brand" href="index.html" style="margin-bottom:var(--s3)"><b>HOPS</b><span>Stanford</span></a><p class="small" style="color:var(--ink-2);max-width:34ch">Hybrid Optimization of Plant Systems. A research tool for siting and sizing low-carbon ammonia production.</p></div>
@@ -69,6 +58,6 @@
 </div></footer>
 <script src="site.js"></script>
 </body>
-<script src="site.js"></script><script src="atlas/lib/cell.js"></script><script src="storage.js"></script>
+<script src="site.js"></script><script src="storage.js"></script>
 </body>
 </html>
