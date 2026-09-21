@@ -228,6 +228,13 @@ svg.chart{width:100%;display:block;overflow:visible}
 ::-webkit-scrollbar-thumb{background:var(--line);border-radius:6px}
 ::-webkit-scrollbar-track{background:transparent}
 @media(max-width:820px){.kpi-grid{grid-template-columns:1fr 1fr}.grid2{grid-template-columns:1fr}.filter-panel{width:210px}}
+/* build wizard: the wide assumptions window across the bottom of the screen */
+.build-wizard{position:fixed;left:50%;transform:translateX(-50%);bottom:16px;width:min(1400px,calc(100vw - 32px));max-height:74vh;z-index:30;padding:14px 18px 12px;display:flex;flex-direction:column;gap:10px}
+.bw-head{display:flex;justify-content:space-between;align-items:center;gap:16px;flex-wrap:wrap;border-bottom:1px solid var(--line);padding-bottom:10px}
+.bw-cols{display:grid;grid-template-columns:1fr 1.15fr 1fr;gap:16px;min-height:0;flex:1}
+.bw-col{overflow-y:auto;max-height:calc(74vh - 92px);padding-right:6px}
+.bw-col .fin-group{margin-top:0}
+@media(max-width:1000px){.bw-cols{grid-template-columns:1fr}.bw-col{max-height:none}.build-wizard{max-height:80vh;overflow-y:auto}}
 h1,h2,h3,.disp,.site-panel h2,.site-kpis .v,.kpi .v,.card-h h3,.section-t,.crumb .loc,.ci-detail .cig .v,.assump-sec h4,.brand h1{font-weight:800;letter-spacing:-.025em}
 .brand h1{font-size:28px}
 </style>
@@ -245,7 +252,7 @@ h1,h2,h3,.disp,.site-panel h2,.site-kpis .v,.kpi .v,.card-h h3,.section-t,.crumb
       <div class="sub">Techno-economic MILP optimization of green / conventional ammonia across a carbon-intensity sweep. Click a highlighted plant to open its site — real terrain and buildings with the optimizer’s renewable buildout — and its technical results.</div>
     </div>
     <div id="sitePanel" class="panel site-panel" hidden></div>
-    <div id="buildPanel" class="panel site-panel" hidden></div>
+    <div id="buildSide" class="panel site-panel" hidden></div>
     </div>
     <div class="panel filter-panel">
       <div class="fp-section">
@@ -263,6 +270,7 @@ h1,h2,h3,.disp,.site-panel h2,.site-kpis .v,.kpi .v,.card-h h3,.section-t,.crumb
     </div>
   </div>
   <div id="facilityBar" class="panel facility-bar" hidden></div>
+  <div id="buildWizard" class="panel build-wizard" hidden></div>
   <div class="globe-foot"><div class="hint">Drag to orient · scroll to zoom · click a highlighted plant · <span id="dataStamp"></span></div></div>
 </section>
 
@@ -413,12 +421,13 @@ function buildLayerList(){
   });
 }
 </script>
-<script src="lib/griddata.js?v=20260921080958"></script>
-<script src="map.js?v=20260921080958"></script>
-<script src="finance.js?v=20260921080958"></script>
-<script src="policy.js?v=20260921080958"></script>
-<script src="build.js?v=20260921080958"></script>
-<script src="facility.js?v=20260921080958"></script>
+<script src="lib/market.js?v=20260921091036"></script>
+<script src="lib/griddata.js?v=20260921091036"></script>
+<script src="map.js?v=20260921091036"></script>
+<script src="finance.js?v=20260921091036"></script>
+<script src="policy.js?v=20260921091036"></script>
+<script src="build.js?v=20260921091036"></script>
+<script src="facility.js?v=20260921091036"></script>
 <script>
 /* ============ NAVIGATION ============ */
 let curScn=null, curPlantIdx=null, curCItarget=null;

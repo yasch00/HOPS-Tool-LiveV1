@@ -56,14 +56,17 @@ function enterBuild(){
     map.addLayer({ id: 'build-pt', type: 'circle', source: 'build-site', filter: ['==', ['geometry-type'], 'Point'], paint: { 'circle-radius': 9, 'circle-color': '#A6392A', 'circle-stroke-color': '#FBFAF8', 'circle-stroke-width': 2 } });
   }
   map.on('click', onBuildClick);
-  if (map.getZoom() < 3) map.flyTo({ zoom: 3.2, center: [0, 42], pitch: 0, duration: 1600 });
+  if (map.getZoom() < 3) map.flyTo({ zoom: 2.6, center: [-10, 40], pitch: 0, duration: 1600 });
+  if (typeof marketLoad === 'function') marketLoad().then(() => renderBuildSide());
   renderBuildPanel();
   if (typeof syncURL === 'function') syncURL();
 }
 function leaveBuild(){
   BUILD.on = false; clearInterval(BUILD.watch); BUILD.status = ''; document.body.classList.remove('build-mode'); map.off('click', onBuildClick); map.getCanvas().style.cursor = '';
   if (map.getSource('build-site')) map.getSource('build-site').setData({ type: 'FeatureCollection', features: [] });
-  document.getElementById('buildPanel').hidden = true;
+  const bs = document.getElementById('buildSide'); if (bs) bs.hidden = true; closeBuildWizard();
+  if (typeof setResourceLayer === 'function') setResourceLayer(null);
+  if (typeof setMarketLayer === 'function' && typeof MARKET !== 'undefined' && MARKET.loaded) { setMarketLayer(null); setFlows(false); }
   if (typeof syncURL === 'function') syncURL();
 }
 function onBuildClick(e){
@@ -81,7 +84,7 @@ function setBuildSite(lat, lon, name){
   map.getSource('build-site').setData({ type: 'FeatureCollection', features: [
     { type: 'Feature', geometry: { type: 'Point', coordinates: [BUILD.lon, BUILD.lat] }, properties: {} }, circlePolygon(BUILD.lon, BUILD.lat, 25)] });
   ensureSiteBase();                                   // terrain + buildings around the chosen point
-  map.flyTo({ center: [BUILD.lon, BUILD.lat], zoom: Math.max(map.getZoom(), 9.5), pitch: 45, duration: 1400 });
+  map.flyTo({ center: [BUILD.lon, BUILD.lat + 0.35 / Math.max(1, map.getZoom() - 8)], zoom: Math.max(map.getZoom(), 9.5), pitch: 45, duration: 1400 });   // a touch north: the wizard covers the lower half
   renderBuildPanel();
   if (typeof syncURL === 'function') syncURL();
 }
@@ -98,28 +101,55 @@ function buildEstimate(){
   return { n, s, r, k, bau, rows, cap: { pv: r.p_pv * k, wt: r.p_wt * k, el: r.p_el * k, b: r.p_b * k, smr: r.p_smr * k, hb: r.p_hb * k },
     land: { wind_km2: r.p_wt * k / RHO_WIND, pv_km2: r.p_pv * k / RHO_PV }, sweep: rows.map(x => [x.target, x.lcoa]) };
 }
-function renderBuildPanel(){
-  const host = document.getElementById('buildPanel'); host.hidden = false;
-  const step = (n, t, done) => `<div class="bstep ${done ? 'done' : ''}"><span class="bnum">${n}</span><span>${t}</span></div>`;
+/* ---- the Build side panel (left): what to show on the globe while choosing a site */
+function renderBuildSide(){
+  const host = document.getElementById('buildSide'); if (!host || !BUILD.on) return; host.hidden = false;
+  const mk = (on, label, fn, title) => `<button class="ci-pill sm ${on ? 'active' : ''}" ${title ? 'title="' + title.replace(/"/g, '&quot;') + '"' : ''} onclick="${fn}">${label}</button>`;
+  const M = (typeof MARKET !== 'undefined') ? MARKET : null;
   let h = `<div class="sp-head" style="display:flex;justify-content:space-between;gap:10px;align-items:flex-start"><div><div class="fp-h" style="margin-bottom:4px">Build a plant</div><h2>${BUILD.lat == null ? 'Choose a site' : (BUILD.name || 'New site')}</h2>
-    <div class="sub">${BUILD.lat == null ? 'Click anywhere on the map, or a modelled plant to start from it.' : `${BUILD.lat.toFixed(4)}°, ${BUILD.lon.toFixed(4)}° · nearest modelled plant ${BUILD.near[0].p.name} (${fmt(BUILD.near[0].km)} km)`}</div></div>
+    <div class="sub">${BUILD.lat == null ? 'Click anywhere on the map — or a modelled plant to start from it. The layers below help you judge a location.' : `${BUILD.lat.toFixed(4)}°, ${BUILD.lon.toFixed(4)}° · <a href="#" onclick="renderBuildPanel();return false">open the assumptions →</a>`}</div></div>
     <button class="btn ghost" style="flex:none" onclick="leaveBuild()">✕</button></div>`;
-  h += `<div class="bsteps">${step(1, 'Site', BUILD.lat != null)}${step(2, 'Plant', BUILD.lat != null)}${step(3, 'Assumptions', BUILD.lat != null)}${step(4, 'Estimate', BUILD.lat != null)}${step(5, 'Exact run', false)}</div>`;
-  if (BUILD.lat == null) { host.innerHTML = h + `<p class="sub" style="margin-top:12px">The estimate uses the nearest of the ${PLANTS.filter(p => !p.custom).length} modelled plants as a proxy for your site's resource, prices and grid. The exact run — HOPS solved for your coordinates and assumptions — is queued from step 5.</p>`; return; }
+  h += `<div class="fin-group" style="margin-top:12px"><div class="fp-h">Renewable resource</div><div id="resourceLayers"></div></div>`;
+  if (M) {
+    h += `<div class="fin-group"><div class="fp-h">Ammonia market · 2025</div>
+      <div class="ci-bar" style="margin:0 0 6px;flex-wrap:wrap">${mk(!M.metric, 'Off', 'setMarketLayer(null)')}${Object.entries(MARKET_METRICS).map(([k, m]) => mk(M.metric === k, m.n, `setMarketLayer('${k}')`, m.d)).join('')}</div>
+      ${M.loaded ? marketLegendHTML() : ''}
+      <label class="legend-row" style="cursor:pointer;margin-top:6px"><input type="checkbox" ${M.flows ? 'checked' : ''} onchange="setFlows(this.checked)"> Trade flows (bilateral, exporter → importer)</label>
+      ${M.flows ? `<label class="fin-f" style="grid-template-columns:1fr 70px;margin-top:4px"><span class="fin-l">Show flows above<small>kt/yr</small></span><input type="range" min="10" max="1000" step="10" value="${M.minKt}" oninput="setFlowMin(this.value)"><span class="fin-n">${fmt(M.minKt)}</span></label>
+        <div class="ci-bar" style="margin:4px 0"><span class="lbl">Country</span><select class="tg" onchange="marketFocus(this.value||null)"><option value="">all (${M.last ? M.last.n : '…'} flows)</option>${(M.last ? [...new Set(M.data.flows.filter(f => f.kt >= M.minKt).flatMap(f => [f.from, f.to]))] : []).map(iso => [iso, M.name[iso] || iso]).sort((x, y) => x[1].localeCompare(y[1])).map(([iso, n]) => `<option value="${iso}" ${M.focus === iso ? 'selected' : ''}>${n}</option>`).join('')}</select></div>
+        ${M.last ? `<div class="sub" style="font-size:10.5px">${M.last.n} flows · ${fmt(M.last.total)} kt/yr shown${M.focus ? ' · ' + (M.name[M.focus] || M.focus) : ''}. Width = tonnage, colour = exporter, the moving dots travel towards the importer. Source: UN Comtrade (WITS), importer-reported 2025.</div>` : ''}` : ''}
+      ${M.focus && M.loaded ? marketCountryHTML(M.focus) : ''}
+      <div class="sub" style="font-size:10.5px;margin-top:6px">USGS production 2025e; Comtrade imports/exports (2024 where 2025 tonnage is missing, flagged). Hover a country for its balance.</div></div>`;
+  }
+  if (BUILD.lat != null && BUILD.near.length) h += `<div class="sub" style="margin-top:6px">Nearest modelled: ${BUILD.near.map(x => `${x.p.name} ${fmt(x.km)} km`).join(' · ')}</div>`;
+  host.innerHTML = h;
+  if (typeof renderResourceControls === 'function') renderResourceControls();
+}
+/* ---- the wide assumptions window (bottom of the screen) once a site is chosen */
+function closeBuildWizard(){ const w = document.getElementById('buildWizard'); if (w) w.hidden = true; }
+function renderBuildPanel(){
+  renderBuildSide();
+  const host = document.getElementById('buildWizard'); if (!host) return;
+  if (BUILD.lat == null) { host.hidden = true; return; }
+  host.hidden = false;
   const E = buildEstimate();
-  // 1 site
-  h += `<div class="fin-group"><div class="fp-h">1 · Site</div>
+  const step = (n, t, done) => `<div class="bstep ${done ? 'done' : ''}"><span class="bnum">${n}</span><span>${t}</span></div>`;
+  const head = `<div class="bw-head"><div><div class="fp-h" style="margin-bottom:2px">Build a plant · ${BUILD.name || 'New site'}</div><div class="sub">${BUILD.lat.toFixed(4)}°, ${BUILD.lon.toFixed(4)}° · nearest modelled plant ${BUILD.near[0].p.name} (${fmt(BUILD.near[0].km)} km) · region ${BUILD.near[0].p.region}</div></div>
+    <div class="bsteps" style="margin:0">${step(1, 'Site', true)}${step(2, 'Plant', true)}${step(3, 'Assumptions', true)}${step(4, 'Estimate', !!E)}${step(5, 'Exact run', false)}</div>
+    <span style="display:flex;gap:6px"><button class="btn ghost sm" onclick="closeBuildWizard()" title="Keep the site, look at the map">Map</button><button class="btn ghost sm" onclick="leaveBuild()">✕</button></span></div>`;
+  // column A — site + resource
+  let colA = `<div class="fin-group"><div class="fp-h">1 · Site</div>
     <label class="fin-f" style="grid-template-columns:1fr"><span class="fin-l">Name<small>optional</small></span><input class="fin-n" style="width:100%;text-align:left" value="${(BUILD.name || '').replace(/"/g, '&quot;')}" onchange="buildSet('name',this.value)"></label>
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px"><label class="fin-f" style="grid-template-columns:1fr"><span class="fin-l">Latitude</span><input type="number" class="fin-n" style="width:100%" step="0.001" value="${BUILD.lat}" onchange="setBuildSite(+this.value,BUILD.lon,null)"></label>
     <label class="fin-f" style="grid-template-columns:1fr"><span class="fin-l">Longitude</span><input type="number" class="fin-n" style="width:100%" step="0.001" value="${BUILD.lon}" onchange="setBuildSite(BUILD.lat,+this.value,null)"></label></div>
-    <div class="sub">Nearest modelled: ${BUILD.near.map(x => `${x.p.name} ${fmt(x.km)} km`).join(' · ')} · region ${BUILD.near[0].p.region}</div>
+    <div class="sub">Nearest modelled: ${BUILD.near.map(x => `${x.p.name} ${fmt(x.km)} km`).join(' · ')}</div>
     ${buildResourceHTML()}</div>`;
-  // 2 plant
-  h += `<div class="fin-group"><div class="fp-h">2 · Plant</div>
+  // column B — plant + assumptions
+  let h = `<div class="fin-group"><div class="fp-h">2 · Plant</div>
     <label class="fin-f"><span class="fin-l">Capacity<small>t NH₃/day</small></span><input type="range" min="100" max="4000" step="50" value="${BUILD.tpd}" oninput="buildSet('tpd',this.value)"><input type="number" class="fin-n" step="50" value="${BUILD.tpd}" onchange="buildSet('tpd',this.value)"></label>
     <div class="sub" style="margin:-4px 0 6px">${fmt(BUILD.tpd * 365 / 1000)} kt/yr</div>
     <div class="ci-bar" style="margin:0 0 4px"><span class="lbl">Show</span>${['SMR', 'SMR+CCS'].map(pt => `<button class="ci-pill sm ${BUILD.path === pt ? 'active' : ''}" onclick="buildSet('path','${pt}')">${pt.replace('+CCS', ' +CCS')}</button>`).join('')}</div>
-    <div class="sub">The exact run always solves both pathways over the full carbon-intensity sweep (0 – 1.75 t CO₂/t NH₃ in 0.25 steps), exactly like the published fleet. The toggle only picks which one the estimate below shows.</div></div>`;
+    <div class="sub">The exact run always solves both pathways over the full carbon-intensity sweep (0 – 1.75 t CO₂/t NH₃ in 0.25 steps), exactly like the published fleet. The toggle only picks which one the estimate shows.</div></div>`;
   // 3 assumptions — economic + technical, defaults shown
   const nT = Object.keys(BUILD.T).length;
   h += `<div class="fin-group"><div class="fp-h">3 · Assumptions <button class="btn ghost sm" style="float:right" onclick="buildResetT()">Reset to defaults</button></div>
@@ -127,6 +157,9 @@ function renderBuildPanel(){
     ${TECH_FIELDS.map(([g, fs]) => `<div class="fp-h" style="margin-top:8px">${g}</div>` + fs.map(f => { const [k, n, u, lo, hi, st, , dec] = f, isPct = u === '%', v = techValue(k), changed = BUILD.T[k] != null;
       return `<label class="fin-f" style="grid-template-columns:1fr 84px${changed ? ';background:var(--anchor-tint,#EAEFF5);border-radius:6px;padding:2px 4px' : ''}"><span class="fin-l">${n}${changed ? ' <b style="color:var(--accent)">·</b>' : ''}<small>${u}</small></span><input type="range" min="${lo}" max="${hi}" step="${st}" value="${v}" oninput="buildSetT('${k}',this.value)"><input type="number" class="fin-n" style="width:84px" step="${isPct ? st * 100 : st}" value="${isPct ? (v * 100).toFixed(dec) : (+v).toFixed(dec)}" onchange="buildSetT('${k}',${isPct ? 'this.value/100' : 'this.value'})"></label>`; }).join('')).join('')}
   </div>`;
+  const colB = h;
+  // column C — estimate + request
+  h = '';
   // 4 estimate
   if (E) {
     const c = E.cap;
@@ -145,7 +178,8 @@ function renderBuildPanel(){
     <p class="sub">Queue HOPS for these coordinates: the site's own hourly weather and local market data are used, the plant is co-sized and dispatched hourly for every CI target and both pathways with the assumptions above, and the results are published here with a link back. Runs are solved in batches and take about an hour of compute each.</p>
     <div class="sp-actions">${REQUEST_ENDPOINT ? `<button class="btn" id="buildSubmitBtn" onclick="buildSubmit()">Request the run →</button>` : `<a class="btn" target="_blank" rel="noopener" href="${buildIssueURL(E)}" onclick="buildWatchForIssue()">Request the run on GitHub →</a>`}<button class="btn ghost" onclick="buildDownloadSpec()">Download spec (JSON)</button></div>
     <div class="sub" id="buildStatus" style="margin-top:8px">${BUILD.status || (REQUEST_ENDPOINT ? 'One click: the request is registered and the site opens under construction while HOPS solves it.' : 'Opens a prefilled GitHub issue in a new tab (a GitHub account is needed to submit it). This page keeps watching and opens the construction site as soon as the request is registered — no reload.')}</div></div>`;
-  host.innerHTML = h;
+  const colC = h;
+  host.innerHTML = head + `<div class="bw-cols"><div class="bw-col">${colA}</div><div class="bw-col">${colB}</div><div class="bw-col">${colC}</div></div>`;
 }
 function buildSpec(E){
   const tech = {}; TECH_FIELDS.flatMap(g => g[1]).forEach(f => { tech[f[0]] = techValue(f[0]); });   // every input, resolved (defaults included)

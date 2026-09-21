@@ -97,6 +97,25 @@ hourly and finance tabs); regenerate them after visual changes — open the atla
 capture `map.getCanvas().toDataURL()` for map views and html2canvas for dashboard panes (see the session notes in docs/).
 Every "Open the tool" button points at `atlas/`; the suite cards deep-link into the tool with URL hashes.
 
+## The ammonia market layer (data/trade/, atlas/lib/market.js)
+
+`tools/build_trade_layer.py --xlsx global_ammonia_demand_trade_2025_1.xlsx -o data/trade` turns the demand/trade workbook
+(USGS production 2025e; UN Comtrade/WITS imports, exports and importer-reported bilateral flows 2025, 2024 tonnage where
+2025 is value-only — flagged in `basis`) into `data/trade/ammonia_2025.json`; `data/geo/countries.json` is Natural Earth
+110m simplified with ISO3 and centroids. On the globe (Build mode → side panel): countries coloured by production, apparent
+demand, imports, exports or net trade; bilateral flows as great-circle arcs, width ∝ tonnage, colour = exporter, arrowhead at
+the importer and moving packets for direction, a minimum-tonnage slider and a country pick that shows only that country's
+flows plus its balance. Hover a country for its numbers. Caveats from the workbook's Coverage_gaps sheet are carried in
+`meta.notes` (Russia reports no trade; apparent demand is an upper bound of the merchant market).
+
+## Build a plant (atlas/build.js)
+
+"Build a plant" opens the globe with a **side panel** of layers to judge a location — renewable resource (solar / wind /
+combined CF and complementarity of every 0.25° cell) and the ammonia market above — and a crosshair. Clicking the map (or a
+modelled plant) sites the plant and opens the **wide assumptions window** across the bottom of the screen: site + resource
+profile · plant + all optimizer assumptions with defaults · proxy estimate + the one-click exact run (worker) or the GitHub
+issue. "Map" hides the window without losing the site; ✕ leaves Build mode and switches the layers off.
+
 ## The map (atlas/map.js)
 
 One MapLibre map from globe to site, no API keys: Esri World Imagery, Mapzen/AWS terrain tiles, OpenStreetMap buildings
