@@ -132,11 +132,11 @@ function tsChart(series, opt){   // time-series line chart, x = period
   const n = Math.max(...series.map(s => s.v.length)); let ymin = 0, ymax = 0;
   series.forEach(s => s.v.forEach(v => { if (v == null) return; ymin = Math.min(ymin, v); ymax = Math.max(ymax, v); }));
   if (opt.ymin != null) ymin = Math.min(ymin, opt.ymin); if (opt.ymax != null) ymax = Math.max(ymax, opt.ymax);
-  if (ymax === ymin) ymax = ymin + 1; const span = ymax - ymin; ymax += span * .06;
+  if (ymax === ymin) ymax = ymin + 1; const nz = niceScale(ymin, ymax + (ymax - ymin) * .04, 5); ymin = nz.min; ymax = nz.max;
   const x = i => ml + i / (n - 1) * pw, y = v => mt + ph - (v - ymin) / (ymax - ymin) * ph;
   let s = svgEl(W, H);
-  for (let i = 0; i <= 4; i++) { const val = ymin + (ymax - ymin) * i / 4, yy = y(val);
-    s += `<line class="gridline" x1="${ml}" y1="${yy}" x2="${W - mr}" y2="${yy}"/><text class="axis" x="${ml - 7}" y="${yy + 3}" text-anchor="end">${opt.fmt ? opt.fmt(val) : fmt(val)}</text>`; }
+  nz.ticks.forEach(val => { const yy = y(val);
+    s += `<line class="gridline" x1="${ml}" y1="${yy}" x2="${W - mr}" y2="${yy}"/><text class="axis" x="${ml - 7}" y="${yy + 3}" text-anchor="end">${opt.fmt ? opt.fmt(val) : axisFmt(val, nz.step)}</text>`; });
   if (ymin < 0) s += `<line x1="${ml}" y1="${y(0)}" x2="${W - mr}" y2="${y(0)}" stroke="${C.ink}" stroke-width="1" opacity=".5"/>`;
   if (opt.ref != null) { const yy = y(opt.ref); s += `<line x1="${ml}" y1="${yy}" x2="${W - mr}" y2="${yy}" stroke="${C.co2}" stroke-width="1.3" stroke-dasharray="5 4"/><text class="axis" x="${W - mr}" y="${yy - 4}" text-anchor="end" fill="${C.co2}">${opt.refLabel || ''}</text>`; }
   if (opt.ncon) { s += `<rect x="${x(0)}" y="${mt}" width="${x(opt.ncon - 1) - x(0) + pw / (n - 1) / 2}" height="${ph}" fill="${C.line}" opacity=".35"/><text class="axis" x="${x(0) + 3}" y="${mt + 11}" fill="${C.mut}">construction</text>`; }

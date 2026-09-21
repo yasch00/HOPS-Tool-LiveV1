@@ -116,6 +116,32 @@ modelled plant) sites the plant and opens the **wide assumptions window** across
 profile · plant + all optimizer assumptions with defaults · proxy estimate + the one-click exact run (worker) or the GitHub
 issue. "Map" hides the window without losing the site; ✕ leaves Build mode and switches the layers off.
 
+## Energy storage in the tool (atlas/lib/storagelab.js, atlas/lib/cell.js)
+
+The results dashboard has a **Storage** tab (also reached from "Zoom in: energy storage →" on the plant's battery, H₂ store or
+heat battery in the site view): this run's three stores with their duty from the hourly dispatch; the **storage-technology
+sweep** — twelve alternatives (Li-ion LFP/NMC, sodium-ion, vanadium flow, iron-air, pumped hydro, adiabatic CAES, liquid air,
+flywheel, hydrogen with reconversion, heat battery, supercapacitor; parameters in `STORAGE_TECH`, indicative 2025 values from
+Lazard LCOS v9 / NREL ATB 2024 / IEA) priced as LCOS at the duty this plant needs (duration, cycles/yr from the hourly
+dispatch, charging price = the run's mean wholesale price while charging, the run's discount rate), a ranking at that duty and
+a sweep across durations; then the **cell lab** (shared `lib/cell.js`) scaled to the run's battery. **Dashboard axes** use a
+nice-number scale (`niceScale` in atlas/index.html) everywhere; the hourly supply chart carries the **wholesale price on a
+right axis** whose zero is aligned with the left one and whose step is a round multiple of the left step.
+
+## Energy storage page (storage.html, storage.js)
+
+Three data-driven sections. **Fleet:** at a chosen CI target and pathway, the share of modelled plants that build a battery /
+H₂ store / heat battery and the distribution of sizes (from `data/scenarios.json`; `p_b` MW with 4 h, `p_st` t H₂, `p_hb` MWh).
+**One plant:** its hourly dispatch (`data/runs/…json.gz`, series `b/bd/bsoc`, `h2chg/h2dis/h2st`, `hb/hbd/hbsoc`) → equivalent full
+cycles, hours active, mean SOC, one week of SOC. **Cell lab:** a bottom-up Li-ion cell model (chemistry, anode, format, areal
+loading, porosities, N/P → electrode stack → capacity, energy, Wh/kg, Wh/L, materials bill; constants in `CHEM/ANODE/FORMAT/ASSUMP`
+in storage.js) scaled to the selected plant's battery (cells, tonnes, cathode material, materials cost). Validation point: 21700
+NMC 811 at 19 mg/cm² → 4.4 Ah, 271 Wh/kg, 667 Wh/L. To align it with STEER's OpenCell, replace the constants/model in storage.js.
+
+**Buildings under the plant's plot** are masked by feature id (`facilityMaskBuildings` in atlas/facility.js, recomputed on every
+map idle): MapLibre's `within` expression ignores polygons, so every loaded OSM building whose bounding box overlaps the plot
+(+14 m) is filtered out of the buildings layer while a plant or construction site is shown; the filter clears on Hide.
+
 ## The map (atlas/map.js)
 
 One MapLibre map from globe to site, no API keys: Esri World Imagery, Mapzen/AWS terrain tiles, OpenStreetMap buildings

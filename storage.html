@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>HOPS — Energy storage</title>
+<meta name="description" content="What storage the optimizer builds across the fleet, how each plant's battery, hydrogen store and heat battery cycle through the year, and a bottom-up Li-ion cell lab that scales a single cell up to the plant's battery.">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="tokens.css"><link rel="stylesheet" href="components.css"><style>
+.ctl{display:flex;gap:var(--s4);flex-wrap:wrap;align-items:end;margin:var(--s5) 0}
+.ctl label{display:grid;gap:4px;font-family:var(--mono);font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--ink-3)}
+.ctl select{font-family:var(--sans);font-size:14px;padding:7px 10px;border:1px solid var(--rule-2);border-radius:var(--r-md);background:var(--panel);color:var(--ink);min-width:160px}
+.oc-link{display:flex;justify-content:space-between;align-items:center;gap:16px;flex-wrap:wrap;background:var(--paper-2);border:1px solid var(--rule);border-radius:var(--r-md);padding:12px 16px;margin:0 0 var(--s4);font-size:14px}.oc-link span{color:var(--ink-2)}
+.cl-grid{display:grid;grid-template-columns:minmax(260px,.8fr) minmax(0,1.4fr) minmax(260px,.9fr);gap:var(--s5);align-items:start}
+.cl-f{display:grid;grid-template-columns:1fr;gap:4px;padding:8px 0;border-bottom:1px dotted var(--rule-2);font-size:14px}
+.cl-f span small{display:block;font-family:var(--mono);font-size:11px;color:var(--ink-3)}
+.cl-f input[type=range]{width:100%;accent-color:var(--anchor)}
+.cl-f select{font-family:var(--sans);font-size:14px;padding:6px 8px;border:1px solid var(--rule-2);border-radius:var(--r-md);background:var(--panel)}
+.cl-f b{font-size:13px}
+.card h3{margin-bottom:var(--s2)}
+.card .readout b{font-size:24px}
+.sec-head .ctl{margin-top:var(--s4)}
+@media(max-width:1000px){.cl-grid{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<a class="skip" href="#main">Skip to content</a><header class="nav"><div class="wrap nav-in">
+<a class="brand" href="index.html"><b>HOPS</b><span>Stanford</span></a>
+<button class="nav-toggle" aria-expanded="false" aria-controls="nav-links">Menu</button>
+<nav class="links" id="nav-links"><a href="index.html">Home</a><a href="method.html">Method</a><a href="results.html">Results</a><a href="storage.html" aria-current="page">Storage</a><a href="data.html">Data &amp; assumptions</a><a href="watch.html">Watch</a><a href="team.html">Team</a><a href="about.html">About</a></nav>
+<a class="btn" href="atlas/">Open the tool →</a>
+</div></header><main id="main">
+<div class="page-hero"><div class="orb o1"></div><div class="orb o2"></div><div class="orb o3"></div><div class="wrap"><div class="in" data-reveal>
+<span class="eyebrow rv">Energy storage</span>
+<h1 class="rv">The buffers that make a hybrid plant work.</h1>
+<p class="lede rv">Three stores sit between an intermittent resource and a synthesis loop that must not stop: a battery for hours, a hydrogen store for days, a heat battery for the reformer's steam. The optimizer sizes all three per site — here is what it builds, how they cycle, and what a single Li-ion cell behind the battery number looks like.</p>
+</div></div></div>
+
+<section id="fleet"><div class="wrap">
+<div class="sec-head"><span class="eyebrow">01 — Across the fleet</span><div><h2>What the optimizer builds, plant by plant.</h2>
+<p>Every modelled plant, at one carbon-intensity target and pathway: how many build each store and how large. Storage is endogenous — it appears where the local resource and prices make it worth more than reformer backup or grid import.</p>
+<div class="ctl"><label>Carbon-intensity target<select id="fleetCI"><option value="0">0.00</option><option value="0.25">0.25</option><option value="0.5" selected>0.50</option><option value="0.75">0.75</option><option value="1.0">1.00</option><option value="1.25">1.25</option><option value="1.5">1.50</option><option value="1.75">1.75</option></select></label><label>Pathway<select id="fleetPath"><option value="SMR">SMR</option><option value="SMR+CCS">SMR + CCS</option></select></label></div>
+<div id="fleetOut"><div class="skeleton"><div class="sk-line" style="width:40%"></div><div class="sk-line" style="width:70%"></div></div></div></div></div>
+</div></section>
+
+<section class="alt" id="plant"><div class="wrap">
+<div class="sec-head"><span class="eyebrow">02 — One plant, hour by hour</span><div><h2>How the stores actually cycle.</h2>
+<p>From the plant's hourly dispatch: equivalent full cycles per year, hours in use, state of charge — and one week of the year to see the rhythm. These are the optimizer's own decisions, not a rule of thumb.</p>
+<div class="ctl"><label>Plant<select id="plantSel"></select></label><label>Carbon-intensity target<select id="plantCI"><option value="0">0.00</option><option value="0.25">0.25</option><option value="0.5" selected>0.50</option><option value="0.75">0.75</option><option value="1.0">1.00</option><option value="1.25">1.25</option><option value="1.5">1.50</option><option value="1.75">1.75</option></select></label><label>Pathway<select id="plantPath"><option value="SMR">SMR</option><option value="SMR+CCS">SMR + CCS</option></select></label><label>Week shown<select id="plantWeek"><option value="0">Week 1</option><option value="1">Week 2</option><option value="2">Week 3</option><option value="3">Week 4</option><option value="4">Week 5</option><option value="5">Week 6</option><option value="6">Week 7</option><option value="7">Week 8</option><option value="8">Week 9</option><option value="9">Week 10</option><option value="10">Week 11</option><option value="11">Week 12</option><option value="12">Week 13</option><option value="13">Week 14</option><option value="14">Week 15</option><option value="15">Week 16</option><option value="16">Week 17</option><option value="17">Week 18</option><option value="18">Week 19</option><option value="19">Week 20</option><option value="20">Week 21</option><option value="21">Week 22</option><option value="22">Week 23</option><option value="23">Week 24</option><option value="24" selected>Week 25</option><option value="25">Week 26</option><option value="26">Week 27</option><option value="27">Week 28</option><option value="28">Week 29</option><option value="29">Week 30</option><option value="30">Week 31</option><option value="31">Week 32</option><option value="32">Week 33</option><option value="33">Week 34</option><option value="34">Week 35</option><option value="35">Week 36</option><option value="36">Week 37</option><option value="37">Week 38</option><option value="38">Week 39</option><option value="39">Week 40</option><option value="40">Week 41</option><option value="41">Week 42</option><option value="42">Week 43</option><option value="43">Week 44</option><option value="44">Week 45</option><option value="45">Week 46</option><option value="46">Week 47</option><option value="47">Week 48</option><option value="48">Week 49</option><option value="49">Week 50</option><option value="50">Week 51</option><option value="51">Week 52</option></select></label></div>
+<div id="plantOut"></div></div></div>
+</div></section>
+
+<section id="cell"><div class="wrap">
+<div class="sec-head"><span class="eyebrow">03 — Cell lab</span><div><h2>Inside the battery: design one cell, scale it to the plant.</h2>
+<p>A bottom-up Li-ion cell: choose chemistry, format and electrode design; the model builds the electrode stack, winds or stacks it into the cell, and returns capacity, energy density, mass and a materials bill — then multiplies it out to the battery the optimizer sized for the plant above. Simplified after the BatPaC / OpenCell approach; every constant is on screen.</p>
+<div id="cellOut"></div>
+<div class="note" style="margin-top:var(--s6)"><span class="eyebrow">What this is and is not</span><p class="small" style="margin:0">Areal capacity = loading × specific capacity; electrode thickness from loading, composite density and porosity; the stack fills the format's inner volume; electrolyte fills the pores. It reproduces commercial cells to within roughly 10 % (a 21700 NMC 811 at 18–20 mg/cm² lands near 4.8–5 Ah and 260–280 Wh/kg). Not modelled: rate capability, cycle life, thermal limits, formation losses, manufacturing cost — the optimizer's installed $/kWh covers those empirically.</p></div>
+</div></div>
+</section>
+<footer class="site"><div class="wrap">
+<div class="foot-grid">
+<div><a class="brand" href="index.html" style="margin-bottom:var(--s3)"><b>HOPS</b><span>Stanford</span></a><p class="small" style="color:var(--ink-2);max-width:34ch">Hybrid Optimization of Plant Systems. A research tool for siting and sizing low-carbon ammonia production.</p></div>
+<div><h4>Pages</h4><ul><li><a href="method.html">Method</a></li><li><a href="results.html">Results</a></li><li><a href="data.html">Data &amp; assumptions</a></li><li><a href="watch.html">Watch</a></li></ul></div>
+<div><h4>Project</h4><ul><li><a href="team.html">Team</a></li><li><a href="about.html#cite">How to cite</a></li><li><a href="about.html#licence">Licence</a></li><li><a href="about.html#contact">Contact</a></li></ul></div>
+<div><h4>Affiliation</h4><ul><li>Stanford University</li><li>STEER program</li></ul></div>
+</div>
+<div class="stamp"><span>Model IRR_v7 · data 2026-09-16 · site 2026-09-21</span><span>Content last updated 2026-09-21 · figures regenerated 2026-09-16</span></div>
+</div></footer>
+<script src="site.js"></script>
+</body>
+<script src="site.js"></script><script src="atlas/lib/cell.js"></script><script src="storage.js"></script>
+</body>
+</html>

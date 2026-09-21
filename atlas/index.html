@@ -229,7 +229,10 @@ svg.chart{width:100%;display:block;overflow:visible}
 ::-webkit-scrollbar-track{background:transparent}
 @media(max-width:820px){.kpi-grid{grid-template-columns:1fr 1fr}.grid2{grid-template-columns:1fr}.filter-panel{width:210px}}
 /* build wizard: the wide assumptions window across the bottom of the screen */
+.oc-link{display:flex;justify-content:space-between;align-items:center;gap:16px;flex-wrap:wrap;background:var(--paper2);border:1px solid var(--line);border-radius:12px;padding:12px 16px;margin:0 0 14px;font-size:13px}.oc-link span{color:var(--mut)}
+.cl-grid{display:grid;grid-template-columns:minmax(240px,.8fr) minmax(0,1.4fr) minmax(240px,.9fr);gap:16px;align-items:start}.cl-f{display:grid;gap:4px;padding:8px 0;border-bottom:1px dotted var(--line);font-size:13px}.cl-f span small{display:block;font-family:'IBM Plex Mono',monospace;font-size:10.5px;color:var(--mut)}.cl-f input[type=range]{width:100%;accent-color:var(--accent)}.cl-f select{font-family:inherit;font-size:13px;padding:5px 8px;border:1px solid var(--line);border-radius:8px;background:var(--card)}.cl-f b{font-size:12.5px}.cl-grid .ptable{width:100%;border-collapse:collapse;font-size:12.5px}.cl-grid .ptable td,.cl-grid .ptable th{padding:5px 6px;border-bottom:1px solid var(--line);text-align:left}.cl-grid .p-val{font-family:'IBM Plex Mono',monospace;text-align:right!important}.cl-grid .readout{display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:8px}.cl-grid .readout b{display:block;font-size:20px;font-weight:800}.cl-grid .readout small{display:block;font-size:11px;color:var(--mut)}.cl-grid .eyebrow{font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:var(--mut);font-weight:600}.cl-grid .row{display:flex;justify-content:space-between;gap:10px;padding:5px 0;border-bottom:1px dotted var(--line);font-size:12.5px}@media(max-width:1000px){.cl-grid{grid-template-columns:1fr}}
 body.wizard-open .hud-left,body.wizard-open .filter-panel,body.wizard-open .globe-foot,body.wizard-open .brand{display:none}
+.build-wizard[hidden]{display:none}
 .build-wizard{position:fixed;left:50%;transform:translateX(-50%);bottom:16px;width:min(1400px,calc(100vw - 32px));max-height:74vh;z-index:30;padding:14px 18px 12px;display:flex;flex-direction:column;gap:10px}
 .bw-head{display:flex;justify-content:space-between;align-items:center;gap:16px;flex-wrap:wrap;border-bottom:1px solid var(--line);padding-bottom:10px}
 .bw-cols{display:grid;grid-template-columns:1fr 1.15fr 1fr;gap:16px;min-height:0;flex:1}
@@ -287,6 +290,7 @@ h1,h2,h3,.disp,.site-panel h2,.site-kpis .v,.kpi .v,.card-h h3,.section-t,.crumb
         <button class="tab active" data-tab="overview">Overview</button>
         <button class="tab" data-tab="hourly">Hourly ops</button>
         <button class="tab" data-tab="util">Utilization</button>
+        <button class="tab" data-tab="storage">Storage</button>
         <button class="tab" data-tab="detail">Results table</button>
         <button class="tab" data-tab="finance">Finance</button>
         <button class="tab" data-tab="assump">Assumptions</button>
@@ -299,6 +303,7 @@ h1,h2,h3,.disp,.site-panel h2,.site-kpis .v,.kpi .v,.card-h h3,.section-t,.crumb
     <div class="tabpane active" id="tab-overview"></div>
     <div class="tabpane" id="tab-hourly"></div>
     <div class="tabpane" id="tab-util"></div>
+    <div class="tabpane" id="tab-storage"></div>
     <div class="tabpane" id="tab-detail"></div>
     <div class="tabpane" id="tab-finance"></div>
     <div class="tabpane" id="tab-assump"></div>
@@ -422,13 +427,15 @@ function buildLayerList(){
   });
 }
 </script>
-<script src="lib/market.js?v=20260921093622"></script>
-<script src="lib/griddata.js?v=20260921093622"></script>
-<script src="map.js?v=20260921093622"></script>
-<script src="finance.js?v=20260921093622"></script>
-<script src="policy.js?v=20260921093622"></script>
-<script src="build.js?v=20260921093622"></script>
-<script src="facility.js?v=20260921093622"></script>
+<script src="lib/market.js?v=20260921101521"></script>
+<script src="lib/cell.js?v=20260921101521"></script>
+<script src="lib/storagelab.js?v=20260921101521"></script>
+<script src="lib/griddata.js?v=20260921101521"></script>
+<script src="map.js?v=20260921101521"></script>
+<script src="finance.js?v=20260921101521"></script>
+<script src="policy.js?v=20260921101521"></script>
+<script src="build.js?v=20260921101521"></script>
+<script src="facility.js?v=20260921101521"></script>
 <script>
 /* ============ NAVIGATION ============ */
 let curScn=null, curPlantIdx=null, curCItarget=null;
@@ -488,6 +495,10 @@ const C={renew:'#009E73',grid:'#0072B2',gas:'#8C6D1F',co2:'#D55E00',gold:'#1B3A5
   el:'#009E73',smr:'#D55E00',nh3:'#0072B2',asu:'#CC79A7',cp:'#6B7379',hb:'#E69F00',b:'#8A8F94',
   ink:'#15181B',mut:'#6B7379',line:'#E3DFD8'};
 function svgEl(w,h){ return `<svg class="chart" viewBox="0 0 ${w} ${h}" preserveAspectRatio="xMidYMid meet">`; }
+/* round axes: a "nice numbers" scale (1/2/2.5/5 × 10^k steps) that covers [lo,hi] with about n ticks */
+function niceStep(span,n){ const raw=span/Math.max(1,n), p=Math.pow(10,Math.floor(Math.log10(raw))), f=raw/p; return (f<=1?1:f<=2?2:f<=2.5?2.5:f<=5?5:10)*p; }
+function niceScale(lo,hi,n){ n=n||5; if(!(hi>lo)){ hi=lo+1; } const st=niceStep(hi-lo,n), min=Math.floor(lo/st)*st, max=Math.ceil(hi/st)*st, ticks=[]; for(let v=min;v<=max+st*1e-9;v+=st) ticks.push(+v.toFixed(10)); return {min,max,step:st,ticks}; }
+function axisFmt(v,st){ const d=st>=1?0:st>=0.1?1:2; return fmt(v,d); }
 function fmt(n,d=0){ if(n==null||isNaN(n))return '—'; return Number(n).toLocaleString('en-US',{maximumFractionDigits:d,minimumFractionDigits:d}); }
 
 /* generic grouped/stacked bar chart over CI sweep */
@@ -501,8 +512,9 @@ function barChart(rows, series, opt){
   rows.forEach(r=>{ let pos=0; series.forEach(s=>{ const v=r[s.k]||0; if(v>=0)pos+=v; }); maxV=Math.max(maxV,pos); });
   if(hasBau){ let bt=0; opt.bauBar.segments.forEach(g=>{ if(g.v>=0)bt+=g.v; }); maxV=Math.max(maxV,bt); }
   if(opt.bauLine!=null) maxV=Math.max(maxV,opt.bauLine);
-  maxV*=1.10; if(maxV<=0)maxV=1;
-  const minV=opt.allowNeg?Math.min(0,...rows.map(r=>series.filter(s=>(r[s.k]||0)<0).reduce((a,s)=>a+(r[s.k]||0),0))):0;
+  maxV*=1.06; if(maxV<=0)maxV=1;
+  let minV=opt.allowNeg?Math.min(0,...rows.map(r=>series.filter(s=>(r[s.k]||0)<0).reduce((a,s)=>a+(r[s.k]||0),0))):0;
+  const nz=niceScale(minV,maxV,5); minV=nz.min; maxV=nz.max;
   const span=maxV-minV;
   const slotW=pw/nSlots;
   const slotX=i=>ml+slotW*(i+0.5);          // centre of slot i (bars never sit on the axis)
@@ -510,10 +522,9 @@ function barChart(rows, series, opt){
   const y=v=>mt+ph-((v-minV)/span)*ph;
   let s=svgEl(W,H);
   // gridlines
-  const ticks=5;
-  for(let i=0;i<=ticks;i++){ const val=minV+span*i/ticks, yy=y(val);
+  nz.ticks.forEach(val=>{ const yy=y(val);
     s+=`<line class="gridline" x1="${ml}" y1="${yy}" x2="${W-mr}" y2="${yy}"/>`;
-    s+=`<text class="axis" x="${ml-8}" y="${yy+3}" text-anchor="end">${fmt(val,Math.abs(val)<10?1:0)}</text>`; }
+    s+=`<text class="axis" x="${ml-8}" y="${yy+3}" text-anchor="end">${axisFmt(val,nz.step)}</text>`; });
   // y-axis line
   s+=`<line x1="${ml}" y1="${mt}" x2="${ml}" y2="${mt+ph}" stroke="${C.line}" stroke-width="1"/>`;
   // CI-sweep bars
@@ -557,12 +568,12 @@ function lineChart(seriesList, opt){
   seriesList.forEach(s=>s.pts.forEach(p=>{allX.push(p[0]);allY.push(p[1]);}));
   if(opt.bau!=null) opt.bau.forEach(b=>allY.push(b.v));
   const xmin=Math.min(...allX),xmax=Math.max(...allX);
-  let ymax=Math.max(...allY)*1.06, ymin=0;
+  const nz=niceScale(0,Math.max(...allY)*1.04,5); let ymax=nz.max, ymin=nz.min;
   const x=v=>ml+(v-xmin)/(xmax-xmin)*pw, y=v=>mt+ph-(v-ymin)/(ymax-ymin)*ph;
   let s=svgEl(W,H);
-  for(let i=0;i<=5;i++){ const val=ymin+(ymax-ymin)*i/5,yy=y(val);
+  nz.ticks.forEach(val=>{ const yy=y(val);
     s+=`<line class="gridline" x1="${ml}" y1="${yy}" x2="${W-mr}" y2="${yy}"/>`;
-    s+=`<text class="axis" x="${ml-7}" y="${yy+3}" text-anchor="end">${fmt(val,0)}</text>`; }
+    s+=`<text class="axis" x="${ml-7}" y="${yy+3}" text-anchor="end">${axisFmt(val,nz.step)}</text>`; });
   // x ticks
   [0,0.5,1.0,1.5,2.0].forEach(t=>{ if(t>=xmin-.01&&t<=xmax+.01){ s+=`<text class="axis" x="${x(t)}" y="${H-mb+16}" text-anchor="middle">${t.toFixed(1)}</text>`;
     s+=`<line class="gridline" x1="${x(t)}" y1="${mt}" x2="${x(t)}" y2="${mt+ph}" opacity=".3"/>`; } });
@@ -590,7 +601,7 @@ function buildScnSelect(){
   host.innerHTML=scns.map(s=>{
     const i=SCN.indexOf(s);
     return `<button class="ci-pill ${s===curScn?'active':''}" onclick="selScn(${i})">${scnShortName(s)}</button>`;
-  }).join('')+`<span style="margin-left:auto">${lcoaBasisToggle(true)}</span>`;
+  }).join('')+(['overview','detail','finance'].includes(activeTab)?`<span style="margin-left:auto">${lcoaBasisToggle(true)}</span>`:'');
   document.getElementById('dashLoc').textContent = plantLabel(curPlantIdx);
 }
 function selScn(i){ curScn=SCN[i]; curCItarget=null; buildScnSelect(); buildCISelect(); renderActiveTab(); syncURL(); }
@@ -762,7 +773,7 @@ let hZoom={a:0,b:HPTS};
 let hourlyDragState=null;
 
 function stackedHours(rec, series, opt){
-  opt=opt||{}; const W=opt.w||880,H=opt.h||300,ml=58,mr=16,mt=14,mb=40;
+  opt=opt||{}; const W=opt.w||880,H=opt.h||300,ml=58,mr=opt.y2?64:16,mt=14,mb=40;
   const pw=W-ml-mr,ph=H-mt-mb;
   const a=Math.max(0,Math.floor(hZoom.a)), b=Math.min(HPTS,Math.ceil(hZoom.b));
   const n=b-a;
@@ -771,16 +782,25 @@ function stackedHours(rec, series, opt){
   for(let i=a;i<b;i++){ let pos=0,neg=0; series.forEach(s=>{const v=rec[s.k][i]||0; if(v>=0)pos+=v;else neg+=v;}); maxV=Math.max(maxV,pos); minV=Math.min(minV,neg); }
   if(opt.overlayKey){ for(let i=a;i<b;i++) maxV=Math.max(maxV,opt.overlayArr[i]||0); }
   if(opt.lineKeys){ opt.lineKeys.forEach(lk=>{ for(let i=a;i<b;i++){const v=rec[lk.k][i]||0; maxV=Math.max(maxV,v); minV=Math.min(minV,v);} }); }
-  const span=(maxV-minV)||1; maxV+=span*0.05;
+  const span=(maxV-minV)||1; maxV+=span*0.04;
+  const nz=niceScale(minV,maxV,5); minV=nz.min; maxV=nz.max;
+  // secondary axis (e.g. wholesale price): zero aligned with the left axis, both with round ticks —
+  // the right step is a nice multiple of the left step scaled to the price range
+  let y2=null;
+  if(opt.y2&&opt.y2.arr){ let pmax=0,pmin=0; for(let i=a;i<b;i++){ const v=opt.y2.arr[i]; if(v==null)continue; if(v>pmax)pmax=v; if(v<pmin)pmin=v; }
+    const ratioNeeded=Math.max(maxV>0?pmax/maxV:0, minV<0?pmin/minV:0, 1e-9), step2=niceStep(nz.step*ratioNeeded*1.02,1), ratio=step2/nz.step;
+    y2={min:minV*ratio,max:maxV*ratio,step:step2,ratio}; }
   const x=i=>ml+(i-a)/(n-1)*pw, y=v=>mt+ph-(v-minV)/(maxV-minV)*ph;
   // downsample for drawing: at most ~1100 px columns
   const stride=Math.max(1,Math.floor(n/1100));
   let s=svgEl(W,H);
   s+=`<rect x="${ml}" y="${mt}" width="${pw}" height="${ph}" fill="transparent" class="hzoom" />`;
   // gridlines
-  for(let i=0;i<=4;i++){ const val=minV+(maxV-minV)*i/4,yy=y(val);
+  nz.ticks.forEach(val=>{ const yy=y(val);
     s+=`<line class="gridline" x1="${ml}" y1="${yy}" x2="${W-mr}" y2="${yy}"/>`;
-    s+=`<text class="axis" x="${ml-7}" y="${yy+3}" text-anchor="end">${fmt(val,(maxV-minV)<4?1:0)}</text>`; }
+    s+=`<text class="axis" x="${ml-7}" y="${yy+3}" text-anchor="end">${axisFmt(val,nz.step)}</text>`;
+    if(y2) s+=`<text class="axis" x="${W-mr+7}" y="${yy+3}" text-anchor="start" fill="${opt.y2.c}">${axisFmt(val*y2.ratio,y2.step)}</text>`; });
+  if(y2) s+=`<text class="axis" transform="translate(${W-8} ${mt+ph/2}) rotate(90)" text-anchor="middle" fill="${opt.y2.c}">${opt.y2.unit||''}</text>`;
   // zero line if neg present
   if(minV<0){ const y0=y(0); s+=`<line x1="${ml}" y1="${y0}" x2="${W-mr}" y2="${y0}" stroke="${C.ink}" stroke-width="1" opacity=".4"/>`; }
   // x ticks: calendar terms (array index i ↔ hour i*HSTEP)
@@ -825,6 +845,8 @@ function stackedHours(rec, series, opt){
     for(let i=a;i<b;i+=stride) d+=(d?'L':'M')+x(i).toFixed(1)+' '+y(rec[lk.k][i]||0).toFixed(1)+' ';
     s+=`<path d="${d}" fill="none" stroke="${lk.c}" stroke-width="1.6"/>`; }); }
   s+=`<text class="axis" transform="translate(13 ${mt+ph/2}) rotate(-90)" text-anchor="middle" fill="${C.mut}">${opt.ylab||'MW'}</text>`;
+  if(y2){ let d=''; for(let i=a;i<b;i+=stride){ const v=opt.y2.arr[i]; if(v==null)continue; d+=(d?'L':'M')+x(i).toFixed(1)+' '+y(v/y2.ratio).toFixed(1)+' '; }
+    s+=`<path d="${d}" fill="none" stroke="${opt.y2.c}" stroke-width="1.1" opacity=".9"><title>${opt.y2.n||''}</title></path>`; }
   s+='</svg>'; return s;
 }
 
@@ -856,8 +878,8 @@ function buildHourly(){
 
   // electricity supply + total demand overlay + grid export line
   h+=`<div class="card hzoom-card"><div class="card-h"><h3>Electricity — supply, demand &amp; grid export</h3><span class="note">MW · model output</span></div>
-    ${legend([...ELEC_SUPPLY.filter(x=>rec[x.k]).map(x=>({c:x.c,n:x.n})),{c:C.ink,n:'Itemized demand (dashed)'},{c:'#D55E00',n:'Grid export (−)'}])}
-    ${stackedHours(rec,ELEC_SUPPLY.filter(x=>rec[x.k]),{overlayKey:1,overlayArr:totDem,lineKeys:[{k:'__expNeg',c:'#D55E00'}],ylab:'MW'})}
+    ${legend([...ELEC_SUPPLY.filter(x=>rec[x.k]).map(x=>({c:x.c,n:x.n})),{c:C.ink,n:'Itemized demand (dashed)'},{c:'#D55E00',n:'Grid export (−)'},...(rec.price?[{c:'#A6392A',n:'Wholesale price (right axis, $/MWh)'}]:[])])}
+    ${stackedHours(rec,ELEC_SUPPLY.filter(x=>rec[x.k]),{overlayKey:1,overlayArr:totDem,lineKeys:[{k:'__expNeg',c:'#D55E00'}],ylab:'MW',y2:rec.price?{arr:rec.price,c:'#A6392A',n:'Wholesale price',unit:'$/MWh'}:null})}
     <p class="foot-note">All series are model columns. The dashed line sums every demand column in the export — electrolyzer, reformer aux., ASU, H₂ compressor, heat-battery charging, battery charging and NH₃ synthesis.${s.ccs?' <b>Missing from the export:</b> CCS electricity — any remaining gap between supply and the dashed line.':''}</p></div>`;
 
   // demand breakdown — exported columns only
@@ -871,16 +893,18 @@ function buildHourly(){
     if(!rec.__bNet) rec.__bNet = rec.b.map((c,i)=> (c||0) - (rec.bd[i]||0));
     // integrity checks: SOC must not rise with zero charging, and the charge column must not
     // run while SOC falls (symptom: a constant/always-on column mapped by mistake)
-    let __socBad=0, __chgBad=0, __overlap=0;
+    let __socBad=0, __chgBad=0, __overlap=0, __chgH=0;
     for(let i=1;i<n;i++){
       const d1=rec.bsoc[i]-rec.bsoc[i-1], c=(rec.b[i]||0)>0.01, dd=(rec.bd[i]||0)>0.01;
+      if(c) __chgH++;
       if(d1>0.5 && !c) __socBad++;
       if(c && d1<-0.5) __chgBad++;
       if(c && dd) __overlap++;
     }
     let __bWarn='';
-    if(__socBad>10) __bWarn=`<p class="foot-note" style="color:#D55E00"><b>Data inconsistency in this run's export:</b> the storage level rises in ${__socBad.toLocaleString()} hours while the charging column reads zero — the charging column was not written correctly for this run in the workbook. Numbers shown as-is.</p>`;
-    else if(__chgBad>10||__overlap>10) __bWarn=`<p class="foot-note" style="color:#D55E00"><b>Data inconsistency in this run's export:</b> the charging column reads “on” while the storage level falls (${__chgBad.toLocaleString()} h) and overlaps discharge (${__overlap.toLocaleString()} h) — it appears to be a different variable (e.g. rated power), not the hourly charging flow. Numbers shown as-is.</p>`;
+    const __sig=Math.max(20, 0.05*__chgH);   // a handful of simultaneous charge/discharge hours is a normal LP degeneracy at zero price, not a data error
+    if(__socBad>__sig) __bWarn=`<p class="foot-note" style="color:#D55E00"><b>Data inconsistency in this run's export:</b> the storage level rises in ${__socBad.toLocaleString()} hours while the charging column reads zero — the charging column was not written correctly for this run in the workbook. Numbers shown as-is.</p>`;
+    else if(__chgBad>__sig||__overlap>Math.max(50,0.2*__chgH)) __bWarn=`<p class="foot-note" style="color:#D55E00"><b>Data inconsistency in this run's export:</b> the charging column reads “on” while the storage level falls (${__chgBad.toLocaleString()} h) and overlaps discharge (${__overlap.toLocaleString()} h) — it appears to be a different variable (e.g. rated power), not the hourly charging flow. Numbers shown as-is.</p>`;
     h+=`<div class="card hzoom-card"><div class="card-h"><h3>Battery — charge / discharge</h3><span class="note">MW · model output</span></div>
       ${legend([{c:'#0072B2',n:'Charging (+)'},{c:'#009E73',n:'Discharging (−)'}])}
       ${stackedHours(rec,[{k:'__bNet',c:'#0072B2',n:'Net battery flow'}],{signColors:{pos:'#0072B2',neg:'#009E73'},ylab:'MW'})}
@@ -969,10 +993,10 @@ function ldcOf(arr,nps=200){ const s=[...arr].sort((a,b)=>b-a); if(s.length<=nps
 function cfOf(arr){ const mx=Math.max(...arr); if(mx<=0)return 0; const mean=arr.reduce((a,b)=>a+b,0)/arr.length; return mean/mx; }
 function ldcChart(curves,opt){
   opt=opt||{}; const W=opt.w||880,H=opt.h||320,ml=72,mr=16,mt=14,mb=42; const pw=W-ml-mr,ph=H-mt-mb;
-  let maxV=0; curves.forEach(c=>c.pts.forEach(v=>maxV=Math.max(maxV,v))); maxV=(maxV||1)*1.05;
+  let maxV=0; curves.forEach(c=>c.pts.forEach(v=>maxV=Math.max(maxV,v))); const nz=niceScale(0,(maxV||1)*1.03,5); maxV=nz.max;
   let s=svgEl(W,H);
-  for(let i=0;i<=4;i++){ const val=maxV*i/4,yy=mt+ph-val/maxV*ph;
-    s+=`<line class="gridline" x1="${ml}" y1="${yy}" x2="${W-mr}" y2="${yy}"/><text class="axis" x="${ml-7}" y="${yy+3}" text-anchor="end">${fmt(val,maxV<4?1:0)}</text>`; }
+  nz.ticks.forEach(val=>{ const yy=mt+ph-val/maxV*ph;
+    s+=`<line class="gridline" x1="${ml}" y1="${yy}" x2="${W-mr}" y2="${yy}"/><text class="axis" x="${ml-7}" y="${yy+3}" text-anchor="end">${axisFmt(val,nz.step)}</text>`; });
   [0,25,50,75,100].forEach(p=>{ s+=`<text class="axis" x="${ml+p/100*pw}" y="${H-mb+15}" text-anchor="middle">${p}%</text>`; });
   curves.forEach(cv=>{ const arr=cv.pts; const x=i=>ml+i/(arr.length-1)*pw,y=v=>mt+ph-v/maxV*ph;
     let d=arr.map((v,i)=>(i?'L':'M')+x(i).toFixed(1)+' '+y(v).toFixed(1)).join(' ');
@@ -1093,6 +1117,7 @@ function renderActiveTab(){
   }
   else if(activeTab==='hourly') buildHourly();
   else if(activeTab==='util') buildUtil();
+  else if(activeTab==='storage') buildStorage();
   else if(activeTab==='detail') buildDetail();
   else if(activeTab==='finance') buildFinance();
   else if(activeTab==='assump') buildAssump();
@@ -1105,7 +1130,7 @@ function initDash(){
     t.onclick=()=>{ document.querySelectorAll('.tab').forEach(x=>x.classList.remove('active')); t.classList.add('active');
       document.querySelectorAll('.tabpane').forEach(p=>p.classList.remove('active'));
       activeTab=t.dataset.tab; document.getElementById('tab-'+activeTab).classList.add('active');
-      renderActiveTab(); syncURL(); };
+      buildScnSelect(); renderActiveTab(); syncURL(); };
   });
   renderActiveTab();
 }

@@ -190,9 +190,25 @@ function facilityPlotPolygon(marginM){
 }
 function facilityMaskBuildings(on){
   if (!map.getLayer('buildings')) return;
-  const poly = on ? facilityPlotPolygon(12) : null;
-  map.setFilter('buildings', poly ? ['!', ['within', poly]] : null);
+  if (!on) { map.setFilter('buildings', null); if (__maskTick) { map.off('idle', __maskTick); __maskTick = null; } __maskIds = ''; return; }
+  const tick = () => {                                                          // MapLibre's `within` ignores polygons, so the mask is by feature id:
+    if (!FAC.on || !FAC.plant) return;                                          // every loaded building whose bounding box overlaps the plot (+ margin) is filtered out
+    const bb = facilityPlotBBox(); if (!bb) return;
+    const m = 14 / 111320; const box = [bb[0] - m, bb[1] - m, bb[2] + m, bb[3] + m];
+    const ids = new Set();
+    for (const f of map.querySourceFeatures('ofm', { sourceLayer: 'building' })) {
+      if (f.id == null) continue; let x0 = 1e9, y0 = 1e9, x1 = -1e9, y1 = -1e9;
+      const rings = f.geometry.type === 'Polygon' ? f.geometry.coordinates : f.geometry.type === 'MultiPolygon' ? f.geometry.coordinates.flat() : [];
+      for (const ring of rings) for (const c of ring) { if (c[0] < x0) x0 = c[0]; if (c[0] > x1) x1 = c[0]; if (c[1] < y0) y0 = c[1]; if (c[1] > y1) y1 = c[1]; }
+      if (x1 >= box[0] && x0 <= box[2] && y1 >= box[1] && y0 <= box[3]) ids.add(f.id);
+    }
+    const key = [...ids].sort().join(','); if (key === __maskIds) return; __maskIds = key;
+    map.setFilter('buildings', ids.size ? ['!', ['in', ['id'], ['literal', [...ids]]]] : null);
+  };
+  __maskIds = ''; tick();
+  if (!__maskTick) { __maskTick = tick; map.on('idle', __maskTick); }        // new tiles while panning → recompute
 }
+let __maskTick = null, __maskIds = '';
 function clipToPlot(gj){
   const bb = facilityPlotBBox(); if (!bb || !gj || !gj.features) return gj;
   const inside = c => c[0] > bb[0] && c[0] < bb[2] && c[1] > bb[1] && c[1] < bb[3];
