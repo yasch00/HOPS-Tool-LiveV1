@@ -116,17 +116,21 @@ modelled plant) sites the plant and opens the **wide assumptions window** across
 profile · plant + all optimizer assumptions with defaults · proxy estimate + the one-click exact run (worker) or the GitHub
 issue. "Map" hides the window without losing the site; ✕ leaves Build mode and switches the layers off.
 
-## Energy storage in the tool (atlas/lib/storagelab.js)
+## Energy Storage Lab in the tool (atlas/lib/storagelab.js, atlas/lib/storage3d.js)
 
-The results dashboard has a **Storage** tab (also reached from "Zoom in: energy storage →" on the plant's battery, H₂ store or
-heat battery in the site view): this run's three stores with their duty from the hourly dispatch; the **storage-technology
-sweep** — twelve alternatives (Li-ion LFP/NMC, sodium-ion, vanadium flow, iron-air, pumped hydro, adiabatic CAES, liquid air,
-flywheel, hydrogen with reconversion, heat battery, supercapacitor; parameters in `STORAGE_TECH`, indicative 2025 values from
-Lazard LCOS v9 / NREL ATB 2024 / IEA) priced as LCOS at the duty this plant needs (duration, cycles/yr from the hourly
-dispatch, charging price = the run's mean wholesale price while charging, the run's discount rate), a ranking at that duty and
-a sweep across durations; then a link to STEER OpenCell for cell-level design. **Dashboard axes** use a
-nice-number scale (`niceScale` in atlas/index.html) everywhere; the hourly supply chart carries the **wholesale price on a
-right axis** whose zero is aligned with the left one and whose step is a round multiple of the left step.
+A full-screen view (`#plant=61&view=lab&tech=lfp`), reached from "Zoom in: energy storage →" on the plant's battery / H₂
+store / heat battery, "Energy storage →" in the site panel, or the dashboard's Storage tab. Top: category (electrochemical,
+mechanical, thermal, electrical, chemical) → technology chips (main ones + "deep cousins"). Centre: a procedural 3D model of
+the technology on a turntable (containers, flow tanks + stack, iron-air modules, pumped hydro, CAES cavern, liquid-air tanks,
+flywheel, hydrogen train, heat battery, molten salt, supercapacitor racks). Left: description, **fit for this plant** (0–100:
+duration match 40, lifetime at the plant's cycles 20, cost rank among suited technologies 30, maturity 10), key facts, applicability,
+and the duty assumptions (duration, cycles/yr, charging price, CAPEX multiplier, discount rate). Right: charge/discharge and state
+of charge (the run's real battery dispatch on its two busiest days when the run builds a battery; illustrative patterns for the
+other demand swings), degradation, system effect (storage CAPEX at the run's MWh, LCOA delta if this technology replaced the
+run's battery), cheapest alternatives at this duty. **Two kinds of numbers:** the plant's own (model output) and the technology
+parameters in `STORAGE_TECH` — indicative 2025 literature values (Lazard LCOS v9, NREL ATB 2024, IEA), the only indicative
+numbers in the tool, labelled "indicative" wherever they appear. Dashboard axes use `niceScale`; the hourly supply chart carries
+the wholesale price on a zero-aligned right axis.
 
 ## Energy storage page (storage.html, storage.js)
 

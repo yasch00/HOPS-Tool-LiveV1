@@ -34,6 +34,40 @@ button{font-family:inherit;cursor:pointer;border:none;background:none;color:inhe
 .view{position:fixed;inset:0;opacity:0;pointer-events:none;transition:opacity .5s ease}
 .view.active{opacity:1;pointer-events:auto}
 
+/* ---------- ENERGY STORAGE LAB ---------- */
+#storageView{background:radial-gradient(circle at 50% 30%,#F4F9FB 0%,#E9F2F6 60%,#DCE8EE 100%);display:grid;grid-template-columns:340px minmax(0,1fr) 340px;grid-template-rows:auto auto auto minmax(0,1fr);gap:12px 14px;padding:12px 16px 16px;overflow:hidden}
+#storageView.active{display:grid}
+.lab-head{grid-column:1/4;display:flex;justify-content:space-between;align-items:center;gap:12px}
+.lab-brand{display:flex;align-items:center;gap:10px}.lab-logo{width:32px;height:32px;border-radius:9px;background:var(--accent);color:#fff;display:grid;place-items:center;font-weight:800}
+.lab-brand b{display:block;font-size:15px}.lab-brand small{display:block;font-size:11px;color:var(--mut);letter-spacing:.08em;text-transform:uppercase}
+.lab-ind{display:inline-block;font-family:'IBM Plex Mono',monospace;font-size:9.5px;letter-spacing:.06em;text-transform:uppercase;color:#8A5A00;background:#FBF1DF;border-radius:4px;padding:1px 5px;vertical-align:middle}
+.lab-cats{grid-column:1/4;display:flex;justify-content:center;gap:4px}
+.lab-cat{display:flex;align-items:center;gap:7px;padding:7px 14px;border-radius:999px;font-size:12.5px;font-weight:600;color:var(--ink2);border:1px solid transparent;font-family:'IBM Plex Mono',monospace}
+.lab-cat i{width:8px;height:8px;border-radius:50%}.lab-cat.active{background:var(--card);border-color:var(--line);box-shadow:var(--shadow)}
+.lab-chips{grid-column:1/4;display:flex;align-items:stretch;gap:6px;justify-content:center;flex-wrap:wrap;background:rgba(255,255,255,.7);border:1px solid var(--line);border-radius:12px;padding:8px 10px}
+.lab-chip{display:grid;gap:2px;text-align:left;padding:7px 12px;border-radius:9px;border:1px solid transparent;min-width:120px;position:relative}
+.lab-chip small{font-family:'IBM Plex Mono',monospace;font-size:9.5px;letter-spacing:.08em;text-transform:uppercase;color:var(--mut)}.lab-chip b{font-size:13px}.lab-chip i{display:block;height:2px;border-radius:2px;width:36px}
+.lab-chip.active{background:var(--paper2);border-color:var(--line)}
+.lab-sep{writing-mode:vertical-rl;transform:rotate(180deg);font-family:'IBM Plex Mono',monospace;font-size:9px;letter-spacing:.12em;text-transform:uppercase;color:var(--faint);border-left:1px solid var(--line);padding-left:6px;margin:0 4px}
+.lab-cousin{padding:6px 10px;border-radius:8px;font-family:'IBM Plex Mono',monospace;font-size:12px;color:var(--ink2);display:grid;gap:1px;text-align:left}.lab-cousin small{font-size:9px;color:var(--faint);letter-spacing:.08em}.lab-cousin.active{background:var(--paper2)}
+.lab-stage{grid-column:2;grid-row:4;position:relative;min-height:0}
+.lab-stage canvas{width:100%;height:100%;display:block}
+.lab-stage-ctl{position:absolute;right:8px;bottom:8px;display:flex;gap:6px}
+.lab-left{grid-column:1;grid-row:4;overflow-y:auto;padding:18px}
+.lab-right{grid-column:3;grid-row:4;overflow-y:auto;display:grid;gap:12px;align-content:start}
+.lab-card{padding:14px 16px}
+.lab-left h2{font-size:22px;font-weight:800;letter-spacing:-.02em;line-height:1.1;margin:6px 0 4px}
+.lab-tags{display:flex;gap:6px;flex-wrap:wrap}.lab-tags span{font-family:'IBM Plex Mono',monospace;font-size:9.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--mut);border:1px solid var(--line);border-radius:4px;padding:2px 6px}.lab-tags span.on{color:var(--accent);border-color:var(--accent)}
+.lab-fit{margin-top:12px;padding-top:10px;border-top:1px solid var(--line)}.lab-fit .l{font-size:10px;letter-spacing:.13em;text-transform:uppercase;color:var(--mut);font-weight:600}
+.lab-fit .score{font-size:26px;font-weight:800;line-height:1.1}.lab-fit .score small{font-size:12px;color:var(--mut);font-weight:500}
+.lab-fit .bar{height:6px;border-radius:3px;background:var(--paper2);margin:6px 0}.lab-fit .bar i{display:block;height:100%;border-radius:3px;background:linear-gradient(90deg,var(--accent),var(--green))}
+.lab-facts{display:grid;grid-template-columns:1fr 1fr;gap:8px}.lab-fact{background:var(--card);border:1px solid var(--line);border-radius:9px;padding:8px 10px}
+.lab-fact .l{font-size:9.5px;letter-spacing:.12em;text-transform:uppercase;color:var(--mut);font-weight:600}.lab-fact .v{font-size:17px;font-weight:800;margin-top:2px;letter-spacing:-.01em}.lab-fact .v small{font-size:10.5px;color:var(--mut);font-weight:500}.lab-fact .d{font-size:10.5px;color:var(--faint);margin-top:3px;line-height:1.3}
+.lab-row{display:flex;justify-content:space-between;gap:8px;align-items:center;padding:6px 0;border-bottom:1px dotted var(--line);font-size:12.5px}.lab-row b{font-family:'IBM Plex Mono',monospace;font-size:11.5px;font-weight:500}.lab-row b.ok{color:var(--green)}.lab-row b.mid{color:#8A5A00}.lab-row b.bad{color:var(--rust)}
+.lab-row .dot{display:inline-block;width:8px;height:8px;border-radius:50%;margin-right:6px}
+.lab-ch{font-size:10.5px;letter-spacing:.12em;text-transform:uppercase;color:var(--mut);font-weight:600;display:flex;justify-content:space-between;margin-bottom:6px}.lab-ch span{font-family:'IBM Plex Mono',monospace;text-transform:none;letter-spacing:0;font-weight:400}.lab-ch span.on{color:var(--green)}
+.legend-mini{display:flex;gap:12px;font-size:10.5px;color:var(--mut);margin-top:4px}.legend-mini i{display:inline-block;width:9px;height:9px;border-radius:2px;margin-right:4px;vertical-align:-1px}
+@media(max-width:1100px){#storageView{grid-template-columns:1fr;grid-template-rows:auto auto auto 420px auto auto;overflow-y:auto}.lab-stage{grid-column:1;grid-row:4;height:420px}.lab-left{grid-column:1;grid-row:5}.lab-right{grid-column:1;grid-row:6}}
 /* ---------- GLOBE ---------- */
 #globeView{background:radial-gradient(circle at 50% 40%,#F4F9FB 0%,#E9F2F6 60%,#DCE8EE 100%)}
 #map{position:absolute;inset:0}
@@ -277,6 +311,9 @@ h1,h2,h3,.disp,.site-panel h2,.site-kpis .v,.kpi .v,.card-h h3,.section-t,.crumb
   <div class="globe-foot"><div class="hint">Drag to orient · scroll to zoom · click a highlighted plant · <span id="dataStamp"></span></div></div>
 </section>
 
+<!-- ===== ENERGY STORAGE LAB ===== -->
+<section id="storageView" class="view"></section>
+
 <!-- ===== DASHBOARD VIEW ===== -->
 <section id="dashView" class="view">
   <div class="dash-head">
@@ -426,14 +463,14 @@ function buildLayerList(){
   });
 }
 </script>
-<script src="lib/market.js?v=20260921102302"></script>
-<script src="lib/storagelab.js?v=20260921102302"></script>
-<script src="lib/griddata.js?v=20260921102302"></script>
-<script src="map.js?v=20260921102302"></script>
-<script src="finance.js?v=20260921102302"></script>
-<script src="policy.js?v=20260921102302"></script>
-<script src="build.js?v=20260921102302"></script>
-<script src="facility.js?v=20260921102302"></script>
+<script src="lib/market.js?v=20260921104704"></script>
+<script src="lib/storagelab.js?v=20260921104704"></script>
+<script src="lib/griddata.js?v=20260921104704"></script>
+<script src="map.js?v=20260921104704"></script>
+<script src="finance.js?v=20260921104704"></script>
+<script src="policy.js?v=20260921104704"></script>
+<script src="build.js?v=20260921104704"></script>
+<script src="facility.js?v=20260921104704"></script>
 <script>
 /* ============ NAVIGATION ============ */
 let curScn=null, curPlantIdx=null, curCItarget=null;
@@ -1150,6 +1187,7 @@ function syncURL(){
   const p=new URLSearchParams(), onMap=document.getElementById('globeView').classList.contains('active');
   if(onMap && BUILD.on){ p.set('view','build'); if(BUILD.lat!=null){ p.set('lat',BUILD.lat); p.set('lon',BUILD.lon); p.set('tpd',BUILD.tpd); } }
   else if(onMap && siteIdx!=null){ p.set('plant',siteIdx); p.set('view','site'); }
+  else if(document.getElementById('storageView').classList.contains('active') && typeof SL!=='undefined' && SL.idx!=null){ p.set('plant',SL.idx); p.set('view','lab'); if(SL.tech) p.set('tech',SL.tech); }
   else if(onMap && typeof PENDING!=='undefined' && PENDING.open){ p.set('issue',PENDING.open.issue); p.set('view','pending'); }
   else if(!onMap && curScn){ p.set('plant',curPlantIdx); p.set('ccs',curScn.ccs?1:0); if(curScn.policy) p.set('policy',curScn.policy); if(curCItarget!=null) p.set('ci',curCItarget); p.set('tab',activeTab); }
   else { history.replaceState(null,'',location.pathname+location.search); return; }
@@ -1161,6 +1199,7 @@ function applyURLState(){
   if(dash && fid && PLANT[parseInt(fid,10)]){ openDashboard(parseInt(fid,10)); return; }
   if(h.get('view')==='site' && PLANT[parseInt(h.get('plant'),10)]){ openSite(parseInt(h.get('plant'),10), true); return; }
   if(h.get('view')==='pending' && h.get('issue')){ openPending(parseInt(h.get('issue'),10)); return; }
+  if(h.get('view')==='lab' && PLANT[parseInt(h.get('plant'),10)]){ if(h.get('tech') && typeof SL!=='undefined') SL.tech=h.get('tech'); openStorageLab(parseInt(h.get('plant'),10)); return; }
   if(h.get('view')==='site' && +h.get('plant')>=1000){ openPending(+h.get('plant')-1000); return; }   // a requested site that is not published yet: its construction view
   if(h.get('view')==='build'){ const go=()=>{ enterBuild(); if(h.get('lat')){ if(h.get('tpd')) BUILD.tpd=+h.get('tpd'); setBuildSite(+h.get('lat'),+h.get('lon'),''); } }; if(mapLoaded) go(); else map.once('load',()=>setTimeout(go,50)); return; }
   if(h.get('plant')!=null && PLANT[parseInt(h.get('plant'),10)]){
