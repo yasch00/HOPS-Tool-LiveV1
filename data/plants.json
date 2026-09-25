@@ -869,5 +869,59 @@
 },
 "name": "Site 1002",
 "admin": "requested site"
+},
+{
+"idx": 1010,
+"lat": 46.3924,
+"lon": 2.2192,
+"country": "France",
+"region": "Europe",
+"tpd": 1000.0,
+"ktpa": 365.0,
+"custom": true,
+"spec": {
+"name": null,
+"lat": 46.3924,
+"lon": 2.2192,
+"tNH3_day": 1000,
+"ccs": true,
+"pathway_code": "SMR_INT_ASU",
+"objective": "IRR",
+"overrides": {
+"nh3_price_usd_per_t": 660,
+"gas_price_mult": 1,
+"grid_price_mult": 1,
+"interest_rate": 0.08,
+"eua_price_eur_per_t": 72,
+"el_capex_usd_per_kw": 1100,
+"pv_capex_mult": 1,
+"wt_capex_mult": 1,
+"battery_capex_usd_per_mwh": 215000,
+"smr_capex_mult": 1,
+"ccs_capex_mult": 1,
+"hb_capex_usd_per_mwh": 53750,
+"res_overbuild": 1.4,
+"el_minload": 0.1,
+"nh3_minload": 0.95,
+"asu_minload": 0.7,
+"hb_hours": 5,
+"ccs_capture_process": 0.99,
+"ccs_capture_flue": 0.9
+},
+"country": "France"
+},
+"skipped": {
+"No": {
+"0.25": "no design earns a positive return at the NH3 price (660 $/t) \u2014 skipped, as in the fleet runs",
+"0.50": "no design earns a positive return at the NH3 price (660 $/t) \u2014 skipped, as in the fleet runs"
+},
+"Yes": {}
+},
+"errors": {
+"No": {},
+"Yes": {}
+},
+"name": "Site 1010",
+"admin": "requested site"
 }
 ]
