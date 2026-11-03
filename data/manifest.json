@@ -5098,12 +5098,55 @@
     }
    ],
    "BAU": "runs/plant1019/BAU/bau.json.gz"
+  },
+  "1020": {
+   "SMR": [
+    {
+     "ci": 0.0,
+     "file": "runs/plant1020/SMR/ci0.00.json.gz"
+    },
+    {
+     "ci": 0.25,
+     "file": "runs/plant1020/SMR/ci0.25.json.gz"
+    },
+    {
+     "ci": 0.5,
+     "file": "runs/plant1020/SMR/ci0.50.json.gz"
+    },
+    {
+     "ci": 0.75,
+     "file": "runs/plant1020/SMR/ci0.75.json.gz"
+    },
+    {
+     "ci": 1.0,
+     "file": "runs/plant1020/SMR/ci1.00.json.gz"
+    },
+    {
+     "ci": 1.25,
+     "file": "runs/plant1020/SMR/ci1.25.json.gz"
+    },
+    {
+     "ci": 1.5,
+     "file": "runs/plant1020/SMR/ci1.50.json.gz"
+    },
+    {
+     "ci": 1.75,
+     "file": "runs/plant1020/SMR/ci1.75.json.gz"
+    }
+   ],
+   "SMR+CCS": [
+    {
+     "ci": 0.0,
+     "file": "runs/plant1020/SMR+CCS/ci0.00.json.gz"
+    }
+   ],
+   "BAU": "runs/plant1020/BAU/bau.json.gz"
   }
  },
  "extra_labels": [
   "site_v1"
  ],
- "n_scenarios": 366,
- "n_runs": 2894,
- "n_plants": 73
+ "n_scenarios": 370,
+ "n_runs": 2912,
+ "n_plants": 74
 }
