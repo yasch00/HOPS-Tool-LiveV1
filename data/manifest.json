@@ -4957,77 +4957,6 @@
    ],
    "BAU": "runs/plant1015/BAU/bau.json.gz"
   },
-  "1018": {
-   "SMR": [
-    {
-     "ci": 0.0,
-     "file": "runs/plant1018/SMR/ci0.00.json.gz"
-    },
-    {
-     "ci": 0.25,
-     "file": "runs/plant1018/SMR/ci0.25.json.gz"
-    },
-    {
-     "ci": 0.5,
-     "file": "runs/plant1018/SMR/ci0.50.json.gz"
-    },
-    {
-     "ci": 0.75,
-     "file": "runs/plant1018/SMR/ci0.75.json.gz"
-    },
-    {
-     "ci": 1.0,
-     "file": "runs/plant1018/SMR/ci1.00.json.gz"
-    },
-    {
-     "ci": 1.25,
-     "file": "runs/plant1018/SMR/ci1.25.json.gz"
-    },
-    {
-     "ci": 1.5,
-     "file": "runs/plant1018/SMR/ci1.50.json.gz"
-    },
-    {
-     "ci": 1.75,
-     "file": "runs/plant1018/SMR/ci1.75.json.gz"
-    }
-   ],
-   "SMR+CCS": [
-    {
-     "ci": 0.0,
-     "file": "runs/plant1018/SMR+CCS/ci0.00.json.gz"
-    },
-    {
-     "ci": 0.25,
-     "file": "runs/plant1018/SMR+CCS/ci0.25.json.gz"
-    },
-    {
-     "ci": 0.5,
-     "file": "runs/plant1018/SMR+CCS/ci0.50.json.gz"
-    },
-    {
-     "ci": 0.75,
-     "file": "runs/plant1018/SMR+CCS/ci0.75.json.gz"
-    },
-    {
-     "ci": 1.0,
-     "file": "runs/plant1018/SMR+CCS/ci1.00.json.gz"
-    },
-    {
-     "ci": 1.25,
-     "file": "runs/plant1018/SMR+CCS/ci1.25.json.gz"
-    },
-    {
-     "ci": 1.5,
-     "file": "runs/plant1018/SMR+CCS/ci1.50.json.gz"
-    },
-    {
-     "ci": 1.75,
-     "file": "runs/plant1018/SMR+CCS/ci1.75.json.gz"
-    }
-   ],
-   "BAU": "runs/plant1018/BAU/bau.json.gz"
-  },
   "1019": {
    "SMR": [
     {
@@ -5103,7 +5032,7 @@
  "extra_labels": [
   "site_v1"
  ],
- "n_scenarios": 366,
+ "n_scenarios": 362,
  "n_runs": 2912,
- "n_plants": 73
+ "n_plants": 72
 }
