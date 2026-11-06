@@ -13,12 +13,61 @@
   "lat": 33.916,
   "lon": -118.419
  },
+ "2": {
+  "name": "Wheatland County",
+  "admin": "Alberta",
+  "country": "Canada",
+  "lat": 50.845,
+  "lon": -113.591
+ },
+ "3": {
+  "name": "Lacombe County",
+  "admin": "Alberta",
+  "country": "Canada",
+  "lat": 52.322,
+  "lon": -113.517
+ },
+ "4": {
+  "name": "Fort Saskatchewan",
+  "admin": "Alberta",
+  "country": "Canada",
+  "lat": 53.725,
+  "lon": -113.193
+ },
+ "5": {
+  "name": "Fort Saskatchewan",
+  "admin": "Alberta",
+  "country": "Canada",
+  "lat": 53.722,
+  "lon": -113.192
+ },
+ "6": {
+  "name": "Sturgeon County",
+  "admin": "Alberta",
+  "country": "Canada",
+  "lat": 53.842,
+  "lon": -113.093
+ },
+ "7": {
+  "name": "Medicine Hat",
+  "admin": "Alberta",
+  "country": "Canada",
+  "lat": 50.091,
+  "lon": -110.719
+ },
  "8": {
   "name": "Sweetwater County",
   "admin": "Wyoming",
   "country": "USA",
   "lat": 41.541,
   "lon": -109.131
+ },
+ "9": {
+  "name": "Pense",
+  "admin": "Saskatchewan",
+  "country": "Canada",
+  "lat": 50.433,
+  "lon": -105.183
  },
  "10": {
   "name": "Laramie County",
@@ -47,6 +96,13 @@
   "country": "USA",
   "lat": 37.78,
   "lon": -100.006
+ },
+ "14": {
+  "name": "Brandon",
+  "admin": "Manitoba",
+  "country": "Canada",
+  "lat": 49.831,
+  "lon": -99.908
  },
  "15": {
   "name": "Woodward County",
@@ -481,5 +537,208 @@
   "country": "Bulgaria",
   "lat": 43.22417507,
   "lon": 27.56477726
+ },
+ "96": {
+  "name": "Kalol",
+  "admin": "Gujarat",
+  "country": "India",
+  "lat": 23.33717,
+  "lon": 72.49837
+ },
+ "97": {
+  "name": "Olpad",
+  "admin": "Gujarat",
+  "country": "India",
+  "lat": 21.28148,
+  "lon": 72.68725
+ },
+ "98": {
+  "name": "Mumbai",
+  "admin": "Maharashtra",
+  "country": "India",
+  "lat": 19.11269,
+  "lon": 72.88725
+ },
+ "99": {
+  "name": "Alibag",
+  "admin": "Maharashtra",
+  "country": "India",
+  "lat": 18.75536,
+  "lon": 72.88725
+ },
+ "100": {
+  "name": "Bharuch",
+  "admin": "Gujarat",
+  "country": "India",
+  "lat": 21.81885,
+  "lon": 73.02058
+ },
+ "101": {
+  "name": "Ambernath",
+  "admin": "Maharashtra",
+  "country": "India",
+  "lat": 19.14418,
+  "lon": 73.13169
+ },
+ "102": {
+  "name": "Savli",
+  "admin": "Gujarat",
+  "country": "India",
+  "lat": 22.4672,
+  "lon": 73.1428
+ },
+ "103": {
+  "name": "Tiswadi",
+  "admin": "Goa",
+  "country": "India",
+  "lat": 15.46397,
+  "lon": 73.90945
+ },
+ "104": {
+  "name": "Talera",
+  "admin": "Rajasthan",
+  "country": "India",
+  "lat": 25.29122,
+  "lon": 75.86496
+ },
+ "105": {
+  "name": "Digod",
+  "admin": "Rajasthan",
+  "country": "India",
+  "lat": 25.29122,
+  "lon": 76.22051
+ },
+ "106": {
+  "name": "Paravur",
+  "admin": "Kerala",
+  "country": "India",
+  "lat": 10.14632,
+  "lon": 76.25384
+ },
+ "107": {
+  "name": "Aluva",
+  "admin": "Kerala",
+  "country": "India",
+  "lat": 10.05881,
+  "lon": 76.36495
+ },
+ "109": {
+  "name": "Raghogarh",
+  "admin": "Madhya Pradesh",
+  "country": "India",
+  "lat": 24.55567,
+  "lon": 77.16493
+ },
+ "110": {
+  "name": "Thoothukudi",
+  "admin": "Tamil Nadu",
+  "country": "India",
+  "lat": 8.82031,
+  "lon": 78.08713
+ },
+ "111": {
+  "name": "Gunnaur",
+  "admin": "Uttar Pradesh",
+  "country": "India",
+  "lat": 28.33497,
+  "lon": 78.42046
+ },
+ "112": {
+  "name": "Aonla",
+  "admin": "Uttar Pradesh",
+  "country": "India",
+  "lat": 28.34475,
+  "lon": 79.176
+ },
+ "113": {
+  "name": "Panruti",
+  "admin": "Tamil Nadu",
+  "country": "India",
+  "lat": 11.60838,
+  "lon": 79.45377
+ },
+ "114": {
+  "name": "Jaipur",
+  "admin": "Telangana",
+  "country": "India",
+  "lat": 18.81847,
+  "lon": 79.50932
+ },
+ "115": {
+  "name": "Shahjahanpur",
+  "admin": "Uttar Pradesh",
+  "country": "India",
+  "lat": 27.95288,
+  "lon": 79.93154
+ },
+ "116": {
+  "name": "Chennai",
+  "admin": "Tamil Nadu",
+  "country": "India",
+  "lat": 13.12775,
+  "lon": 80.22042
+ },
+ "117": {
+  "name": "Kanpur",
+  "admin": "Uttar Pradesh",
+  "country": "India",
+  "lat": 26.56026,
+  "lon": 80.24264
+ },
+ "118": {
+  "name": "Chennai",
+  "admin": "Tamil Nadu",
+  "country": "India",
+  "lat": 13.26838,
+  "lon": 80.24264
+ },
+ "119": {
+  "name": "Hasanganj",
+  "admin": "Uttar Pradesh",
+  "country": "India",
+  "lat": 26.82828,
+  "lon": 80.55374
+ },
+ "120": {
+  "name": "Phulpur",
+  "admin": "Uttar Pradesh",
+  "country": "India",
+  "lat": 25.62228,
+  "lon": 82.08704
+ },
+ "121": {
+  "name": "Gorakhpur",
+  "admin": "Uttar Pradesh",
+  "country": "India",
+  "lat": 26.83819,
+  "lon": 83.3759
+ },
+ "122": {
+  "name": "Hatibari",
+  "admin": "Odisha",
+  "country": "India",
+  "lat": 22.34394,
+  "lon": 84.85365
+ },
+ "123": {
+  "name": "Bhagwanpur",
+  "admin": "Bihar",
+  "country": "India",
+  "lat": 25.54211,
+  "lon": 85.99807
+ },
+ "124": {
+  "name": "Nirsa-Cum-Chirkunda",
+  "admin": "Jharkhand",
+  "country": "India",
+  "lat": 23.83611,
+  "lon": 86.69805
+ },
+ "125": {
+  "name": "Naharkatiya",
+  "admin": "Assam",
+  "country": "India",
+  "lat": 27.24393,
+  "lon": 95.35341
  }
 }

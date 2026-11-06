@@ -1,9 +1,9 @@
 {
  "version": "IRR_v7-2026-09-16",
  "label": "IRR_v7",
- "bau_label": "site_v1",
+ "bau_label": "BAU_cain",
  "pathway": "SMR_INT_ASU",
- "generated": "2026-11-03",
+ "generated": "2026-11-06",
  "policies": {
   "ETSlaw": "EU ETS (current law)",
   "ETSprop": "EU ETS (proposed)",
@@ -4956,12 +4956,2640 @@
     }
    ],
    "BAU": "runs/plant1015/BAU/bau.json.gz"
+  },
+  "2": {
+   "SMR": [
+    {
+     "ci": 0.0,
+     "file": null
+    },
+    {
+     "ci": 0.25,
+     "file": null
+    },
+    {
+     "ci": 0.5,
+     "file": null
+    },
+    {
+     "ci": 0.75,
+     "file": null
+    },
+    {
+     "ci": 1.0,
+     "file": null
+    },
+    {
+     "ci": 1.25,
+     "file": null
+    },
+    {
+     "ci": 1.5,
+     "file": null
+    },
+    {
+     "ci": 1.75,
+     "file": null
+    }
+   ],
+   "SMR+CCS": [
+    {
+     "ci": 0.0,
+     "file": null
+    },
+    {
+     "ci": 0.25,
+     "file": null
+    },
+    {
+     "ci": 0.5,
+     "file": null
+    },
+    {
+     "ci": 0.75,
+     "file": null
+    },
+    {
+     "ci": 1.0,
+     "file": null
+    },
+    {
+     "ci": 1.25,
+     "file": null
+    },
+    {
+     "ci": 1.5,
+     "file": null
+    },
+    {
+     "ci": 1.75,
+     "file": null
+    }
+   ],
+   "BAU": null
+  },
+  "3": {
+   "SMR": [
+    {
+     "ci": 0.0,
+     "file": null
+    },
+    {
+     "ci": 0.25,
+     "file": null
+    },
+    {
+     "ci": 0.5,
+     "file": null
+    },
+    {
+     "ci": 0.75,
+     "file": null
+    },
+    {
+     "ci": 1.0,
+     "file": null
+    },
+    {
+     "ci": 1.25,
+     "file": null
+    },
+    {
+     "ci": 1.5,
+     "file": null
+    },
+    {
+     "ci": 1.75,
+     "file": null
+    }
+   ],
+   "SMR+CCS": [
+    {
+     "ci": 0.0,
+     "file": null
+    },
+    {
+     "ci": 0.25,
+     "file": null
+    },
+    {
+     "ci": 0.5,
+     "file": null
+    },
+    {
+     "ci": 0.75,
+     "file": null
+    },
+    {
+     "ci": 1.0,
+     "file": null
+    },
+    {
+     "ci": 1.25,
+     "file": null
+    },
+    {
+     "ci": 1.5,
+     "file": null
+    },
+    {
+     "ci": 1.75,
+     "file": null
+    }
+   ],
+   "BAU": null
+  },
+  "4": {
+   "SMR": [
+    {
+     "ci": 0.0,
+     "file": null
+    },
+    {
+     "ci": 0.25,
+     "file": null
+    },
+    {
+     "ci": 0.5,
+     "file": null
+    },
+    {
+     "ci": 0.75,
+     "file": null
+    },
+    {
+     "ci": 1.0,
+     "file": null
+    },
+    {
+     "ci": 1.25,
+     "file": null
+    },
+    {
+     "ci": 1.5,
+     "file": null
+    },
+    {
+     "ci": 1.75,
+     "file": null
+    }
+   ],
+   "SMR+CCS": [
+    {
+     "ci": 0.0,
+     "file": null
+    },
+    {
+     "ci": 0.25,
+     "file": null
+    },
+    {
+     "ci": 0.5,
+     "file": null
+    },
+    {
+     "ci": 0.75,
+     "file": null
+    },
+    {
+     "ci": 1.0,
+     "file": null
+    },
+    {
+     "ci": 1.25,
+     "file": null
+    },
+    {
+     "ci": 1.5,
+     "file": null
+    },
+    {
+     "ci": 1.75,
+     "file": null
+    }
+   ],
+   "BAU": null
+  },
+  "5": {
+   "SMR": [
+    {
+     "ci": 0.0,
+     "file": null
+    },
+    {
+     "ci": 0.25,
+     "file": null
+    },
+    {
+     "ci": 0.5,
+     "file": null
+    },
+    {
+     "ci": 0.75,
+     "file": null
+    },
+    {
+     "ci": 1.0,
+     "file": null
+    },
+    {
+     "ci": 1.25,
+     "file": null
+    },
+    {
+     "ci": 1.5,
+     "file": null
+    },
+    {
+     "ci": 1.75,
+     "file": null
+    }
+   ],
+   "SMR+CCS": [
+    {
+     "ci": 0.0,
+     "file": null
+    },
+    {
+     "ci": 0.25,
+     "file": null
+    },
+    {
+     "ci": 0.5,
+     "file": null
+    },
+    {
+     "ci": 0.75,
+     "file": null
+    },
+    {
+     "ci": 1.0,
+     "file": null
+    },
+    {
+     "ci": 1.25,
+     "file": null
+    },
+    {
+     "ci": 1.5,
+     "file": null
+    },
+    {
+     "ci": 1.75,
+     "file": null
+    }
+   ],
+   "BAU": null
+  },
+  "6": {
+   "SMR": [
+    {
+     "ci": 0.0,
+     "file": null
+    },
+    {
+     "ci": 0.25,
+     "file": null
+    },
+    {
+     "ci": 0.5,
+     "file": null
+    },
+    {
+     "ci": 0.75,
+     "file": null
+    },
+    {
+     "ci": 1.0,
+     "file": null
+    },
+    {
+     "ci": 1.25,
+     "file": null
+    },
+    {
+     "ci": 1.5,
+     "file": null
+    },
+    {
+     "ci": 1.75,
+     "file": null
+    }
+   ],
+   "SMR+CCS": [
+    {
+     "ci": 0.0,
+     "file": null
+    },
+    {
+     "ci": 0.25,
+     "file": null
+    },
+    {
+     "ci": 0.5,
+     "file": null
+    },
+    {
+     "ci": 0.75,
+     "file": null
+    },
+    {
+     "ci": 1.0,
+     "file": null
+    },
+    {
+     "ci": 1.25,
+     "file": null
+    },
+    {
+     "ci": 1.5,
+     "file": null
+    },
+    {
+     "ci": 1.75,
+     "file": null
+    }
+   ],
+   "BAU": null
+  },
+  "7": {
+   "SMR": [
+    {
+     "ci": 0.0,
+     "file": null
+    },
+    {
+     "ci": 0.25,
+     "file": null
+    },
+    {
+     "ci": 0.5,
+     "file": null
+    },
+    {
+     "ci": 0.75,
+     "file": null
+    },
+    {
+     "ci": 1.0,
+     "file": null
+    },
+    {
+     "ci": 1.25,
+     "file": null
+    },
+    {
+     "ci": 1.5,
+     "file": null
+    },
+    {
+     "ci": 1.75,
+     "file": null
+    }
+   ],
+   "SMR+CCS": [
+    {
+     "ci": 0.0,
+     "file": null
+    },
+    {
+     "ci": 0.25,
+     "file": null
+    },
+    {
+     "ci": 0.5,
+     "file": null
+    },
+    {
+     "ci": 0.75,
+     "file": null
+    },
+    {
+     "ci": 1.0,
+     "file": null
+    },
+    {
+     "ci": 1.25,
+     "file": null
+    },
+    {
+     "ci": 1.5,
+     "file": null
+    },
+    {
+     "ci": 1.75,
+     "file": null
+    }
+   ],
+   "BAU": null
+  },
+  "9": {
+   "SMR": [
+    {
+     "ci": 0.0,
+     "file": null
+    },
+    {
+     "ci": 0.25,
+     "file": null
+    },
+    {
+     "ci": 0.5,
+     "file": null
+    },
+    {
+     "ci": 0.75,
+     "file": null
+    },
+    {
+     "ci": 1.0,
+     "file": null
+    },
+    {
+     "ci": 1.25,
+     "file": null
+    },
+    {
+     "ci": 1.5,
+     "file": null
+    },
+    {
+     "ci": 1.75,
+     "file": null
+    }
+   ],
+   "SMR+CCS": [
+    {
+     "ci": 0.0,
+     "file": null
+    },
+    {
+     "ci": 0.25,
+     "file": null
+    },
+    {
+     "ci": 0.5,
+     "file": null
+    },
+    {
+     "ci": 0.75,
+     "file": null
+    },
+    {
+     "ci": 1.0,
+     "file": null
+    },
+    {
+     "ci": 1.25,
+     "file": null
+    },
+    {
+     "ci": 1.5,
+     "file": null
+    },
+    {
+     "ci": 1.75,
+     "file": null
+    }
+   ],
+   "BAU": null
+  },
+  "14": {
+   "SMR": [
+    {
+     "ci": 0.0,
+     "file": null
+    },
+    {
+     "ci": 0.25,
+     "file": null
+    },
+    {
+     "ci": 0.5,
+     "file": null
+    },
+    {
+     "ci": 0.75,
+     "file": null
+    },
+    {
+     "ci": 1.0,
+     "file": null
+    },
+    {
+     "ci": 1.25,
+     "file": null
+    },
+    {
+     "ci": 1.5,
+     "file": null
+    },
+    {
+     "ci": 1.75,
+     "file": null
+    }
+   ],
+   "SMR+CCS": [
+    {
+     "ci": 0.0,
+     "file": null
+    },
+    {
+     "ci": 0.25,
+     "file": null
+    },
+    {
+     "ci": 0.5,
+     "file": null
+    },
+    {
+     "ci": 0.75,
+     "file": null
+    },
+    {
+     "ci": 1.0,
+     "file": null
+    },
+    {
+     "ci": 1.25,
+     "file": null
+    },
+    {
+     "ci": 1.5,
+     "file": null
+    },
+    {
+     "ci": 1.75,
+     "file": null
+    }
+   ],
+   "BAU": null
+  },
+  "96": {
+   "SMR": [
+    {
+     "ci": 0.0,
+     "file": null
+    },
+    {
+     "ci": 0.25,
+     "file": null
+    },
+    {
+     "ci": 0.5,
+     "file": null
+    },
+    {
+     "ci": 0.75,
+     "file": null
+    },
+    {
+     "ci": 1.0,
+     "file": null
+    },
+    {
+     "ci": 1.25,
+     "file": null
+    },
+    {
+     "ci": 1.5,
+     "file": null
+    },
+    {
+     "ci": 1.75,
+     "file": null
+    }
+   ],
+   "SMR+CCS": [
+    {
+     "ci": 0.0,
+     "file": null
+    },
+    {
+     "ci": 0.25,
+     "file": null
+    },
+    {
+     "ci": 0.5,
+     "file": null
+    },
+    {
+     "ci": 0.75,
+     "file": null
+    },
+    {
+     "ci": 1.0,
+     "file": null
+    },
+    {
+     "ci": 1.25,
+     "file": null
+    },
+    {
+     "ci": 1.5,
+     "file": null
+    },
+    {
+     "ci": 1.75,
+     "file": null
+    }
+   ],
+   "BAU": null
+  },
+  "97": {
+   "SMR": [
+    {
+     "ci": 0.0,
+     "file": null
+    },
+    {
+     "ci": 0.25,
+     "file": null
+    },
+    {
+     "ci": 0.5,
+     "file": null
+    },
+    {
+     "ci": 0.75,
+     "file": null
+    },
+    {
+     "ci": 1.0,
+     "file": null
+    },
+    {
+     "ci": 1.25,
+     "file": null
+    },
+    {
+     "ci": 1.5,
+     "file": null
+    },
+    {
+     "ci": 1.75,
+     "file": null
+    }
+   ],
+   "SMR+CCS": [
+    {
+     "ci": 0.0,
+     "file": null
+    },
+    {
+     "ci": 0.25,
+     "file": null
+    },
+    {
+     "ci": 0.5,
+     "file": null
+    },
+    {
+     "ci": 0.75,
+     "file": null
+    },
+    {
+     "ci": 1.0,
+     "file": null
+    },
+    {
+     "ci": 1.25,
+     "file": null
+    },
+    {
+     "ci": 1.5,
+     "file": null
+    },
+    {
+     "ci": 1.75,
+     "file": null
+    }
+   ],
+   "BAU": null
+  },
+  "98": {
+   "SMR": [
+    {
+     "ci": 0.0,
+     "file": null
+    },
+    {
+     "ci": 0.25,
+     "file": null
+    },
+    {
+     "ci": 0.5,
+     "file": null
+    },
+    {
+     "ci": 0.75,
+     "file": null
+    },
+    {
+     "ci": 1.0,
+     "file": null
+    },
+    {
+     "ci": 1.25,
+     "file": null
+    },
+    {
+     "ci": 1.5,
+     "file": null
+    },
+    {
+     "ci": 1.75,
+     "file": null
+    }
+   ],
+   "SMR+CCS": [
+    {
+     "ci": 0.0,
+     "file": null
+    },
+    {
+     "ci": 0.25,
+     "file": null
+    },
+    {
+     "ci": 0.5,
+     "file": null
+    },
+    {
+     "ci": 0.75,
+     "file": null
+    },
+    {
+     "ci": 1.0,
+     "file": null
+    },
+    {
+     "ci": 1.25,
+     "file": null
+    },
+    {
+     "ci": 1.5,
+     "file": null
+    },
+    {
+     "ci": 1.75,
+     "file": null
+    }
+   ],
+   "BAU": null
+  },
+  "99": {
+   "SMR": [
+    {
+     "ci": 0.0,
+     "file": null
+    },
+    {
+     "ci": 0.25,
+     "file": null
+    },
+    {
+     "ci": 0.5,
+     "file": null
+    },
+    {
+     "ci": 0.75,
+     "file": null
+    },
+    {
+     "ci": 1.0,
+     "file": null
+    },
+    {
+     "ci": 1.25,
+     "file": null
+    },
+    {
+     "ci": 1.5,
+     "file": null
+    },
+    {
+     "ci": 1.75,
+     "file": null
+    }
+   ],
+   "SMR+CCS": [
+    {
+     "ci": 0.0,
+     "file": null
+    },
+    {
+     "ci": 0.25,
+     "file": null
+    },
+    {
+     "ci": 0.5,
+     "file": null
+    },
+    {
+     "ci": 0.75,
+     "file": null
+    },
+    {
+     "ci": 1.0,
+     "file": null
+    },
+    {
+     "ci": 1.25,
+     "file": null
+    },
+    {
+     "ci": 1.5,
+     "file": null
+    },
+    {
+     "ci": 1.75,
+     "file": null
+    }
+   ],
+   "BAU": null
+  },
+  "100": {
+   "SMR": [
+    {
+     "ci": 0.0,
+     "file": null
+    },
+    {
+     "ci": 0.25,
+     "file": null
+    },
+    {
+     "ci": 0.5,
+     "file": null
+    },
+    {
+     "ci": 0.75,
+     "file": null
+    },
+    {
+     "ci": 1.0,
+     "file": null
+    },
+    {
+     "ci": 1.25,
+     "file": null
+    },
+    {
+     "ci": 1.5,
+     "file": null
+    },
+    {
+     "ci": 1.75,
+     "file": null
+    }
+   ],
+   "SMR+CCS": [
+    {
+     "ci": 0.0,
+     "file": null
+    },
+    {
+     "ci": 0.25,
+     "file": null
+    },
+    {
+     "ci": 0.5,
+     "file": null
+    },
+    {
+     "ci": 0.75,
+     "file": null
+    },
+    {
+     "ci": 1.0,
+     "file": null
+    },
+    {
+     "ci": 1.25,
+     "file": null
+    },
+    {
+     "ci": 1.5,
+     "file": null
+    },
+    {
+     "ci": 1.75,
+     "file": null
+    }
+   ],
+   "BAU": null
+  },
+  "101": {
+   "SMR": [
+    {
+     "ci": 0.0,
+     "file": null
+    },
+    {
+     "ci": 0.25,
+     "file": null
+    },
+    {
+     "ci": 0.5,
+     "file": null
+    },
+    {
+     "ci": 0.75,
+     "file": null
+    },
+    {
+     "ci": 1.0,
+     "file": null
+    },
+    {
+     "ci": 1.25,
+     "file": null
+    },
+    {
+     "ci": 1.5,
+     "file": null
+    },
+    {
+     "ci": 1.75,
+     "file": null
+    }
+   ],
+   "SMR+CCS": [
+    {
+     "ci": 0.0,
+     "file": null
+    },
+    {
+     "ci": 0.25,
+     "file": null
+    },
+    {
+     "ci": 0.5,
+     "file": null
+    },
+    {
+     "ci": 0.75,
+     "file": null
+    },
+    {
+     "ci": 1.0,
+     "file": null
+    },
+    {
+     "ci": 1.25,
+     "file": null
+    },
+    {
+     "ci": 1.5,
+     "file": null
+    },
+    {
+     "ci": 1.75,
+     "file": null
+    }
+   ],
+   "BAU": null
+  },
+  "102": {
+   "SMR": [
+    {
+     "ci": 0.0,
+     "file": null
+    },
+    {
+     "ci": 0.25,
+     "file": null
+    },
+    {
+     "ci": 0.5,
+     "file": null
+    },
+    {
+     "ci": 0.75,
+     "file": null
+    },
+    {
+     "ci": 1.0,
+     "file": null
+    },
+    {
+     "ci": 1.25,
+     "file": null
+    },
+    {
+     "ci": 1.5,
+     "file": null
+    },
+    {
+     "ci": 1.75,
+     "file": null
+    }
+   ],
+   "SMR+CCS": [
+    {
+     "ci": 0.0,
+     "file": null
+    },
+    {
+     "ci": 0.25,
+     "file": null
+    },
+    {
+     "ci": 0.5,
+     "file": null
+    },
+    {
+     "ci": 0.75,
+     "file": null
+    },
+    {
+     "ci": 1.0,
+     "file": null
+    },
+    {
+     "ci": 1.25,
+     "file": null
+    },
+    {
+     "ci": 1.5,
+     "file": null
+    },
+    {
+     "ci": 1.75,
+     "file": null
+    }
+   ],
+   "BAU": null
+  },
+  "103": {
+   "SMR": [
+    {
+     "ci": 0.0,
+     "file": null
+    },
+    {
+     "ci": 0.25,
+     "file": null
+    },
+    {
+     "ci": 0.5,
+     "file": null
+    },
+    {
+     "ci": 0.75,
+     "file": null
+    },
+    {
+     "ci": 1.0,
+     "file": null
+    },
+    {
+     "ci": 1.25,
+     "file": null
+    },
+    {
+     "ci": 1.5,
+     "file": null
+    },
+    {
+     "ci": 1.75,
+     "file": null
+    }
+   ],
+   "SMR+CCS": [
+    {
+     "ci": 0.0,
+     "file": null
+    },
+    {
+     "ci": 0.25,
+     "file": null
+    },
+    {
+     "ci": 0.5,
+     "file": null
+    },
+    {
+     "ci": 0.75,
+     "file": null
+    },
+    {
+     "ci": 1.0,
+     "file": null
+    },
+    {
+     "ci": 1.25,
+     "file": null
+    },
+    {
+     "ci": 1.5,
+     "file": null
+    },
+    {
+     "ci": 1.75,
+     "file": null
+    }
+   ],
+   "BAU": null
+  },
+  "104": {
+   "SMR": [
+    {
+     "ci": 0.0,
+     "file": null
+    },
+    {
+     "ci": 0.25,
+     "file": null
+    },
+    {
+     "ci": 0.5,
+     "file": null
+    },
+    {
+     "ci": 0.75,
+     "file": null
+    },
+    {
+     "ci": 1.0,
+     "file": null
+    },
+    {
+     "ci": 1.25,
+     "file": null
+    },
+    {
+     "ci": 1.5,
+     "file": null
+    },
+    {
+     "ci": 1.75,
+     "file": null
+    }
+   ],
+   "SMR+CCS": [
+    {
+     "ci": 0.0,
+     "file": null
+    },
+    {
+     "ci": 0.25,
+     "file": null
+    },
+    {
+     "ci": 0.5,
+     "file": null
+    },
+    {
+     "ci": 0.75,
+     "file": null
+    },
+    {
+     "ci": 1.0,
+     "file": null
+    },
+    {
+     "ci": 1.25,
+     "file": null
+    },
+    {
+     "ci": 1.5,
+     "file": null
+    },
+    {
+     "ci": 1.75,
+     "file": null
+    }
+   ],
+   "BAU": null
+  },
+  "105": {
+   "SMR": [
+    {
+     "ci": 0.0,
+     "file": null
+    },
+    {
+     "ci": 0.25,
+     "file": null
+    },
+    {
+     "ci": 0.5,
+     "file": null
+    },
+    {
+     "ci": 0.75,
+     "file": null
+    },
+    {
+     "ci": 1.0,
+     "file": null
+    },
+    {
+     "ci": 1.25,
+     "file": null
+    },
+    {
+     "ci": 1.5,
+     "file": null
+    },
+    {
+     "ci": 1.75,
+     "file": null
+    }
+   ],
+   "SMR+CCS": [
+    {
+     "ci": 0.0,
+     "file": null
+    },
+    {
+     "ci": 0.25,
+     "file": null
+    },
+    {
+     "ci": 0.5,
+     "file": null
+    },
+    {
+     "ci": 0.75,
+     "file": null
+    },
+    {
+     "ci": 1.0,
+     "file": null
+    },
+    {
+     "ci": 1.25,
+     "file": null
+    },
+    {
+     "ci": 1.5,
+     "file": null
+    },
+    {
+     "ci": 1.75,
+     "file": null
+    }
+   ],
+   "BAU": null
+  },
+  "106": {
+   "SMR": [
+    {
+     "ci": 0.0,
+     "file": null
+    },
+    {
+     "ci": 0.25,
+     "file": null
+    },
+    {
+     "ci": 0.5,
+     "file": null
+    },
+    {
+     "ci": 0.75,
+     "file": null
+    },
+    {
+     "ci": 1.0,
+     "file": null
+    },
+    {
+     "ci": 1.25,
+     "file": null
+    },
+    {
+     "ci": 1.5,
+     "file": null
+    },
+    {
+     "ci": 1.75,
+     "file": null
+    }
+   ],
+   "SMR+CCS": [
+    {
+     "ci": 0.0,
+     "file": null
+    },
+    {
+     "ci": 0.25,
+     "file": null
+    },
+    {
+     "ci": 0.5,
+     "file": null
+    },
+    {
+     "ci": 0.75,
+     "file": null
+    },
+    {
+     "ci": 1.0,
+     "file": null
+    },
+    {
+     "ci": 1.25,
+     "file": null
+    },
+    {
+     "ci": 1.5,
+     "file": null
+    },
+    {
+     "ci": 1.75,
+     "file": null
+    }
+   ],
+   "BAU": null
+  },
+  "107": {
+   "SMR": [
+    {
+     "ci": 0.0,
+     "file": null
+    },
+    {
+     "ci": 0.25,
+     "file": null
+    },
+    {
+     "ci": 0.5,
+     "file": null
+    },
+    {
+     "ci": 0.75,
+     "file": null
+    },
+    {
+     "ci": 1.0,
+     "file": null
+    },
+    {
+     "ci": 1.25,
+     "file": null
+    },
+    {
+     "ci": 1.5,
+     "file": null
+    },
+    {
+     "ci": 1.75,
+     "file": null
+    }
+   ],
+   "SMR+CCS": [
+    {
+     "ci": 0.0,
+     "file": null
+    },
+    {
+     "ci": 0.25,
+     "file": null
+    },
+    {
+     "ci": 0.5,
+     "file": null
+    },
+    {
+     "ci": 0.75,
+     "file": null
+    },
+    {
+     "ci": 1.0,
+     "file": null
+    },
+    {
+     "ci": 1.25,
+     "file": null
+    },
+    {
+     "ci": 1.5,
+     "file": null
+    },
+    {
+     "ci": 1.75,
+     "file": null
+    }
+   ],
+   "BAU": null
+  },
+  "109": {
+   "SMR": [
+    {
+     "ci": 0.0,
+     "file": null
+    },
+    {
+     "ci": 0.25,
+     "file": null
+    },
+    {
+     "ci": 0.5,
+     "file": null
+    },
+    {
+     "ci": 0.75,
+     "file": null
+    },
+    {
+     "ci": 1.0,
+     "file": null
+    },
+    {
+     "ci": 1.25,
+     "file": null
+    },
+    {
+     "ci": 1.5,
+     "file": null
+    },
+    {
+     "ci": 1.75,
+     "file": null
+    }
+   ],
+   "SMR+CCS": [
+    {
+     "ci": 0.0,
+     "file": null
+    },
+    {
+     "ci": 0.25,
+     "file": null
+    },
+    {
+     "ci": 0.5,
+     "file": null
+    },
+    {
+     "ci": 0.75,
+     "file": null
+    },
+    {
+     "ci": 1.0,
+     "file": null
+    },
+    {
+     "ci": 1.25,
+     "file": null
+    },
+    {
+     "ci": 1.5,
+     "file": null
+    },
+    {
+     "ci": 1.75,
+     "file": null
+    }
+   ],
+   "BAU": null
+  },
+  "110": {
+   "SMR": [
+    {
+     "ci": 0.0,
+     "file": null
+    },
+    {
+     "ci": 0.25,
+     "file": null
+    },
+    {
+     "ci": 0.5,
+     "file": null
+    },
+    {
+     "ci": 0.75,
+     "file": null
+    },
+    {
+     "ci": 1.0,
+     "file": null
+    },
+    {
+     "ci": 1.25,
+     "file": null
+    },
+    {
+     "ci": 1.5,
+     "file": null
+    },
+    {
+     "ci": 1.75,
+     "file": null
+    }
+   ],
+   "SMR+CCS": [
+    {
+     "ci": 0.0,
+     "file": null
+    },
+    {
+     "ci": 0.25,
+     "file": null
+    },
+    {
+     "ci": 0.5,
+     "file": null
+    },
+    {
+     "ci": 0.75,
+     "file": null
+    },
+    {
+     "ci": 1.0,
+     "file": null
+    },
+    {
+     "ci": 1.25,
+     "file": null
+    },
+    {
+     "ci": 1.5,
+     "file": null
+    },
+    {
+     "ci": 1.75,
+     "file": null
+    }
+   ],
+   "BAU": null
+  },
+  "111": {
+   "SMR": [
+    {
+     "ci": 0.0,
+     "file": null
+    },
+    {
+     "ci": 0.25,
+     "file": null
+    },
+    {
+     "ci": 0.5,
+     "file": null
+    },
+    {
+     "ci": 0.75,
+     "file": null
+    },
+    {
+     "ci": 1.0,
+     "file": null
+    },
+    {
+     "ci": 1.25,
+     "file": null
+    },
+    {
+     "ci": 1.5,
+     "file": null
+    },
+    {
+     "ci": 1.75,
+     "file": null
+    }
+   ],
+   "SMR+CCS": [
+    {
+     "ci": 0.0,
+     "file": null
+    },
+    {
+     "ci": 0.25,
+     "file": null
+    },
+    {
+     "ci": 0.5,
+     "file": null
+    },
+    {
+     "ci": 0.75,
+     "file": null
+    },
+    {
+     "ci": 1.0,
+     "file": null
+    },
+    {
+     "ci": 1.25,
+     "file": null
+    },
+    {
+     "ci": 1.5,
+     "file": null
+    },
+    {
+     "ci": 1.75,
+     "file": null
+    }
+   ],
+   "BAU": null
+  },
+  "112": {
+   "SMR": [
+    {
+     "ci": 0.0,
+     "file": null
+    },
+    {
+     "ci": 0.25,
+     "file": null
+    },
+    {
+     "ci": 0.5,
+     "file": null
+    },
+    {
+     "ci": 0.75,
+     "file": null
+    },
+    {
+     "ci": 1.0,
+     "file": null
+    },
+    {
+     "ci": 1.25,
+     "file": null
+    },
+    {
+     "ci": 1.5,
+     "file": null
+    },
+    {
+     "ci": 1.75,
+     "file": null
+    }
+   ],
+   "SMR+CCS": [
+    {
+     "ci": 0.0,
+     "file": null
+    },
+    {
+     "ci": 0.25,
+     "file": null
+    },
+    {
+     "ci": 0.5,
+     "file": null
+    },
+    {
+     "ci": 0.75,
+     "file": null
+    },
+    {
+     "ci": 1.0,
+     "file": null
+    },
+    {
+     "ci": 1.25,
+     "file": null
+    },
+    {
+     "ci": 1.5,
+     "file": null
+    },
+    {
+     "ci": 1.75,
+     "file": null
+    }
+   ],
+   "BAU": null
+  },
+  "113": {
+   "SMR": [
+    {
+     "ci": 0.0,
+     "file": null
+    },
+    {
+     "ci": 0.25,
+     "file": null
+    },
+    {
+     "ci": 0.5,
+     "file": null
+    },
+    {
+     "ci": 0.75,
+     "file": null
+    },
+    {
+     "ci": 1.0,
+     "file": null
+    },
+    {
+     "ci": 1.25,
+     "file": null
+    },
+    {
+     "ci": 1.5,
+     "file": null
+    },
+    {
+     "ci": 1.75,
+     "file": null
+    }
+   ],
+   "SMR+CCS": [
+    {
+     "ci": 0.0,
+     "file": null
+    },
+    {
+     "ci": 0.25,
+     "file": null
+    },
+    {
+     "ci": 0.5,
+     "file": null
+    },
+    {
+     "ci": 0.75,
+     "file": null
+    },
+    {
+     "ci": 1.0,
+     "file": null
+    },
+    {
+     "ci": 1.25,
+     "file": null
+    },
+    {
+     "ci": 1.5,
+     "file": null
+    },
+    {
+     "ci": 1.75,
+     "file": null
+    }
+   ],
+   "BAU": null
+  },
+  "114": {
+   "SMR": [
+    {
+     "ci": 0.0,
+     "file": null
+    },
+    {
+     "ci": 0.25,
+     "file": null
+    },
+    {
+     "ci": 0.5,
+     "file": null
+    },
+    {
+     "ci": 0.75,
+     "file": null
+    },
+    {
+     "ci": 1.0,
+     "file": null
+    },
+    {
+     "ci": 1.25,
+     "file": null
+    },
+    {
+     "ci": 1.5,
+     "file": null
+    },
+    {
+     "ci": 1.75,
+     "file": null
+    }
+   ],
+   "SMR+CCS": [
+    {
+     "ci": 0.0,
+     "file": null
+    },
+    {
+     "ci": 0.25,
+     "file": null
+    },
+    {
+     "ci": 0.5,
+     "file": null
+    },
+    {
+     "ci": 0.75,
+     "file": null
+    },
+    {
+     "ci": 1.0,
+     "file": null
+    },
+    {
+     "ci": 1.25,
+     "file": null
+    },
+    {
+     "ci": 1.5,
+     "file": null
+    },
+    {
+     "ci": 1.75,
+     "file": null
+    }
+   ],
+   "BAU": null
+  },
+  "115": {
+   "SMR": [
+    {
+     "ci": 0.0,
+     "file": null
+    },
+    {
+     "ci": 0.25,
+     "file": null
+    },
+    {
+     "ci": 0.5,
+     "file": null
+    },
+    {
+     "ci": 0.75,
+     "file": null
+    },
+    {
+     "ci": 1.0,
+     "file": null
+    },
+    {
+     "ci": 1.25,
+     "file": null
+    },
+    {
+     "ci": 1.5,
+     "file": null
+    },
+    {
+     "ci": 1.75,
+     "file": null
+    }
+   ],
+   "SMR+CCS": [
+    {
+     "ci": 0.0,
+     "file": null
+    },
+    {
+     "ci": 0.25,
+     "file": null
+    },
+    {
+     "ci": 0.5,
+     "file": null
+    },
+    {
+     "ci": 0.75,
+     "file": null
+    },
+    {
+     "ci": 1.0,
+     "file": null
+    },
+    {
+     "ci": 1.25,
+     "file": null
+    },
+    {
+     "ci": 1.5,
+     "file": null
+    },
+    {
+     "ci": 1.75,
+     "file": null
+    }
+   ],
+   "BAU": null
+  },
+  "116": {
+   "SMR": [
+    {
+     "ci": 0.0,
+     "file": null
+    },
+    {
+     "ci": 0.25,
+     "file": null
+    },
+    {
+     "ci": 0.5,
+     "file": null
+    },
+    {
+     "ci": 0.75,
+     "file": null
+    },
+    {
+     "ci": 1.0,
+     "file": null
+    },
+    {
+     "ci": 1.25,
+     "file": null
+    },
+    {
+     "ci": 1.5,
+     "file": null
+    },
+    {
+     "ci": 1.75,
+     "file": null
+    }
+   ],
+   "SMR+CCS": [
+    {
+     "ci": 0.0,
+     "file": null
+    },
+    {
+     "ci": 0.25,
+     "file": null
+    },
+    {
+     "ci": 0.5,
+     "file": null
+    },
+    {
+     "ci": 0.75,
+     "file": null
+    },
+    {
+     "ci": 1.0,
+     "file": null
+    },
+    {
+     "ci": 1.25,
+     "file": null
+    },
+    {
+     "ci": 1.5,
+     "file": null
+    },
+    {
+     "ci": 1.75,
+     "file": null
+    }
+   ],
+   "BAU": null
+  },
+  "117": {
+   "SMR": [
+    {
+     "ci": 0.0,
+     "file": null
+    },
+    {
+     "ci": 0.25,
+     "file": null
+    },
+    {
+     "ci": 0.5,
+     "file": null
+    },
+    {
+     "ci": 0.75,
+     "file": null
+    },
+    {
+     "ci": 1.0,
+     "file": null
+    },
+    {
+     "ci": 1.25,
+     "file": null
+    },
+    {
+     "ci": 1.5,
+     "file": null
+    },
+    {
+     "ci": 1.75,
+     "file": null
+    }
+   ],
+   "SMR+CCS": [
+    {
+     "ci": 0.0,
+     "file": null
+    },
+    {
+     "ci": 0.25,
+     "file": null
+    },
+    {
+     "ci": 0.5,
+     "file": null
+    },
+    {
+     "ci": 0.75,
+     "file": null
+    },
+    {
+     "ci": 1.0,
+     "file": null
+    },
+    {
+     "ci": 1.25,
+     "file": null
+    },
+    {
+     "ci": 1.5,
+     "file": null
+    },
+    {
+     "ci": 1.75,
+     "file": null
+    }
+   ],
+   "BAU": null
+  },
+  "118": {
+   "SMR": [
+    {
+     "ci": 0.0,
+     "file": null
+    },
+    {
+     "ci": 0.25,
+     "file": null
+    },
+    {
+     "ci": 0.5,
+     "file": null
+    },
+    {
+     "ci": 0.75,
+     "file": null
+    },
+    {
+     "ci": 1.0,
+     "file": null
+    },
+    {
+     "ci": 1.25,
+     "file": null
+    },
+    {
+     "ci": 1.5,
+     "file": null
+    },
+    {
+     "ci": 1.75,
+     "file": null
+    }
+   ],
+   "SMR+CCS": [
+    {
+     "ci": 0.0,
+     "file": null
+    },
+    {
+     "ci": 0.25,
+     "file": null
+    },
+    {
+     "ci": 0.5,
+     "file": null
+    },
+    {
+     "ci": 0.75,
+     "file": null
+    },
+    {
+     "ci": 1.0,
+     "file": null
+    },
+    {
+     "ci": 1.25,
+     "file": null
+    },
+    {
+     "ci": 1.5,
+     "file": null
+    },
+    {
+     "ci": 1.75,
+     "file": null
+    }
+   ],
+   "BAU": null
+  },
+  "119": {
+   "SMR": [
+    {
+     "ci": 0.0,
+     "file": null
+    },
+    {
+     "ci": 0.25,
+     "file": null
+    },
+    {
+     "ci": 0.5,
+     "file": null
+    },
+    {
+     "ci": 0.75,
+     "file": null
+    },
+    {
+     "ci": 1.0,
+     "file": null
+    },
+    {
+     "ci": 1.25,
+     "file": null
+    },
+    {
+     "ci": 1.5,
+     "file": null
+    },
+    {
+     "ci": 1.75,
+     "file": null
+    }
+   ],
+   "SMR+CCS": [
+    {
+     "ci": 0.0,
+     "file": null
+    },
+    {
+     "ci": 0.25,
+     "file": null
+    },
+    {
+     "ci": 0.5,
+     "file": null
+    },
+    {
+     "ci": 0.75,
+     "file": null
+    },
+    {
+     "ci": 1.0,
+     "file": null
+    },
+    {
+     "ci": 1.25,
+     "file": null
+    },
+    {
+     "ci": 1.5,
+     "file": null
+    },
+    {
+     "ci": 1.75,
+     "file": null
+    }
+   ],
+   "BAU": null
+  },
+  "120": {
+   "SMR": [
+    {
+     "ci": 0.0,
+     "file": null
+    },
+    {
+     "ci": 0.25,
+     "file": null
+    },
+    {
+     "ci": 0.5,
+     "file": null
+    },
+    {
+     "ci": 0.75,
+     "file": null
+    },
+    {
+     "ci": 1.0,
+     "file": null
+    },
+    {
+     "ci": 1.25,
+     "file": null
+    },
+    {
+     "ci": 1.5,
+     "file": null
+    },
+    {
+     "ci": 1.75,
+     "file": null
+    }
+   ],
+   "SMR+CCS": [
+    {
+     "ci": 0.0,
+     "file": null
+    },
+    {
+     "ci": 0.25,
+     "file": null
+    },
+    {
+     "ci": 0.5,
+     "file": null
+    },
+    {
+     "ci": 0.75,
+     "file": null
+    },
+    {
+     "ci": 1.0,
+     "file": null
+    },
+    {
+     "ci": 1.25,
+     "file": null
+    },
+    {
+     "ci": 1.5,
+     "file": null
+    },
+    {
+     "ci": 1.75,
+     "file": null
+    }
+   ],
+   "BAU": null
+  },
+  "121": {
+   "SMR": [
+    {
+     "ci": 0.0,
+     "file": null
+    },
+    {
+     "ci": 0.25,
+     "file": null
+    },
+    {
+     "ci": 0.5,
+     "file": null
+    },
+    {
+     "ci": 0.75,
+     "file": null
+    },
+    {
+     "ci": 1.0,
+     "file": null
+    },
+    {
+     "ci": 1.25,
+     "file": null
+    },
+    {
+     "ci": 1.5,
+     "file": null
+    },
+    {
+     "ci": 1.75,
+     "file": null
+    }
+   ],
+   "SMR+CCS": [
+    {
+     "ci": 0.0,
+     "file": null
+    },
+    {
+     "ci": 0.25,
+     "file": null
+    },
+    {
+     "ci": 0.5,
+     "file": null
+    },
+    {
+     "ci": 0.75,
+     "file": null
+    },
+    {
+     "ci": 1.0,
+     "file": null
+    },
+    {
+     "ci": 1.25,
+     "file": null
+    },
+    {
+     "ci": 1.5,
+     "file": null
+    },
+    {
+     "ci": 1.75,
+     "file": null
+    }
+   ],
+   "BAU": null
+  },
+  "122": {
+   "SMR": [
+    {
+     "ci": 0.0,
+     "file": null
+    },
+    {
+     "ci": 0.25,
+     "file": null
+    },
+    {
+     "ci": 0.5,
+     "file": null
+    },
+    {
+     "ci": 0.75,
+     "file": null
+    },
+    {
+     "ci": 1.0,
+     "file": null
+    },
+    {
+     "ci": 1.25,
+     "file": null
+    },
+    {
+     "ci": 1.5,
+     "file": null
+    },
+    {
+     "ci": 1.75,
+     "file": null
+    }
+   ],
+   "SMR+CCS": [
+    {
+     "ci": 0.0,
+     "file": null
+    },
+    {
+     "ci": 0.25,
+     "file": null
+    },
+    {
+     "ci": 0.5,
+     "file": null
+    },
+    {
+     "ci": 0.75,
+     "file": null
+    },
+    {
+     "ci": 1.0,
+     "file": null
+    },
+    {
+     "ci": 1.25,
+     "file": null
+    },
+    {
+     "ci": 1.5,
+     "file": null
+    },
+    {
+     "ci": 1.75,
+     "file": null
+    }
+   ],
+   "BAU": null
+  },
+  "123": {
+   "SMR": [
+    {
+     "ci": 0.0,
+     "file": null
+    },
+    {
+     "ci": 0.25,
+     "file": null
+    },
+    {
+     "ci": 0.5,
+     "file": null
+    },
+    {
+     "ci": 0.75,
+     "file": null
+    },
+    {
+     "ci": 1.0,
+     "file": null
+    },
+    {
+     "ci": 1.25,
+     "file": null
+    },
+    {
+     "ci": 1.5,
+     "file": null
+    },
+    {
+     "ci": 1.75,
+     "file": null
+    }
+   ],
+   "SMR+CCS": [
+    {
+     "ci": 0.0,
+     "file": null
+    },
+    {
+     "ci": 0.25,
+     "file": null
+    },
+    {
+     "ci": 0.5,
+     "file": null
+    },
+    {
+     "ci": 0.75,
+     "file": null
+    },
+    {
+     "ci": 1.0,
+     "file": null
+    },
+    {
+     "ci": 1.25,
+     "file": null
+    },
+    {
+     "ci": 1.5,
+     "file": null
+    },
+    {
+     "ci": 1.75,
+     "file": null
+    }
+   ],
+   "BAU": null
+  },
+  "124": {
+   "SMR": [
+    {
+     "ci": 0.0,
+     "file": null
+    },
+    {
+     "ci": 0.25,
+     "file": null
+    },
+    {
+     "ci": 0.5,
+     "file": null
+    },
+    {
+     "ci": 0.75,
+     "file": null
+    },
+    {
+     "ci": 1.0,
+     "file": null
+    },
+    {
+     "ci": 1.25,
+     "file": null
+    },
+    {
+     "ci": 1.5,
+     "file": null
+    },
+    {
+     "ci": 1.75,
+     "file": null
+    }
+   ],
+   "SMR+CCS": [
+    {
+     "ci": 0.0,
+     "file": null
+    },
+    {
+     "ci": 0.25,
+     "file": null
+    },
+    {
+     "ci": 0.5,
+     "file": null
+    },
+    {
+     "ci": 0.75,
+     "file": null
+    },
+    {
+     "ci": 1.0,
+     "file": null
+    },
+    {
+     "ci": 1.25,
+     "file": null
+    },
+    {
+     "ci": 1.5,
+     "file": null
+    },
+    {
+     "ci": 1.75,
+     "file": null
+    }
+   ],
+   "BAU": null
+  },
+  "125": {
+   "SMR": [
+    {
+     "ci": 0.0,
+     "file": null
+    },
+    {
+     "ci": 0.25,
+     "file": null
+    },
+    {
+     "ci": 0.5,
+     "file": null
+    },
+    {
+     "ci": 0.75,
+     "file": null
+    },
+    {
+     "ci": 1.0,
+     "file": null
+    },
+    {
+     "ci": 1.25,
+     "file": null
+    },
+    {
+     "ci": 1.5,
+     "file": null
+    },
+    {
+     "ci": 1.75,
+     "file": null
+    }
+   ],
+   "SMR+CCS": [
+    {
+     "ci": 0.0,
+     "file": null
+    },
+    {
+     "ci": 0.25,
+     "file": null
+    },
+    {
+     "ci": 0.5,
+     "file": null
+    },
+    {
+     "ci": 0.75,
+     "file": null
+    },
+    {
+     "ci": 1.0,
+     "file": null
+    },
+    {
+     "ci": 1.25,
+     "file": null
+    },
+    {
+     "ci": 1.5,
+     "file": null
+    },
+    {
+     "ci": 1.75,
+     "file": null
+    }
+   ],
+   "BAU": null
   }
  },
  "extra_labels": [
+  "IRR_cain",
   "site_v1"
  ],
- "n_scenarios": 358,
- "n_runs": 2912,
- "n_plants": 71
+ "n_scenarios": 432,
+ "n_runs": 3422,
+ "n_plants": 108
 }
