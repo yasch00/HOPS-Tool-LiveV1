@@ -146,7 +146,7 @@ export function mountStorageScene(canvas){
   let camDist = 33;
   function fit(g){ const bb = new THREE.Box3().setFromObject(g), sz = bb.getSize(new THREE.Vector3()); const r = Math.max(sz.x, sz.z) * .5 * 1.15 + sz.y * .6; camDist = Math.max(20, Math.min(60, r / Math.tan(camera.fov * Math.PI / 360) * .95)); camera.position.setLength(camDist); camera.lookAt(0, sz.y * .35, 0); }
   const clock = new THREE.Clock(); let alive = true;
-  function frame(){ if (!alive) return; const dt = Math.min(.05, clock.getDelta()); if (turning) table.rotation.y += dt * .1; if (spin) spin.rotation.y += dt * 7; renderer.render(scene, camera); requestAnimationFrame(frame); }
+  function frame(){ if (!alive) return; if (document.hidden || canvas.offsetParent === null) { clock.getDelta(); setTimeout(frame, 300); return; } const dt = Math.min(.05, clock.getDelta()); if (turning) table.rotation.y += dt * .1; if (spin) spin.rotation.y += dt * 7; renderer.render(scene, camera); requestAnimationFrame(frame); }
   frame();
   return {
     setTech(model){ if (model === tech) return; tech = model; holder.clear(); const b = BUILDERS[model] || BUILDERS.containers; const g = b(); g.traverse(o => { if (o.isMesh) { o.castShadow = true; o.receiveShadow = true; } }); holder.add(g); spin = g.getObjectByName('spin') || null; fit(g); },

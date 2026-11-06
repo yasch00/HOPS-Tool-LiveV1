@@ -51,7 +51,8 @@ function makeFacilityLayer(M){
       const Mx = new THREE.Matrix4().fromArray(proj);
       const Lm = new THREE.Matrix4().makeTranslation(this.origin.x, this.origin.y, this.origin.z).scale(new THREE.Vector3(this.scale, -this.scale, this.scale)).multiply(new THREE.Matrix4().makeRotationX(Math.PI / 2));
       this.camera.projectionMatrix = Mx.multiply(Lm);
-      this.renderer.resetState(); this.renderer.render(this.scene, this.camera); this.map.triggerRepaint();
+      this.renderer.resetState(); this.renderer.render(this.scene, this.camera);
+      if (!this.__rp) this.__rp = setTimeout(() => { this.__rp = null; if (FAC.on) this.map.triggerRepaint(); }, FAC.playing || FAC.construction ? 16 : 40);   // 25 fps for the idle animation, 60 fps while the year plays
     }
   };
 }
@@ -167,9 +168,11 @@ function renderFacilityBar(state){
 
 /* ---- the map follows the scene's weather: imagery darkens at night and desaturates under cloud, the sky takes the palette */
 let __wxLast = 0, __wxPrev = null;
+let __wxKey = '';
 function applyWeatherToMap(st){
   const now = performance.now(); if (st && now - __wxLast < 150) return; __wxLast = now;
   if (!st) { st = { dayF: 1, cloud: 0, rainAmt: 0, top: '#8fbcdc', hor: '#e6eef2', nightF: 0 }; }
+  const key = [st.dayF.toFixed(2), st.cloud.toFixed(2), st.rainAmt.toFixed(2), st.nightF.toFixed(2), st.top, st.hor].join('|'); if (key === __wxKey) return; __wxKey = key;   // style updates only when the weather actually changed
   const bright = 0.18 + 0.82 * st.dayF * (1 - 0.35 * st.cloud) * (1 - 0.15 * st.rainAmt), sat = -0.75 * st.cloud - 0.5 * st.nightF, contrast = -0.25 * st.cloud;
   if (map.getLayer('sat')) { map.setPaintProperty('sat', 'raster-brightness-max', bright); map.setPaintProperty('sat', 'raster-saturation', Math.max(-1, sat)); map.setPaintProperty('sat', 'raster-contrast', contrast); }
   if (map.getLayer('buildings')) map.setPaintProperty('buildings', 'fill-extrusion-opacity', 0.92 * (0.35 + 0.65 * st.dayF));

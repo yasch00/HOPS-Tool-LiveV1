@@ -81,7 +81,7 @@ async function setFlows(on){
   ['flow-shadow', 'flow-line', 'flow-dots', 'flow-head', 'flow-lbl'].forEach(l => map.setLayoutProperty(l, 'visibility', on ? 'visible' : 'none'));
   if (!on) { if (__flowAnim) cancelAnimationFrame(__flowAnim); __flowAnim = null; marketFocus(null, true); if (typeof renderBuildSide === 'function') renderBuildSide(); return; }
   refreshFlows();
-  let t = 0; const step = () => { if (!MARKET.flows) return; t = (t + 0.004) % 1;
+  let t = 0, last = 0; const step = (now) => { if (!MARKET.flows) return; if (now - last < 48) { __flowAnim = requestAnimationFrame(step); return; } last = now; t = (t + 0.012) % 1;
     const lines = MARKET.last.fc.features.filter(f => f.geometry.type === 'LineString'), dots = [];
     for (const f of lines) { const pts = f.geometry.coordinates, n = pts.length - 1; for (let k = 0; k < 3; k++) { const u = (t + k / 3) % 1, i = Math.min(n - 1, Math.floor(u * n)), fr = u * n - i; const a = pts[i], b = pts[i + 1];
       dots.push({ type: 'Feature', geometry: { type: 'Point', coordinates: [a[0] + (b[0] - a[0]) * fr, a[1] + (b[1] - a[1]) * fr] }, properties: { w: f.properties.w, c: f.properties.c } }); } }

@@ -27,6 +27,7 @@ function initGlobe(){
              sky: { 'atmosphere-blend': ['interpolate', ['linear'], ['zoom'], 0, 1, 5, 1, 7, 0] },
              projection: { type: 'globe' } },
     center: [-20, 38], zoom: GLOBE_ZOOM, minZoom: 1, maxZoom: 18, attributionControl: { compact: true }, maxPitch: 75,
+    fadeDuration: 0,   // no label cross-fade: with terrain on, the fade kept symbol placement dirty and the map re-rendering at 60 fps even when idle
     canvasContextAttributes: { preserveDrawingBuffer: /[?&]shot=1/.test(location.search) }   // lets toDataURL() read the frame (tools: landing-page screenshots)
   });
   map.addControl(new maplibregl.NavigationControl({ visualizePitch: true }), 'bottom-right');
@@ -135,6 +136,7 @@ async function openSite(idx, instant){
   if (!mapLoaded) { __sitePending = idx; return; }
   const p = PLANT[idx]; if (!p) return;
   siteIdx = idx; siteInfo = null; siteLayoutKey = null; document.body.classList.add('site-mode');
+  if (map.setPixelRatio && devicePixelRatio > 1.5) map.setPixelRatio(1.5);   // terrain + 3D buildings + the plant: cap the render resolution on retina screens
   show('globeView'); map.resize();
   ensureSiteBase();
   map.getSource('catchment').setData({ type: 'FeatureCollection', features: [circlePolygon(p.lon, p.lat, 25)] });
@@ -263,6 +265,7 @@ function renderSitePanel(p, l, state){
   host.innerHTML = h;
 }
 function leaveSite(){
+  if (map.setPixelRatio && devicePixelRatio > 1.5) map.setPixelRatio(devicePixelRatio);
   if (typeof hideFacility === 'function') hideFacility();
   clearInterval(__sitingWatch); __sitingWatch = null;
   if (PENDING.open) closePending(false);
@@ -320,7 +323,8 @@ function makeTurbineLayer(){
           m.multiplyMatrices(tr, r); this.blades.setMatrixAt(i * 3 + b, m); } });
         this.blades.instanceMatrix.needsUpdate = true;
       }
-      this.renderer.resetState(); this.renderer.render(this.scene, this.camera); this.map.triggerRepaint();
+      this.renderer.resetState(); this.renderer.render(this.scene, this.camera);
+      if (this.blades && (this.speed || 1) > 0.02 && !this.__rp) this.__rp = setTimeout(() => { this.__rp = null; if (this.visible) this.map.triggerRepaint(); }, 40);
     }
   };
   return L;
