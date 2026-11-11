@@ -142,10 +142,10 @@ function ensureSiteBase(){
   ['dev', 'excl', 'layout'].forEach(s => map.addSource(s, { type: 'geojson', data: { type: 'FeatureCollection', features: [] } }));
   map.addLayer({ id: 'excl-fill', type: 'fill', source: 'excl', layout: { visibility: 'none' }, paint: { 'fill-color': ['match', ['get', 'class'],
     'structures', '#D55E00', 'roads', '#8A8F94', 'rails', '#4C5B6E', 'water', '#0072B2', 'landcover', '#009E73', 'natura', '#CC79A7', '#6B7379'], 'fill-opacity': .28 } }, 'amm-pts');
-  map.addLayer({ id: 'dev-wind', type: 'fill', source: 'dev', filter: ['==', ['get', 'tech'], 'wind'], paint: { 'fill-color': '#56B4E9', 'fill-opacity': ['interpolate', ['linear'], ['zoom'], 10, .18, 14, .08] } }, 'amm-pts');
-  map.addLayer({ id: 'dev-wind-line', type: 'line', source: 'dev', filter: ['==', ['get', 'tech'], 'wind'], paint: { 'line-color': '#56B4E9', 'line-width': .8, 'line-opacity': .7 } }, 'amm-pts');
+  map.addLayer({ id: 'dev-wind', type: 'fill', source: 'dev', filter: ['==', ['get', 'tech'], 'wind'], layout: { visibility: 'none' }, paint: { 'fill-color': '#56B4E9', 'fill-opacity': ['interpolate', ['linear'], ['zoom'], 10, .18, 14, .08] } }, 'amm-pts');
+  map.addLayer({ id: 'dev-wind-line', type: 'line', source: 'dev', filter: ['==', ['get', 'tech'], 'wind'], layout: { visibility: 'none' }, paint: { 'line-color': '#56B4E9', 'line-width': .8, 'line-opacity': .7 } }, 'amm-pts');
   map.addLayer({ id: 'dev-solar', type: 'fill', source: 'dev', filter: ['==', ['get', 'tech'], 'solar'], layout: { visibility: 'none' }, paint: { 'fill-color': '#E69F00', 'fill-opacity': .16 } }, 'amm-pts');
-  map.addLayer({ id: 'windland', type: 'fill', source: 'layout', filter: ['==', ['get', 'kind'], 'windland'], paint: { 'fill-color': '#0072B2', 'fill-opacity': .10 } }, 'amm-pts');
+  map.addLayer({ id: 'windland', type: 'fill', source: 'layout', filter: ['==', ['get', 'kind'], 'windland'], layout: { visibility: 'none' }, paint: { 'fill-color': '#0072B2', 'fill-opacity': .10 } }, 'amm-pts');
   map.addLayer({ id: 'pv-blocks', type: 'fill-extrusion', source: 'layout', filter: ['==', ['get', 'kind'], 'pv'], paint: {
     'fill-extrusion-color': '#1B3A5C', 'fill-extrusion-height': 3, 'fill-extrusion-opacity': .95 } }, 'amm-pts');
   map.addLayer({ id: 'turbine-dots', type: 'circle', source: 'layout', filter: ['==', ['get', 'kind'], 'turbine'], maxzoom: 10.5, paint: {
@@ -203,10 +203,12 @@ function watchSitingFor(idx){
 }
 /* ---- the run shown at a site: pathway × policy × CI (independent of whether siting layers exist) */
 let siteRun = { path: 'SMR', policy: null, ci: null }, siteLayoutGeo = null, renewOn = true;
-/* one switch for the whole renewable buildout: turbines (3D + dots), PV blocks, developable wind land */
+/* one switch for the renewable buildout: turbines (3D + dots) and PV blocks. The developable wind land (fill, outline, placed wind land)
+   starts hidden and is shown only by its own checkbox; switching the buildout off hides it too, switching it on leaves it as it is. */
 function siteRenewables(on){
   renewOn = on;
-  ['pv-blocks', 'turbine-dots', 'dev-wind', 'dev-wind-line', 'windland'].forEach(id => toggleSiteLayer(id, on));
+  ['pv-blocks', 'turbine-dots'].forEach(id => toggleSiteLayer(id, on));
+  if (!on) toggleSiteLayer('dev-wind', false);
   if (turbineLayer) turbineLayer.visible = on;
   map.triggerRepaint(); renderSitePanel(PLANT[siteIdx], layoutFor(siteRun.path, siteRun.ci), siteInfo ? 'ok' : 'none');
 }
