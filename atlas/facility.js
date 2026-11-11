@@ -37,6 +37,8 @@ function makeFacilityLayer(M){
       this.origin = maplibregl.MercatorCoordinate.fromLngLat([plant.lon, plant.lat], 0); this.scale = this.origin.meterInMercatorCoordinateUnits();
       const samples = []; for (let i = 0; i <= 8; i++) for (let j = 0; j <= 6; j++) { const [lx, lz] = sceneToLocal({ x: -88 + 176 * i / 8, z: -58 + 116 * j / 6 }); const ll = facLocal2LngLat(plant, lx, lz); samples.push(this.map.queryTerrainElevation({ lng: ll[0], lat: ll[1] }) || 0); }
       const base = Math.max(...samples) + 1.5;                                             // graded pad: above the highest ground under the plot
+      if (!samples.some(v => v) && this.map.getTerrain() && !this.__replace) {              // DEM not loaded yet: the pad would sit at sea level, under the terrain -> place again when the tiles are in
+        this.__replace = true; this.map.once('idle', () => { this.__replace = false; if (FAC.on && this.P === P && this.plant === plant) this.setPlant(plant, P); }); }
       P.root.scale.setScalar(FAC_SCALE); P.root.position.set(FAC_OFFSET.x, base, FAC_OFFSET.z); this.holder.add(P.root);
       if (!P.weather) { P.weather = M.makeWeather(this.lights); P.root.add(P.weather.group); }
       this.map.triggerRepaint();

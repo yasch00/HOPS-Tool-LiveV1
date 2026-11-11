@@ -106,9 +106,29 @@ function circlePolygon(lon, lat, km, n = 96){
   for (let i = 0; i <= n; i++) { const a = i / n * 2 * Math.PI; c.push([lon + dLon * Math.cos(a), lat + dLat * Math.sin(a)]); }
   return { type: 'Feature', geometry: { type: 'Polygon', coordinates: [c] }, properties: {} };
 }
+const TERRAIN = { source: 'dem', exaggeration: 1.15 };
+/* Fly to a site with the terrain switched off for the flight and back on at arrival.
+   MapLibre freezes the camera's centre elevation while a camera animation runs and
+   does not release the freeze afterwards. Flying in from the globe, the destination's
+   DEM tiles are not loaded yet, so the centre elevation ends at 0 m while the terrain
+   is drawn at its true height: at a plant 300-500 m above sea level the ground sits
+   between camera and target, the view lands too close and off the plant, and the 3D
+   plant model (placed on the DEM) ends up outside the frame. With no terrain during
+   the flight nothing is frozen; once the terrain is back the map keeps the centre
+   elevation in step with the DEM as the tiles arrive, and the plant model is placed
+   again when the map goes idle. */
+function flyToSite(view, duration){
+  if (map.getTerrain()) map.setTerrain(null);
+  map.once('moveend', () => {
+    if (map.getLayer('buildings')) map.setTerrain(TERRAIN);
+    map._elevationFreeze = false;                                   // release a freeze left behind by an earlier easeTo/flyTo (MapLibre internal flag)
+    map.once('idle', () => { if (typeof facilityLayer !== 'undefined' && facilityLayer && FAC.on && FAC.P) facilityLayer.setPlant(FAC.plant, FAC.P); });
+  });
+  map.flyTo({ ...view, duration, essential: true });
+}
 function ensureSiteBase(){
   if (map.getLayer('buildings')) return;
-  map.setTerrain({ source: 'dem', exaggeration: 1.15 });
+  map.setTerrain(TERRAIN);
   map.addLayer({ id: 'hillshade', type: 'hillshade', source: 'dem', minzoom: 8, paint: { 'hillshade-exaggeration': .35, 'hillshade-shadow-color': '#2b2a26', 'hillshade-highlight-color': '#ffffff' } }, 'amm-pts');
   map.addLayer({ id: 'buildings', type: 'fill-extrusion', source: 'ofm', 'source-layer': 'building', minzoom: 12.5, paint: {
     'fill-extrusion-color': ['interpolate', ['linear'], ['coalesce', ['get', 'render_height'], 6], 0, '#e6e1d6', 40, '#cfc9bd', 120, '#b9b3a7'],
@@ -145,7 +165,7 @@ async function openSite(idx, instant){
   turbineLayer.setTurbines([], p);
   const mLon = 111320 * Math.cos(p.lat * Math.PI / 180), fo = (typeof facOffsetFor === 'function') ? facOffsetFor(idx) : { x: 650, z: 120 };
   const view = { center: [p.lon + (fo.x * 0.6) / mLon, p.lat - (fo.z * 0.6) / 110574], zoom: siteZoomFor(p.lat), pitch: 60, bearing: -25 };   // between the real plant and the new units
-  if (instant) map.jumpTo(view); else map.flyTo({ ...view, duration: 3200, essential: true });
+  if (instant) map.jumpTo(view); else flyToSite(view, 3200);
   renderSitePanel(p, null, 'loading');
   const got = await loadSitingLayers(idx);
   if (siteIdx !== idx) return;
@@ -227,7 +247,7 @@ function renderSitePanel(p, l, state){
   const s = siteScn(p.idx, siteRun.path, siteRun.policy), rows = s ? cappedRows(s) : [], r = rows.find(x => Math.abs(x.target - siteRun.ci) < 1e-6) || rows[0];
   const bau = s ? bauFor(s) : null, base = s && s.policy ? siteScn(p.idx, siteRun.path, null) : null;
   const baseRow = base ? cappedRows(base).find(x => Math.abs(x.target - siteRun.ci) < 1e-6) : null;
-  let h = `<div class="sp-head" style="display:flex;justify-content:space-between;gap:10px;align-items:flex-start"><div><div class="fp-h" style="margin-bottom:4px">Site</div><h2>${p.name}</h2><div class="sub">${p.custom ? '<span class="badge" style="background:' + CUSTOM_COLOR + ';color:#15181B">requested site</span> · ' : ''}${p.admin ? p.admin + ', ' : ''}${p.country} · ${fmt(p.ktpa)} ktpa NH₃ · ${p.lat.toFixed(3)}°, ${p.lon.toFixed(3)}°</div></div><span style="display:flex;gap:4px;flex-wrap:wrap;justify-content:flex-end;max-width:52%"><button class="btn ghost sm" title="25 km catchment: developable land, turbines, PV" onclick="map.flyTo({center:[PLANT[siteIdx].lon,PLANT[siteIdx].lat],zoom:siteZoomFor(PLANT[siteIdx].lat)-3.9,pitch:55,bearing:-18,duration:1800})">Catchment</button><button class="btn ghost sm" title="Back to the plant" onclick="const p=PLANT[siteIdx],m=111320*Math.cos(p.lat*Math.PI/180),fo=facOffsetFor(p.idx);map.flyTo({center:[p.lon+fo.x*0.6/m,p.lat-fo.z*0.6/110574],zoom:siteZoomFor(p.lat),pitch:60,bearing:-25,duration:1800})">Plant</button><button class="btn ghost sm" onclick="leaveSite()">← Globe</button></span></div>`;
+  let h = `<div class="sp-head" style="display:flex;justify-content:space-between;gap:10px;align-items:flex-start"><div><div class="fp-h" style="margin-bottom:4px">Site</div><h2>${p.name}</h2><div class="sub">${p.custom ? '<span class="badge" style="background:' + CUSTOM_COLOR + ';color:#15181B">requested site</span> · ' : ''}${p.admin ? p.admin + ', ' : ''}${p.country} · ${fmt(p.ktpa)} ktpa NH₃ · ${p.lat.toFixed(3)}°, ${p.lon.toFixed(3)}°</div></div><span style="display:flex;gap:4px;flex-wrap:wrap;justify-content:flex-end;max-width:52%"><button class="btn ghost sm" title="25 km catchment: developable land, turbines, PV" onclick="map.flyTo({center:[PLANT[siteIdx].lon,PLANT[siteIdx].lat],zoom:siteZoomFor(PLANT[siteIdx].lat)-3.9,pitch:55,bearing:-18,duration:1800,freezeElevation:true})">Catchment</button><button class="btn ghost sm" title="Back to the plant" onclick="const p=PLANT[siteIdx],m=111320*Math.cos(p.lat*Math.PI/180),fo=facOffsetFor(p.idx);map.flyTo({center:[p.lon+fo.x*0.6/m,p.lat-fo.z*0.6/110574],zoom:siteZoomFor(p.lat),pitch:60,bearing:-25,duration:1800,freezeElevation:true})">Plant</button><button class="btn ghost sm" onclick="leaveSite()">← Globe</button></span></div>`;
   if (state === 'loading') { h += `<p class="sub" style="margin-top:12px">Loading …</p>`; host.innerHTML = h; return; }
   // the run: pathway × policy × CI
   h += `<div class="fin-group" style="margin-top:12px"><div class="fp-h">Run</div>
@@ -366,7 +386,7 @@ async function openPending(issue){
   map.getSource('site-plant').setData({ type: 'FeatureCollection', features: [{ type: 'Feature', geometry: { type: 'Point', coordinates: [r.lon, r.lat] }, properties: {} }] });
   ['dev', 'excl', 'layout'].forEach(s => map.getSource(s).setData({ type: 'FeatureCollection', features: [] }));
   const mLon = 111320 * Math.cos(r.lat * Math.PI / 180), fo = (typeof facOffsetFor === 'function') ? facOffsetFor(r.idx) : { x: 650, z: 120 };
-  map.flyTo({ center: [r.lon + (fo.x * 0.6) / mLon, r.lat - (fo.z * 0.6) / 110574], zoom: siteZoomFor(r.lat), pitch: 60, bearing: -25, duration: 3200, essential: true });
+  flyToSite({ center: [r.lon + (fo.x * 0.6) / mLon, r.lat - (fo.z * 0.6) / 110574], zoom: siteZoomFor(r.lat), pitch: 60, bearing: -25 }, 3200);
   renderPendingPanel(r, null);
   if (typeof showConstruction === 'function') showConstruction(r, 0.02);
   await refreshPendingProgress();
