@@ -1,9 +1,9 @@
 {
- "generated": "2026-11-11T14:33:57+00:00",
- "since": "2026-11-08",
- "collected": 215,
- "unseen": 152,
- "screened": 132,
+ "generated": "2026-11-12T15:26:35+00:00",
+ "since": "2026-11-09",
+ "collected": 241,
+ "unseen": 168,
+ "screened": 149,
  "added": 0,
  "feed_items": 0,
  "model": "github:openai/gpt-4o-mini"
