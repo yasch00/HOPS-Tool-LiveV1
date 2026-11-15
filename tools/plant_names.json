@@ -796,5 +796,12 @@
   "country": "India",
   "lat": 30.25039,
   "lon": 74.91636
+ },
+ "422": {
+  "name": "Avilés",
+  "admin": "Asturias",
+  "country": "Spain",
+  "lat": 43.5489,
+  "lon": -5.8622
  }
 }

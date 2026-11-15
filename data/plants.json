@@ -1272,6 +1272,18 @@
 "admin": "Punjab"
 },
 {
+"idx": 422,
+"lat": 43.5489,
+"lon": -5.8622,
+"country": "Spain",
+"region": "Europe",
+"tpd": 493.2,
+"ktpa": 180.0,
+"amm_idx": null,
+"name": "Avil\u00e9s",
+"admin": "Asturias"
+},
+{
 "idx": 1002,
 "lat": 37.4088,
 "lon": -122.1772,
