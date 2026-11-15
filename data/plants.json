@@ -1008,6 +1008,18 @@
 "admin": "Kerala"
 },
 {
+"idx": 108,
+"lat": 31.37098,
+"lon": 76.35675,
+"country": "India",
+"region": "India",
+"tpd": 950.7,
+"ktpa": 347.0,
+"amm_idx": null,
+"name": "Nangal",
+"admin": "Punjab"
+},
+{
 "idx": 109,
 "lat": 24.49849,
 "lon": 77.15279,
@@ -1260,6 +1272,18 @@
 "admin": "Uttar Pradesh"
 },
 {
+"idx": 156,
+"lat": 23.4427,
+"lon": 87.49165,
+"country": "India",
+"region": "India",
+"tpd": 1989.0,
+"ktpa": 726.0,
+"amm_idx": null,
+"name": "Panagarh",
+"admin": "West Bengal"
+},
+{
 "idx": 157,
 "lat": 30.25039,
 "lon": 74.91636,
@@ -1270,6 +1294,18 @@
 "amm_idx": null,
 "name": "Bathinda",
 "admin": "Punjab"
+},
+{
+"idx": 158,
+"lat": 29.35875,
+"lon": 76.95766,
+"country": "India",
+"region": "India",
+"tpd": 901.4,
+"ktpa": 329.0,
+"amm_idx": null,
+"name": "Panipat",
+"admin": "Haryana"
 },
 {
 "idx": 422,

@@ -803,5 +803,26 @@
   "country": "Spain",
   "lat": 43.5489,
   "lon": -5.8622
+ },
+ "108": {
+  "name": "Nangal",
+  "admin": "Punjab",
+  "country": "India",
+  "lat": 31.37098,
+  "lon": 76.35675
+ },
+ "156": {
+  "name": "Panagarh",
+  "admin": "West Bengal",
+  "country": "India",
+  "lat": 23.4427,
+  "lon": 87.49165
+ },
+ "158": {
+  "name": "Panipat",
+  "admin": "Haryana",
+  "country": "India",
+  "lat": 29.35875,
+  "lon": 76.95766
  }
 }

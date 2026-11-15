@@ -27,6 +27,20 @@
    "nlat": 125,
    "nlon": 261,
    "n_valid": 32625
+  },
+  {
+   "region": "SouthAsia",
+   "lat": [
+    8.0,
+    32.0
+   ],
+   "lon": [
+    72.0,
+    96.0
+   ],
+   "nlat": 97,
+   "nlon": 97,
+   "n_valid": 9409
   }
  ],
  "year": 2025,
