@@ -33,9 +33,11 @@ const CAPEX_KEYS = ['capex_pv', 'capex_wt', 'capex_el', 'capex_b', 'capex_cp', '
 const OPEX_KEYS = ['opex_pv', 'opex_wt', 'opex_el', 'opex_b', 'opex_cp', 'opex_nh3', 'opex_asu', 'opex_smr', 'opex_hb', 'opex_stturb', 'opex_ccs'];
 const CAPEX_LABEL = { capex_pv: 'Solar PV', capex_wt: 'Wind', capex_el: 'Electrolyzer', capex_b: 'Battery', capex_cp: 'H₂ compressor', capex_st: 'H₂ storage', capex_asu: 'ASU', capex_nh3: 'NH₃ synthesis', capex_grid: 'Grid connection (export)', capex_gridload: 'Grid connection (load)', capex_smr: 'SMR', capex_hb: 'Heat battery', capex_stturb: 'Steam turbine', capex_ccs: 'CCS' };
 
+/* NH3 price the fleet run was solved with, by sales region (Canada sells at the US price); anything else gets the European price. */
+const FIN_NH3_PRICE = { US: 450, Canada: 450, India: 500, Europe: 660 };
 function finDefaults(plant){
-  const us = plant && plant.region === 'US';
-  return { ...FIN_DEFAULTS, spend: [...FIN_DEFAULTS.spend], price: us ? 450 : 660, tax: us ? 0.21 : 0.30 };
+  const reg = plant && plant.region, us = reg === 'US';
+  return { ...FIN_DEFAULTS, spend: [...FIN_DEFAULTS.spend], price: FIN_NH3_PRICE[reg] != null ? FIN_NH3_PRICE[reg] : 660, tax: us ? 0.21 : 0.30 };
 }
 /* ---- de-annualise the optimizer's per-tonne lines (identical to hops_extract._scenario_from_getter) */
 function finInputsFromRow(r, plant){
