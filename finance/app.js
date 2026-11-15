@@ -8,6 +8,7 @@
   const num = v => (typeof v === 'number' && isFinite(v) ? v : 0);
   const MARKET = { US: 450, Canada: 450, India: 500, Europe: 660 };          // same starting prices as the atlas finance tab
   const REGION_ORDER = ['Europe', 'US', 'Canada', 'India'];
+  const EXP_REAL = 1.0;        // exports valued at the full wholesale price (user decision 2026-11-14); the run itself credited 0.90 x wholesale
   const UNIT_SHORT = { RES: 'Renewables', BAT: 'Battery', HB: 'Heat battery', EL: 'Electrolyzer', H2ST: 'Hydrogen storage', NH3: 'Ammonia plant', OPR: 'Operator' };
   const UNIT_SUB = { RES: 'PV + wind', BAT: '', HB: '', EL: '', H2ST: 'compressor + tank', NH3: 'SMR + synthesis + ASU', OPR: 'grid connection + trading hub' };
   const RATE_SHORT = {
@@ -166,7 +167,7 @@
         const explicit = boot && /[?&]plant=/.test(location.search) && /[?&]c(cs|i)=/.test(location.search);
         if (!explicit) { if (cc.includes(sv.ccs)) S.ccs = sv.ccs; if (isFinite(sv.ci)) S.ci = sv.ci; }
         if (sv.market != null && isFinite(sv.market)) { S.market = sv.market; S.marketEdited = true; }
-        if (sv.inp && sv.inpEdited && sv.inpEdited.length) { S.inp = Object.assign({ curt_paid: S.M.curt_paid, grid_opex_pct: S.M.grid_opex_pct, exp_real: 1 }, sv.inp); sv.inpEdited.forEach(k => S.inpEdited.add(k)); }
+        if (sv.inp && sv.inpEdited && sv.inpEdited.length) { S.inp = Object.assign({ curt_paid: S.M.curt_paid, grid_opex_pct: S.M.grid_opex_pct, exp_real: EXP_REAL }, sv.inp); sv.inpEdited.forEach(k => S.inpEdited.add(k)); }
         if (sv.rates && sv.edited && sv.edited.length && S.M.rates.every(r => isFinite(sv.rates[r[0]]))) { S.rates = Object.assign({}, sv.rates); sv.edited.forEach(k => S.edited.add(k)); }
       }
       pickCi(); compute(true);
@@ -189,7 +190,7 @@
   function compute(rebuild) {
     const d = points().find(x => x.CI === S.ci); if (!d) return;
     S.d = d;
-    if (!S.inp) S.inp = { curt_paid: S.M.curt_paid, grid_opex_pct: S.M.grid_opex_pct, exp_real: Math.round(num(d.EXPORT_DISC) * 100) / 100 || 1 };
+    if (!S.inp) S.inp = { curt_paid: S.M.curt_paid, grid_opex_pct: S.M.grid_opex_pct, exp_real: EXP_REAL };
     if (!S.marketEdited) S.market = MARKET[S.plant.region] != null ? MARKET[S.plant.region] : (num(d.NH3_PRICE_RUN) || 660);
     if (!S.rates || (S.edited.size === 0 && rebuild)) S.rates = BUFin.defaultRates(d, S.inp, S.fins, S.sh, S.market);
     S.rates.p_NH3 = S.market;
@@ -238,8 +239,7 @@
     S.M.units.forEach(u => {
       let rates = UNIT_RATES[u].map(rateRow).join('');
       if (u === 'OPR') rates =
-        '<div class="rate"><label for="i_exp">Export price realised vs wholesale</label><div class="in"><input id="i_exp" type="number" step="0.01" min="0" data-inp="exp_real"><span class="un">× wholesale</span></div><div class="min">the run assumed ' + fd(num(d.EXPORT_DISC), 2) + '</div></div>' +
-        '<div class="rate"><label for="i_curt">Curtailed renewable MWh still paid</label><div class="in"><input id="i_curt" type="number" step="5" min="0" max="100" data-inp="curt_paid" data-pct="1"><span class="un">%</span></div></div>';
+        '<div class="rate"><label for="i_curt">Curtailed renewable MWh still paid</label><div class="in"><input id="i_curt" type="number" step="5" min="0" max="100" data-inp="curt_paid" data-pct="1"><span class="un">%</span></div><div class="min" data-k="expnote" style="justify-self:start"></div></div>';
       h += '<div class="unit" style="--uc:var(--u-' + u + ')" data-unit="' + u + '" role="button" tabindex="0" aria-label="' + esc(UNIT_SHORT[u]) + ': open details">' +
         '<header><div><h4>' + esc(UNIT_SHORT[u]) + '</h4><div class="cap">' + esc(capText(u, d)) + '</div></div><span class="pill" data-k="pill"></span></header>' +
         '<div><div class="irr"><b data-k="irr"></b><span data-k="irrsub"></span></div><div class="gauge" aria-hidden="true"><i data-k="gfill"></i><u data-k="gmark"></u></div></div>' +
@@ -320,7 +320,8 @@
         } else if (mn) mn.remove();
       });
       if (u === 'OPR') {
-        setVal(el.querySelector('[data-inp="exp_real"]'), S.inp.exp_real, 2); setVal(el.querySelector('[data-inp="curt_paid"]'), S.inp.curt_paid * 100, 0);
+        setVal(el.querySelector('[data-inp="curt_paid"]'), S.inp.curt_paid * 100, 0);
+        q('expnote').textContent = 'Grid exports valued at ' + fd(S.inp.exp_real, 2) + ' × wholesale (set in the details)';
         el.querySelectorAll('[data-inp]').forEach(i => i.classList.toggle('edited', S.inpEdited.has(i.dataset.inp)));
       }
     });
@@ -354,13 +355,14 @@
     if (e.target.closest('.x')) { MD.close(); return; }
     const t = e.target.closest('[data-tab]'); if (t) { S.tab = t.dataset.tab; renderModal(true); return; }
     const b = e.target.closest('[data-basis]'); if (b) { S.basis = b.dataset.basis; renderModal(false); return; }
-    if (e.target.closest('[data-finreset]')) { const u = S.modal; S.fins[u] = Object.assign({}, S.M.fin[u]); S.finEdited[u].clear(); S.sh.esc_rev = S.M.esc_rev; S.sh.esc_cost = S.M.esc_cost; S.shEdited.clear(); if (S.edited.size === 0) S.rates = null; compute(true); }
+    if (e.target.closest('[data-finreset]')) { const u = S.modal; S.fins[u] = Object.assign({}, S.M.fin[u]); S.finEdited[u].clear(); S.sh.esc_rev = S.M.esc_rev; S.sh.esc_cost = S.M.esc_cost; S.shEdited.clear(); if (u === 'OPR') { S.inp.exp_real = EXP_REAL; S.inpEdited.delete('exp_real'); } if (S.edited.size === 0) S.rates = null; compute(true); }
   });
   MDI.addEventListener('change', e => {
     const t = e.target, v = parseFloat(t.value); if (!isFinite(v)) return;
     if (t.dataset.fin) {
       const k = t.dataset.fin, u = S.modal; S.fins[u][k] = (k === 'tenor' || k === 'dep') ? Math.max(1, Math.round(v)) : k === 'dscr' ? v : v / 100; S.finEdited[u].add(k);
-    } else if (t.dataset.sh) { S.sh[t.dataset.sh] = v / 100; S.shEdited.add(t.dataset.sh); } else return;
+    } else if (t.dataset.sh) { S.sh[t.dataset.sh] = v / 100; S.shEdited.add(t.dataset.sh);
+    } else if (t.dataset.inp === 'exp_real') { S.inp.exp_real = Math.max(0, v); if (Math.abs(S.inp.exp_real - EXP_REAL) > 1e-9) S.inpEdited.add('exp_real'); else S.inpEdited.delete('exp_real'); } else return;
     if (S.edited.size === 0) S.rates = null;
     compute(true);
   });
@@ -448,12 +450,16 @@
       const v = un === '%' ? fin[k] * 100 : fin[k];
       h += '<label>' + lab + '<span class="in"><input type="number" step="' + (un === '%' ? 0.5 : un === '×' ? 0.05 : 1) + '" value="' + Number(v.toFixed(3)) + '" data-fin="' + k + '" class="' + (ed.has(k) ? 'edited' : '') + '"><span class="un">' + un + '</span></span></label>';
     });
-    h += '</div><h4>Shared by all units</h4><div class="agrid">' +
+    h += '</div>';
+    if (u === 'OPR') h += '<h4>Grid exports</h4><p class="hint">1.00 values every exported MWh at the full hourly wholesale price. The HOPS run itself credited exports at ' + fd(num(S.d.EXPORT_DISC), 2) +
+      ' × wholesale when it chose the dispatch; the dispatch is not changed here, only the price the operator is paid.</p><div class="agrid"><label>Export price realised, share of wholesale<span class="in"><input type="number" step="0.01" min="0" value="' +
+      Number(S.inp.exp_real.toFixed(3)) + '" data-inp="exp_real" class="' + (S.inpEdited.has('exp_real') ? 'edited' : '') + '"><span class="un">× wholesale</span></span></label></div>';
+    h += '<h4>Shared by all units</h4><div class="agrid">' +
       '<label>Revenue escalation per year<span class="in"><input type="number" step="0.1" value="' + Number((S.sh.esc_rev * 100).toFixed(3)) + '" data-sh="esc_rev" class="' + (S.shEdited.has('esc_rev') ? 'edited' : '') + '"><span class="un">%</span></span></label>' +
       '<label>Cost escalation per year<span class="in"><input type="number" step="0.1" value="' + Number((S.sh.esc_cost * 100).toFixed(3)) + '" data-sh="esc_cost" class="' + (S.shEdited.has('esc_cost') ? 'edited' : '') + '"><span class="un">%</span></span></label>' +
       '<label>Construction<span class="in"><b class="num">' + S.M.ncon + ' years · ' + S.sh.spend.map(x => Math.round(x * 100) + '%').join(' / ') + '</b></span></label>' +
       '<label>Operating life<span class="in"><b class="num">' + S.M.nops + ' years</b></span></label></div>' +
-      '<p style="margin-top:var(--s4)"><button class="btn ghost sm" type="button" data-finreset="1">Reset this unit\'s financing and the escalation</button></p>' +
+      '<p style="margin-top:var(--s4)"><button class="btn ghost sm" type="button" data-finreset="1">Reset the assumptions on this tab</button></p>' +
       '<h4>How the numbers are built</h4><p class="hint">Debt is drawn pro rata with the spend, interest during construction is capitalised, and the loan is repaid as an annuity over the tenor. Tax is paid on positive earnings before tax only; losses are not carried forward. ' +
       'Project NPV discounts the unlevered after-tax cash flow at the project discount rate; equity NPV discounts the cash flow to equity at the equity hurdle. The minimum rate is the unit\'s main selling rate at which its project NPV is zero, with every other rate as set.</p>';
     return h;
