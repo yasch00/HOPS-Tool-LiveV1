@@ -50,7 +50,7 @@ function initGlobe(){
 }
 function plantsGeo(list, keyfn){ return { type: 'FeatureCollection', features: list.map(p => ({ type: 'Feature', geometry: { type: 'Point', coordinates: [p.lon, p.lat] }, properties: keyfn(p) })) }; }
 function addPlantLayers(){
-  map.addSource('amm', { type: 'geojson', data: plantsGeo(AMM, p => ({ idx: p.idx, country: p.country, ktpa: p.ktpa || 0 })) });
+  map.addSource('amm', { type: 'geojson', data: plantsGeo(AMM, p => ({ idx: p.idx, country: p.country, ktpa: p.ktpa || 0, name: p.name || '' })) });
   map.addSource('hops', { type: 'geojson', data: plantsGeo(PLANTS, p => ({ idx: p.idx, name: p.name, admin: p.admin || '', country: p.country, ktpa: p.ktpa || 0, region: p.region, custom: !!p.custom })) });
   map.addSource('pending', { type: 'geojson', data: { type: 'FeatureCollection', features: [] } });
   map.addLayer({ id: 'amm-pts', type: 'circle', source: 'amm', paint: {
@@ -77,7 +77,7 @@ function showTip(e, modelled){
     ? `<div class="t-n">${p.name}</div><div class="t-m">${fmt(p.tpd)} t/d · requested #${p.issue} · HOPS is solving it</div><div class="t-cta">click to watch the site →</div>`
     : modelled
     ? `<div class="t-n">${p.name}${p.admin ? ' · ' + p.admin : ''}, ${p.country}</div><div class="t-m">${fmt(p.ktpa)} ktpa · ${p.custom ? 'requested site · solved' : 'modelled'}</div><div class="t-cta">click to open the site →</div>`
-    : `<div class="t-n">Ammonia plant</div><div class="t-m">${p.country} · ${fmt(p.ktpa)} ktpa</div>`;
+    : `<div class="t-n">${p.name || 'Ammonia plant'}</div><div class="t-m">${p.country} · ${p.ktpa ? fmt(p.ktpa) + ' ktpa' : 'capacity not reported'}</div>`;
 }
 function hideTip(){ document.getElementById('tip').style.opacity = 0; map.getCanvas().style.cursor = ''; }
 
