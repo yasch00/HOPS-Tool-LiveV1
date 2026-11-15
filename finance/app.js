@@ -25,6 +25,25 @@
   const S = { index: null, M: null, plant: null, ccs: 'No', ci: null, rates: null, edited: new Set(), inp: null, inpEdited: new Set(),
     fins: {}, finEdited: {}, sh: null, shEdited: new Set(), market: null, marketEdited: false, res: null, d: null, modal: null, tab: 'overview', basis: 'equity', map: null };
 
+  /* ------------------------------------------------------------ saved adjustments (this browser only)
+     Everything the user changes is kept in localStorage and comes back on return: the last plant / CCS / target,
+     per plant its rates, market price and operator inputs, and (for all plants) financing and escalation. */
+  const LS = 'hopsProjectFinance.v1';
+  function loadStore() { try { return JSON.parse(localStorage.getItem(LS)) || {}; } catch (e) { return {}; } }
+  function saveStore() {
+    try {
+      const st = loadStore(); st.plants = st.plants || {};
+      st.last = { plant: S.plant.idx, ccs: S.ccs, ci: S.ci };
+      if (S.edited.size || S.inpEdited.size || S.marketEdited) st.plants[S.plant.idx] = { ccs: S.ccs, ci: S.ci, edited: [...S.edited], rates: S.edited.size ? S.rates : null,
+        market: S.marketEdited ? S.market : null, inp: S.inpEdited.size ? S.inp : null, inpEdited: [...S.inpEdited] };
+      else delete st.plants[S.plant.idx];
+      st.fins = {}; S.M.units.forEach(u => { if (S.finEdited[u].size) { st.fins[u] = {}; S.finEdited[u].forEach(k => { st.fins[u][k] = S.fins[u][k]; }); } });
+      st.sh = {}; S.shEdited.forEach(k => { st.sh[k] = S.sh[k]; });
+      localStorage.setItem(LS, JSON.stringify(st));
+    } catch (e) { /* private window or storage blocked: the page works, nothing is kept */ }
+  }
+  function changeCount() { return S.edited.size + S.inpEdited.size + (S.marketEdited ? 1 : 0) + S.shEdited.size + S.M.units.reduce((n, u) => n + S.finEdited[u].size, 0); }
+
   /* ------------------------------------------------------------ formatting */
   const nf0 = new Intl.NumberFormat('en-US', { maximumFractionDigits: 0 });
   const nfd = n => new Intl.NumberFormat('en-US', { minimumFractionDigits: n, maximumFractionDigits: n });
@@ -49,18 +68,29 @@
     S.index = ix; S.M = ix.model; BUFin.setModel(ix.model);
     S.M.units.forEach(u => { S.fins[u] = Object.assign({}, ix.model.fin[u]); S.finEdited[u] = new Set(); });
     S.sh = { spend: ix.model.spend.slice(), esc_rev: ix.model.esc_rev, esc_cost: ix.model.esc_cost };
+    const st = loadStore();
+    S.M.units.forEach(u => { const f = (st.fins || {})[u]; if (f) for (const k in f) if (k in S.fins[u] && isFinite(f[k])) { S.fins[u][k] = f[k]; S.finEdited[u].add(k); } });
+    for (const k in (st.sh || {})) if ((k === 'esc_rev' || k === 'esc_cost') && isFinite(st.sh[k])) { S.sh[k] = st.sh[k]; S.shEdited.add(k); }
     $('pfStamp').textContent = 'Project Finance · model ' + ix.label + ' · data ' + ix.generated;
     buildList(''); initMap();
     const q = new URLSearchParams(location.search), want = parseInt(q.get('plant'), 10);
-    const first = ix.plants.find(p => p.idx === want) || ix.plants.find(p => p.idx === 61) || ix.plants[0];
-    if (q.get('ccs')) S.ccs = q.get('ccs') === 'Yes' ? 'Yes' : 'No';
-    if (q.get('ci')) S.ci = parseFloat(q.get('ci'));
-    selectPlant(first.idx, false);
+    const last = st.last || {};
+    const first = ix.plants.find(p => p.idx === want) || ix.plants.find(p => p.idx === last.plant) || ix.plants.find(p => p.idx === 61) || ix.plants[0];
+    // a link with ?plant=…&ccs=…&ci=… wins; otherwise the view the user left
+    const url = isFinite(want) && first.idx === want;
+    if (url ? q.get('ccs') : last.ccs) S.ccs = (url ? q.get('ccs') : last.ccs) === 'Yes' ? 'Yes' : 'No';
+    if (url ? q.get('ci') : last.ci != null) S.ci = parseFloat(url ? q.get('ci') : last.ci);
+    selectPlant(first.idx, false, true);
   }).catch(e => { $('pfStatus').textContent = 'The finance data could not be loaded (' + e.message + ').'; });
 
   $('pfSearch').addEventListener('input', e => buildList(e.target.value));
   $('pfMarket').addEventListener('input', e => { const v = parseFloat(e.target.value); if (isFinite(v) && v >= 0) { S.market = v; S.marketEdited = true; S.rates.p_NH3 = v; compute(); } });
-  $('pfReset').addEventListener('click', () => { S.edited.clear(); S.inpEdited.clear(); S.inp = null; S.rates = null; compute(true); });
+  $('pfReset').addEventListener('click', () => {            // back to the reference: rates, market price, operator inputs, financing, escalation
+    S.edited.clear(); S.inpEdited.clear(); S.inp = null; S.rates = null; S.marketEdited = false; S.market = null;
+    S.M.units.forEach(u => { S.fins[u] = Object.assign({}, S.M.fin[u]); S.finEdited[u].clear(); });
+    S.sh.esc_rev = S.M.esc_rev; S.sh.esc_cost = S.M.esc_cost; S.shEdited.clear();
+    compute(true);
+  });
 
   /* ------------------------------------------------------------ plant list + map */
   function buildList(q) {
@@ -124,13 +154,21 @@
   }
 
   /* ------------------------------------------------------------ selection */
-  function selectPlant(idx, fly) {
+  function selectPlant(idx, fly, boot) {
     $('pfStatus').hidden = false; $('pfStatus').textContent = 'Loading plant…';
     fetch(DATA + 'plant' + idx + '.json', { cache: 'no-cache' }).then(r => { if (!r.ok) throw new Error(r.status); return r.json(); }).then(p => {
       S.plant = p;
       const cc = Object.keys(p.cases);
       if (!cc.includes(S.ccs)) S.ccs = cc.includes('No') ? 'No' : cc[0];
       S.rates = null; S.inp = null; S.edited.clear(); S.inpEdited.clear(); S.marketEdited = false; S.market = null;
+      const sv = (loadStore().plants || {})[idx];
+      if (sv) {                                               // the adjustments made for this plant, at the design they were made for
+        const explicit = boot && /[?&]plant=/.test(location.search) && /[?&]c(cs|i)=/.test(location.search);
+        if (!explicit) { if (cc.includes(sv.ccs)) S.ccs = sv.ccs; if (isFinite(sv.ci)) S.ci = sv.ci; }
+        if (sv.market != null && isFinite(sv.market)) { S.market = sv.market; S.marketEdited = true; }
+        if (sv.inp && sv.inpEdited && sv.inpEdited.length) { S.inp = Object.assign({ curt_paid: S.M.curt_paid, grid_opex_pct: S.M.grid_opex_pct, exp_real: 1 }, sv.inp); sv.inpEdited.forEach(k => S.inpEdited.add(k)); }
+        if (sv.rates && sv.edited && sv.edited.length && S.M.rates.every(r => isFinite(sv.rates[r[0]]))) { S.rates = Object.assign({}, sv.rates); sv.edited.forEach(k => S.edited.add(k)); }
+      }
       pickCi(); compute(true);
       $('pfStatus').hidden = true; $('pfMain').hidden = false; $('pfHead').hidden = false;
       document.querySelectorAll('#pfList button').forEach(b => {
@@ -161,6 +199,7 @@
     if (S.modal && $('pfModal').open) renderModal(false);
     const q = new URLSearchParams({ plant: S.plant.idx, ccs: S.ccs, ci: S.ci.toFixed(2) });
     try { history.replaceState(null, '', '?' + q.toString()); } catch (e) { /* file:// */ }
+    saveStore();
   }
 
   /* ------------------------------------------------------------ headline */
@@ -297,10 +336,13 @@
       'The rates only settle who earns what: internal payments cancel, so the units\' EBITDA always adds up to the integrated plant\'s. ' +
       'The starting rates are cost-reflective: each supplier is paid exactly what it needs to earn its project hurdle, the operator charges its average cost of electricity (renewables and grid imports with their charges) plus ' + fd(S.M.opr_margin, 0) + ' $/MWh, and the ammonia plant carries the result.' +
       (runP && def && Math.abs(runP - def) > 1 ? ' <b>Note:</b> this design was solved at an ammonia price of ' + f0(runP) + ' $/t, because the plant has no solution at ' + f0(def) + ' $/t.' : '') +
-      (S.edited.size ? ' <b>' + S.edited.size + ' rate' + (S.edited.size > 1 ? 's' : '') + ' changed by you</b> (darker yellow); the others stay as they were.' : '');
-    $('pfRatesNote').textContent = S.edited.size ? 'Your rates are held when you change the target. Click a unit for cash flows, NPV, IRR and assumptions.'
+      (nch0() ? ' <b>' + nch0() + ' value' + (nch0() > 1 ? 's' : '') + ' changed by you</b> (darker yellow). They are saved in this browser and come back when you return; "Reset to reference" restores the starting values.' : '');
+    const nch = changeCount(), rb = $('pfReset');
+    rb.disabled = !nch; rb.textContent = nch ? 'Reset to reference · ' + nch + ' change' + (nch > 1 ? 's' : '') : 'At reference values';
+    $('pfRatesNote').textContent = S.edited.size ? 'Your rates are held when you change the target, and kept in this browser for your next visit. Click a unit for cash flows, NPV, IRR and assumptions.'
       : 'Yellow fields are the rates between the units. Click a unit for cash flows, NPV, IRR and assumptions.';
   }
+  const nch0 = changeCount;
   const card = (l, v, s) => '<div class="sumc"><div class="lab">' + esc(l) + '</div><div class="v">' + esc(v) + '</div><div class="s">' + esc(s) + '</div></div>';
 
   /* ------------------------------------------------------------ detail window */
