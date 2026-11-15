@@ -394,7 +394,7 @@ async function loadData(){
   DATA={...st,scenarios:scn,bau,plants,manifest:man,hourlyByCI:{}};
   SCN=scn; AMM=st.ammonia; BAU=bau; GEO=st.geo; PLANTS=plants; MANIFEST=man; PLANT={}; plants.forEach(p=>PLANT[p.idx]=p);
   postProcessRows(); applyLcoaBasis();
-  const nC=plants.filter(p=>p.custom).length, lg=document.getElementById('legendModeled'); if(lg) lg.textContent=`Modelled (${plants.length-nC} plants · US + EU)`;
+  const nC=plants.filter(p=>p.custom).length, lg=document.getElementById('legendModeled'); if(lg) { const short={US:'US',Canada:'Canada',Europe:'EU',India:'India'}, regs=['US','Canada','Europe','India'].filter(r=>plants.some(p=>!p.custom&&p.region===r)).map(r=>short[r]); lg.textContent=`Modelled (${plants.length-nC} plants · ${regs.join(', ')})`; }
   const lc=document.getElementById('legendCustom'); if(lc) lc.textContent=`Requested sites, solved (${nC})`;
   if(mapLoaded && map.getSource('hops')) map.getSource('hops').setData(plantsGeo(PLANTS, p => ({ idx: p.idx, name: p.name, admin: p.admin || '', country: p.country, ktpa: p.ktpa || 0, region: p.region, custom: !!p.custom })));
   const ds=document.getElementById('dataStamp'); if(ds) ds.textContent=`data ${man.version}`;
