@@ -8,6 +8,7 @@
   const num = v => (typeof v === 'number' && isFinite(v) ? v : 0);
   const MARKET = { US: 450, Canada: 450, India: 500, Europe: 660 };          // same starting prices as the atlas finance tab
   const REGION_ORDER = ['Europe', 'US', 'Canada', 'India'];
+  const PAGE_VERSION = 5;      // shown in the footer: tells at a glance which version of the page a browser is running
   const EXP_REAL = 1.0;        // exports valued at the full wholesale price (user decision 2026-11-14); the run itself credited 0.90 x wholesale
   const UNIT_SHORT = { RES: 'Renewables', BAT: 'Battery', HB: 'Heat battery', EL: 'Electrolyzer', H2ST: 'Hydrogen storage', NH3: 'Ammonia plant', OPR: 'Operator' };
   const UNIT_SUB = { RES: 'PV + wind', BAT: '', HB: '', EL: '', H2ST: 'compressor + tank', NH3: 'SMR + synthesis + ASU', OPR: 'grid connection + trading hub' };
@@ -72,9 +73,11 @@
     const st = loadStore();
     S.M.units.forEach(u => { const f = (st.fins || {})[u]; if (f) for (const k in f) if (k in S.fins[u] && isFinite(f[k])) { S.fins[u][k] = f[k]; S.finEdited[u].add(k); } });
     for (const k in (st.sh || {})) if ((k === 'esc_rev' || k === 'esc_cost') && isFinite(st.sh[k])) { S.sh[k] = st.sh[k]; S.shEdited.add(k); }
-    $('pfStamp').textContent = 'Project Finance · model ' + ix.label + ' · data ' + ix.generated;
+    $('pfStamp').textContent = 'Project Finance · model ' + ix.label + ' · data ' + ix.generated + ' · page version ' + PAGE_VERSION;
     buildList(''); initMap();
-    const q = new URLSearchParams(location.search), want = parseInt(q.get('plant'), 10);
+    // the view lives in the #fragment (one page address, so the browser keeps one copy of the page); old ?plant= links still work
+    const q = new URLSearchParams(location.hash.length > 1 ? location.hash.slice(1) : location.search), want = parseInt(q.get('plant'), 10);
+    S.explicit = isFinite(want) && !!(q.get('ccs') || q.get('ci'));
     const last = st.last || {};
     const first = ix.plants.find(p => p.idx === want) || ix.plants.find(p => p.idx === last.plant) || ix.plants.find(p => p.idx === 61) || ix.plants[0];
     // a link with ?plant=…&ccs=…&ci=… wins; otherwise the view the user left
@@ -164,7 +167,7 @@
       S.rates = null; S.inp = null; S.edited.clear(); S.inpEdited.clear(); S.marketEdited = false; S.market = null;
       const sv = (loadStore().plants || {})[idx];
       if (sv) {                                               // the adjustments made for this plant, at the design they were made for
-        const explicit = boot && /[?&]plant=/.test(location.search) && /[?&]c(cs|i)=/.test(location.search);
+        const explicit = boot && S.explicit;
         if (!explicit) { if (cc.includes(sv.ccs)) S.ccs = sv.ccs; if (isFinite(sv.ci)) S.ci = sv.ci; }
         if (sv.market != null && isFinite(sv.market)) { S.market = sv.market; S.marketEdited = true; }
         if (sv.inp && sv.inpEdited && sv.inpEdited.length) { S.inp = Object.assign({ curt_paid: S.M.curt_paid, grid_opex_pct: S.M.grid_opex_pct, exp_real: EXP_REAL }, sv.inp); sv.inpEdited.forEach(k => S.inpEdited.add(k)); }
@@ -199,7 +202,7 @@
     paint();
     if (S.modal && $('pfModal').open) renderModal(false);
     const q = new URLSearchParams({ plant: S.plant.idx, ccs: S.ccs, ci: S.ci.toFixed(2) });
-    try { history.replaceState(null, '', '?' + q.toString()); } catch (e) { /* file:// */ }
+    try { history.replaceState(null, '', location.pathname + '#' + q.toString()); } catch (e) { /* file:// */ }
     saveStore();
   }
 

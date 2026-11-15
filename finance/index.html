@@ -237,7 +237,17 @@ table.tb td.neg{color:var(--bad)}
 </div></footer>
 <script src="https://cdn.jsdelivr.net/npm/maplibre-gl@5.24.0/dist/maplibre-gl.js"></script>
 <script src="../site.js"></script>
-<script src="engine.js?v=4"></script>
-<script src="app.js?v=4"></script>
+<script>
+/* Always run the current engine and app. This page can come out of the browser's cache (Back button, GitHub's
+   10-minute cache); the two scripts are therefore fetched with revalidation and run in order. If that fails
+   (offline, file://), plain script tags are used. */
+(function(){
+  var files=['engine.js','app.js'];
+  function tag(i){if(i>=files.length)return;var s=document.createElement('script');s.src=files[i];s.onload=function(){tag(i+1)};document.body.appendChild(s)}
+  Promise.all(files.map(function(f){return fetch(f,{cache:'no-cache'}).then(function(r){if(!r.ok)throw 0;return r.text()})}))
+    .then(function(t){t.forEach(function(code,i){var s=document.createElement('script');s.textContent=code+'\n//# sourceURL=finance/'+files[i];document.body.appendChild(s)})})
+    .catch(function(){tag(0)});
+})();
+</script>
 </body>
 </html>
