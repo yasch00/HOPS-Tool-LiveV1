@@ -1,9 +1,9 @@
 {
  "plant": 1,
- "lat": 33.916,
- "lon": -118.419,
+ "lat": 33.91385,
+ "lon": -118.41897,
  "country": "USA",
- "capacity_ktpa": 19.68,
+ "capacity_ktpa": null,
  "radius_km": 25.0,
  "setback_scenario": "p50",
  "setbacks": {
@@ -29,15 +29,15 @@
  "rho_pv_mw_km2": 50.0,
  "developable_km2": {
   "wind": 0.33,
-  "solar": 31.98
+  "solar": 31.99
  },
  "breakdown": {
   "wind": {
-   "structures": 1132.835,
-   "roads": 1063.42,
-   "rails": 159.938,
-   "water": 934.606,
-   "landcover": 723.409,
+   "structures": 1126.822,
+   "roads": 1057.521,
+   "rails": 159.821,
+   "water": 942.756,
+   "landcover": 719.307,
    "natura": 0.0,
    "_gross_km2": 1960.343,
    "_developable_km2": 0.325,
@@ -45,15 +45,15 @@
    "_developable_frac": 0.0
   },
   "solar": {
-   "structures": 964.839,
-   "roads": 583.171,
-   "rails": 32.072,
-   "water": 832.628,
-   "landcover": 723.409,
+   "structures": 959.972,
+   "roads": 580.021,
+   "rails": 32.032,
+   "water": 840.955,
+   "landcover": 719.307,
    "natura": 0.0,
    "_gross_km2": 1960.343,
-   "_developable_km2": 31.984,
-   "_excluded_km2": 1928.359,
+   "_developable_km2": 31.986,
+   "_excluded_km2": 1928.356,
    "_developable_frac": 0.016
   }
  },
@@ -64,13 +64,13 @@
    "ci": 0.0,
    "file": "layouts/SMR_ci0.00.geojson",
    "turbines": 3,
-   "wind_mw_target": 27.8,
+   "wind_mw_target": 813.7,
    "wind_mw_placed": 18.0,
    "wind_short": true,
-   "pv_mw_target": 110.9,
-   "pv_mw_placed": 127.8,
-   "pv_km2": 2.56,
-   "pv_short": false
+   "pv_mw_target": 3982.3,
+   "pv_mw_placed": 1583.1,
+   "pv_km2": 31.66,
+   "pv_short": true
   },
   {
    "path": "SMR",
@@ -80,10 +80,10 @@
    "wind_mw_target": 0.0,
    "wind_mw_placed": 0.0,
    "wind_short": false,
-   "pv_mw_target": 105.7,
-   "pv_mw_placed": 127.8,
-   "pv_km2": 2.56,
-   "pv_short": false
+   "pv_mw_target": 3760.5,
+   "pv_mw_placed": 1583.1,
+   "pv_km2": 31.66,
+   "pv_short": true
   },
   {
    "path": "SMR",
@@ -93,10 +93,10 @@
    "wind_mw_target": 0.0,
    "wind_mw_placed": 0.0,
    "wind_short": false,
-   "pv_mw_target": 90.0,
-   "pv_mw_placed": 101.1,
-   "pv_km2": 2.02,
-   "pv_short": false
+   "pv_mw_target": 3201.7,
+   "pv_mw_placed": 1583.1,
+   "pv_km2": 31.66,
+   "pv_short": true
   },
   {
    "path": "SMR",
@@ -106,10 +106,10 @@
    "wind_mw_target": 0.0,
    "wind_mw_placed": 0.0,
    "wind_short": false,
-   "pv_mw_target": 74.0,
-   "pv_mw_placed": 83.6,
-   "pv_km2": 1.67,
-   "pv_short": false
+   "pv_mw_target": 2633.7,
+   "pv_mw_placed": 1583.1,
+   "pv_km2": 31.66,
+   "pv_short": true
   },
   {
    "path": "SMR",
@@ -119,10 +119,10 @@
    "wind_mw_target": 0.0,
    "wind_mw_placed": 0.0,
    "wind_short": false,
-   "pv_mw_target": 58.1,
-   "pv_mw_placed": 83.6,
-   "pv_km2": 1.67,
-   "pv_short": false
+   "pv_mw_target": 2064.9,
+   "pv_mw_placed": 1583.1,
+   "pv_km2": 31.66,
+   "pv_short": true
   },
   {
    "path": "SMR",
@@ -132,9 +132,9 @@
    "wind_mw_target": 0.0,
    "wind_mw_placed": 0.0,
    "wind_short": false,
-   "pv_mw_target": 42.0,
-   "pv_mw_placed": 51.6,
-   "pv_km2": 1.03,
+   "pv_mw_target": 1494.3,
+   "pv_mw_placed": 1512.0,
+   "pv_km2": 30.24,
    "pv_short": false
   },
   {
@@ -145,9 +145,9 @@
    "wind_mw_target": 0.0,
    "wind_mw_placed": 0.0,
    "wind_short": false,
-   "pv_mw_target": 26.4,
-   "pv_mw_placed": 51.6,
-   "pv_km2": 1.03,
+   "pv_mw_target": 938.2,
+   "pv_mw_placed": 938.3,
+   "pv_km2": 18.77,
    "pv_short": false
   },
   {
@@ -158,9 +158,9 @@
    "wind_mw_target": 0.0,
    "wind_mw_placed": 0.0,
    "wind_short": false,
-   "pv_mw_target": 11.3,
-   "pv_mw_placed": 15.0,
-   "pv_km2": 0.3,
+   "pv_mw_target": 400.8,
+   "pv_mw_placed": 408.2,
+   "pv_km2": 8.16,
    "pv_short": false
   },
   {
@@ -168,12 +168,103 @@
    "ci": 0.0,
    "file": "layouts/SMR+CCS_ci0.00.geojson",
    "turbines": 3,
-   "wind_mw_target": 27.8,
+   "wind_mw_target": 813.7,
    "wind_mw_placed": 18.0,
    "wind_short": true,
-   "pv_mw_target": 110.9,
-   "pv_mw_placed": 127.8,
-   "pv_km2": 2.56,
+   "pv_mw_target": 3982.3,
+   "pv_mw_placed": 1583.1,
+   "pv_km2": 31.66,
+   "pv_short": true
+  },
+  {
+   "path": "SMR+CCS",
+   "ci": 0.25,
+   "file": "layouts/SMR+CCS_ci0.25.geojson",
+   "turbines": 0,
+   "wind_mw_target": 0.0,
+   "wind_mw_placed": 0.0,
+   "wind_short": false,
+   "pv_mw_target": 67.2,
+   "pv_mw_placed": 84.0,
+   "pv_km2": 1.68,
+   "pv_short": false
+  },
+  {
+   "path": "SMR+CCS",
+   "ci": 0.5,
+   "file": "layouts/SMR+CCS_ci0.50.geojson",
+   "turbines": 0,
+   "wind_mw_target": 0.0,
+   "wind_mw_placed": 0.0,
+   "wind_short": false,
+   "pv_mw_target": 0.0,
+   "pv_mw_placed": 0.0,
+   "pv_km2": 0.0,
+   "pv_short": false
+  },
+  {
+   "path": "SMR+CCS",
+   "ci": 0.75,
+   "file": "layouts/SMR+CCS_ci0.75.geojson",
+   "turbines": 0,
+   "wind_mw_target": 0.0,
+   "wind_mw_placed": 0.0,
+   "wind_short": false,
+   "pv_mw_target": 0.0,
+   "pv_mw_placed": 0.0,
+   "pv_km2": 0.0,
+   "pv_short": false
+  },
+  {
+   "path": "SMR+CCS",
+   "ci": 1.0,
+   "file": "layouts/SMR+CCS_ci1.00.geojson",
+   "turbines": 0,
+   "wind_mw_target": 0.0,
+   "wind_mw_placed": 0.0,
+   "wind_short": false,
+   "pv_mw_target": 0.0,
+   "pv_mw_placed": 0.0,
+   "pv_km2": 0.0,
+   "pv_short": false
+  },
+  {
+   "path": "SMR+CCS",
+   "ci": 1.25,
+   "file": "layouts/SMR+CCS_ci1.25.geojson",
+   "turbines": 0,
+   "wind_mw_target": 0.0,
+   "wind_mw_placed": 0.0,
+   "wind_short": false,
+   "pv_mw_target": 0.0,
+   "pv_mw_placed": 0.0,
+   "pv_km2": 0.0,
+   "pv_short": false
+  },
+  {
+   "path": "SMR+CCS",
+   "ci": 1.5,
+   "file": "layouts/SMR+CCS_ci1.50.geojson",
+   "turbines": 0,
+   "wind_mw_target": 0.0,
+   "wind_mw_placed": 0.0,
+   "wind_short": false,
+   "pv_mw_target": 0.0,
+   "pv_mw_placed": 0.0,
+   "pv_km2": 0.0,
+   "pv_short": false
+  },
+  {
+   "path": "SMR+CCS",
+   "ci": 1.75,
+   "file": "layouts/SMR+CCS_ci1.75.geojson",
+   "turbines": 0,
+   "wind_mw_target": 0.0,
+   "wind_mw_placed": 0.0,
+   "wind_short": false,
+   "pv_mw_target": 0.0,
+   "pv_mw_placed": 0.0,
+   "pv_km2": 0.0,
    "pv_short": false
   }
  ],

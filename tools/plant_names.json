@@ -3,43 +3,43 @@
   "name": "Columbia County",
   "admin": "Oregon",
   "country": "USA",
-  "lat": 45.911,
-  "lon": -122.824
+  "lat": 45.91251,
+  "lon": -122.82906
  },
  "1": {
   "name": "El Segundo",
   "admin": "California",
   "country": "USA",
-  "lat": 33.916,
-  "lon": -118.419
+  "lat": 33.91385,
+  "lon": -118.41897
  },
  "2": {
   "name": "Wheatland County",
   "admin": "Alberta",
   "country": "Canada",
-  "lat": 50.845,
-  "lon": -113.591
+  "lat": 50.84432,
+  "lon": -113.58955
  },
  "3": {
   "name": "Lacombe County",
   "admin": "Alberta",
   "country": "Canada",
-  "lat": 52.322,
-  "lon": -113.517
+  "lat": 52.32211,
+  "lon": -113.51728
  },
  "4": {
   "name": "Fort Saskatchewan",
   "admin": "Alberta",
   "country": "Canada",
-  "lat": 53.725,
-  "lon": -113.193
+  "lat": 53.72547,
+  "lon": -113.19286
  },
  "5": {
   "name": "Fort Saskatchewan",
   "admin": "Alberta",
   "country": "Canada",
-  "lat": 53.722,
-  "lon": -113.192
+  "lat": 53.71976,
+  "lon": -113.19042
  },
  "6": {
   "name": "Sturgeon County",
@@ -52,246 +52,246 @@
   "name": "Medicine Hat",
   "admin": "Alberta",
   "country": "Canada",
-  "lat": 50.091,
-  "lon": -110.719
+  "lat": 50.08828,
+  "lon": -110.71597
  },
  "8": {
   "name": "Sweetwater County",
   "admin": "Wyoming",
   "country": "USA",
-  "lat": 41.541,
-  "lon": -109.131
+  "lat": 41.54171,
+  "lon": -109.13265
  },
  "9": {
   "name": "Pense",
   "admin": "Saskatchewan",
   "country": "Canada",
-  "lat": 50.433,
-  "lon": -105.183
+  "lat": 50.43408,
+  "lon": -105.21741
  },
  "10": {
   "name": "Laramie County",
   "admin": "Wyoming",
   "country": "USA",
-  "lat": 41.095,
-  "lon": -104.908
+  "lat": 41.09513,
+  "lon": -104.90671
  },
  "11": {
   "name": "Mercer County",
   "admin": "North Dakota",
   "country": "USA",
-  "lat": 47.361,
-  "lon": -101.838
+  "lat": 47.35967,
+  "lon": -101.83894
  },
  "12": {
   "name": "Hutchinson County",
   "admin": "Texas",
   "country": "USA",
-  "lat": 35.641,
-  "lon": -101.42
+  "lat": 35.64588,
+  "lon": -101.42799
  },
  "13": {
-  "name": "Ford County",
+  "name": "Dodge City",
   "admin": "Kansas",
   "country": "USA",
-  "lat": 37.78,
-  "lon": -100.006
+  "lat": 37.77734,
+  "lon": -99.92953
  },
  "14": {
   "name": "Brandon",
   "admin": "Manitoba",
   "country": "Canada",
-  "lat": 49.831,
-  "lon": -99.908
+  "lat": 49.83296,
+  "lon": -99.90944
  },
  "15": {
   "name": "Woodward County",
   "admin": "Oklahoma",
   "country": "USA",
-  "lat": 36.437,
-  "lon": -99.471
+  "lat": 36.43889,
+  "lon": -99.47264
  },
  "16": {
   "name": "Garfield County",
   "admin": "Oklahoma",
   "country": "USA",
-  "lat": 36.38,
-  "lon": -97.765
+  "lat": 36.38034,
+  "lon": -97.76065
  },
  "17": {
   "name": "Fillmore County",
   "admin": "Nebraska",
   "country": "USA",
-  "lat": 40.539,
-  "lon": -97.58
+  "lat": 40.54045,
+  "lon": -97.57973
  },
  "18": {
   "name": "Gage County",
   "admin": "Nebraska",
   "country": "USA",
-  "lat": 40.319,
-  "lon": -96.841
+  "lat": 40.3193,
+  "lon": -96.83895
  },
  "19": {
   "name": "Liberty Township",
   "admin": "Iowa",
   "country": "USA",
-  "lat": 42.328,
-  "lon": -96.365
+  "lat": 42.3332,
+  "lon": -96.37882
  },
  "20": {
   "name": "Rogers County",
   "admin": "Oklahoma",
   "country": "USA",
-  "lat": 36.234,
-  "lon": -95.719
+  "lat": 36.23378,
+  "lon": -95.71814
  },
  "21": {
   "name": "Coffeyville",
   "admin": "Kansas",
   "country": "USA",
-  "lat": 37.045,
-  "lon": -95.605
+  "lat": 37.04914,
+  "lon": -95.60577
  },
  "22": {
   "name": "Brazoria County",
   "admin": "Texas",
   "country": "USA",
-  "lat": 29.003,
-  "lon": -95.394
+  "lat": 29.00077,
+  "lon": -95.39232
  },
  "23": {
   "name": "Mayes County",
   "admin": "Oklahoma",
   "country": "USA",
-  "lat": 36.241,
-  "lon": -95.278
+  "lat": 36.24237,
+  "lon": -95.2765
  },
  "24": {
   "name": "Creston",
   "admin": "Iowa",
   "country": "USA",
-  "lat": 41.071,
-  "lon": -94.357
+  "lat": 41.11686,
+  "lon": -94.35523
  },
  "25": {
   "name": "Colfax Township",
   "admin": "Iowa",
   "country": "USA",
-  "lat": 42.499,
-  "lon": -94.017
+  "lat": 42.49853,
+  "lon": -94.01764
  },
  "26": {
-  "name": "Nederland",
+  "name": "Beaumont",
   "admin": "Texas",
   "country": "USA",
-  "lat": 29.973,
-  "lon": -93.997
+  "lat": 30.01177,
+  "lon": -94.03339
  },
  "27": {
   "name": "El Dorado",
   "admin": "Arkansas",
   "country": "USA",
-  "lat": 33.225,
-  "lon": -92.647
+  "lat": 33.26594,
+  "lon": -92.68906
  },
  "28": {
   "name": "Lee County",
   "admin": "Iowa",
   "country": "USA",
-  "lat": 40.69,
-  "lon": -91.23
+  "lat": 40.69249,
+  "lon": -91.23262
  },
  "29": {
   "name": "Ascension Parish",
   "admin": "Louisiana",
   "country": "USA",
-  "lat": 30.226,
-  "lon": -91.053
+  "lat": 30.22566,
+  "lon": -91.05422
  },
  "30": {
   "name": "Ascension Parish",
   "admin": "Louisiana",
   "country": "USA",
-  "lat": 30.087,
-  "lon": -90.958
+  "lat": 30.09369,
+  "lon": -90.95399
  },
  "31": {
   "name": "St. James Parish",
   "admin": "Louisiana",
   "country": "USA",
-  "lat": 30.083,
-  "lon": -90.915
+  "lat": 30.08311,
+  "lon": -90.91739
  },
  "32": {
   "name": "Menominee Township",
   "admin": "Illinois",
   "country": "USA",
-  "lat": 42.443,
-  "lon": -90.557
+  "lat": 42.44297,
+  "lon": -90.55724
  },
  "33": {
-  "name": "Yazoo County",
+  "name": "Yazoo City",
   "admin": "Mississippi",
   "country": "USA",
-  "lat": 32.928,
-  "lon": -90.407
+  "lat": 32.90436,
+  "lon": -90.38013
  },
  "34": {
   "name": "Jefferson Parish",
   "admin": "Louisiana",
   "country": "USA",
-  "lat": 29.965,
-  "lon": -90.265
+  "lat": 29.96147,
+  "lon": -90.26954
  },
  "35": {
   "name": "Colbert County",
   "admin": "Alabama",
   "country": "USA",
-  "lat": 34.803,
-  "lon": -87.94
+  "lat": 34.80702,
+  "lon": -87.93632
  },
  "36": {
   "name": "Shawnee Township",
   "admin": "Ohio",
   "country": "USA",
-  "lat": 40.711,
-  "lon": -84.138
+  "lat": 40.71359,
+  "lon": -84.13329
  },
  "37": {
   "name": "Greene County",
   "admin": "Tennessee",
   "country": "USA",
-  "lat": 36.194,
-  "lon": -83.003
+  "lat": 36.18794,
+  "lon": -83.00474
  },
  "39": {
   "name": "Augusta",
   "admin": "Georgia",
   "country": "USA",
-  "lat": 33.47,
-  "lon": -81.97
+  "lat": 33.44419,
+  "lon": -81.92959
  },
  "40": {
-  "name": "Prince George County",
+  "name": "Hopewell",
   "admin": "Virginia",
   "country": "USA",
-  "lat": 37.182,
-  "lon": -77.162
+  "lat": 37.30163,
+  "lon": -77.27271
  },
  "41": {
   "name": "Huelva",
   "admin": "Andalusia",
   "country": "Spain",
-  "lat": 37.22220709,
-  "lon": -6.94427212
+  "lat": 37.18077,
+  "lon": -6.88815
  },
  "42": {
-  "name": "Argamasilla de Calatrava",
+  "name": "Puertollano",
   "admin": "Castile-La Mancha",
   "country": "Spain",
-  "lat": 38.71831435,
-  "lon": -4.08940063
+  "lat": 38.66613,
+  "lon": -4.06709
  },
  "45": {
   "name": "Mont",
@@ -304,29 +304,29 @@
   "name": "Sabiñánigo",
   "admin": "Aragon",
   "country": "Spain",
-  "lat": 42.51853025,
-  "lon": -0.35544464
+  "lat": 42.51826,
+  "lon": -0.35825
  },
  "48": {
   "name": "Le Havre",
   "admin": "Normandy",
   "country": "France",
-  "lat": 49.48069272,
-  "lon": 0.19006976
+  "lat": 49.47975,
+  "lon": 0.19587
  },
  "49": {
   "name": "Le Grand-Quevilly",
   "admin": "Normandy",
   "country": "France",
-  "lat": 49.40828094,
-  "lon": 1.02254511
+  "lat": 49.41672,
+  "lon": 1.02402
  },
  "50": {
   "name": "Grandpuits-Bailly-Carrois",
   "admin": "Ile-de-France",
   "country": "France",
-  "lat": 48.58865777,
-  "lon": 2.94683619
+  "lat": 48.5977,
+  "lon": 2.95295
  },
  "51": {
   "name": "Waziers",
@@ -336,25 +336,25 @@
   "lon": 3.11272867
  },
  "52": {
-  "name": "Hoek",
+  "name": "Sluiskil",
   "admin": "Zeeland",
   "country": "Netherlands",
-  "lat": 51.33664233,
-  "lon": 3.7518322
+  "lat": 51.27222,
+  "lon": 3.84981
  },
  "53": {
   "name": "Saint-Ghislain",
   "admin": "Hainaut",
   "country": "Belgium",
-  "lat": 50.47613238,
-  "lon": 3.81305306
+  "lat": 50.48042,
+  "lon": 3.79797
  },
  "54": {
   "name": "Antwerp",
   "admin": "Antwerp",
   "country": "Belgium",
-  "lat": 51.25689728,
-  "lon": 4.33749385
+  "lat": 51.36859,
+  "lon": 4.27137
  },
  "55": {
   "name": "Maastricht",
@@ -364,235 +364,235 @@
   "lon": 5.70314133
  },
  "56": {
-  "name": "Born",
+  "name": "Geleen",
   "admin": "Limburg",
   "country": "Netherlands",
-  "lat": 51.05297426,
-  "lon": 5.81733801
+  "lat": 50.97928,
+  "lon": 5.79293
  },
  "57": {
   "name": "Cologne",
   "admin": "North Rhine-Westphalia",
   "country": "Germany",
-  "lat": 50.97514042,
-  "lon": 6.98724375
+  "lat": 51.07225,
+  "lon": 6.85473
  },
  "58": {
   "name": "Gelsenkirchen",
   "admin": "North Rhine-Westphalia",
   "country": "Germany",
-  "lat": 51.60255904,
-  "lon": 7.0304467
+  "lat": 51.60256,
+  "lon": 7.03045
  },
  "59": {
   "name": "Ottmarsheim",
   "admin": "Grand Est",
   "country": "France",
-  "lat": 47.80313016,
-  "lon": 7.53365543
+  "lat": 47.79126,
+  "lon": 7.52222
  },
  "60": {
   "name": "Mannheim",
   "admin": "Baden-Württemberg",
   "country": "Germany",
-  "lat": 49.52499378,
-  "lon": 8.44491331
+  "lat": 49.51704,
+  "lon": 8.42041
  },
  "61": {
   "name": "Brunsbüttel",
   "admin": "Schleswig-Holstein",
   "country": "Germany",
-  "lat": 53.90941191,
-  "lon": 9.15982632
+  "lat": 53.91119,
+  "lon": 9.21019
  },
  "63": {
   "name": "Ferrara",
   "admin": "Emilia-Romagna",
   "country": "Italy",
-  "lat": 44.85703414,
-  "lon": 11.59310182
+  "lat": 44.85871,
+  "lon": 11.5957
  },
  "64": {
-  "name": "Wittenberg",
+  "name": "Piesteritz",
   "admin": "Saxony-Anhalt",
   "country": "Germany",
-  "lat": 51.89913201,
-  "lon": 12.61732267
+  "lat": 51.87744,
+  "lon": 12.58622
  },
  "65": {
   "name": "Litvínov",
   "admin": "Ústí nad Labem Region",
   "country": "Czechia",
-  "lat": 50.56752653,
-  "lon": 13.59884383
+  "lat": 50.55962,
+  "lon": 13.60588
  },
  "66": {
   "name": "Schwedt/Oder",
   "admin": "Brandenburg",
   "country": "Germany",
-  "lat": 53.09396727,
-  "lon": 14.23459886
+  "lat": 53.09397,
+  "lon": 14.2346
  },
  "67": {
   "name": "Linz",
   "admin": "Upper Austria",
   "country": "Austria",
-  "lat": 48.29673314,
-  "lon": 14.33037722
+  "lat": 48.28331,
+  "lon": 14.32825
  },
  "68": {
-  "name": "Szczecin",
+  "name": "Police",
   "admin": "West Pomeranian Voivodeship",
   "country": "Poland",
-  "lat": 53.42348725,
-  "lon": 14.58175736
+  "lat": 53.57161,
+  "lon": 14.54983
  },
  "69": {
   "name": "Grad Kutina",
   "admin": "",
   "country": "Croatia",
-  "lat": 45.46416634,
-  "lon": 16.80225077
+  "lat": 45.46755,
+  "lon": 16.79567
  },
  "70": {
   "name": "Močenok",
   "admin": "Region of Nitra",
   "country": "Slovakia",
-  "lat": 48.1796254,
-  "lon": 17.93920341
+  "lat": 48.18709,
+  "lon": 17.93003
  },
  "71": {
-  "name": "Várpalota",
+  "name": "Pétfürdő",
   "admin": "Transdanubia",
   "country": "Hungary",
-  "lat": 47.2016813,
-  "lon": 18.21133072
+  "lat": 47.15672,
+  "lon": 18.13993
  },
  "72": {
   "name": "Kędzierzyn-Koźle",
   "admin": "Opole Voivodeship",
   "country": "Poland",
-  "lat": 50.35595724,
-  "lon": 18.2897621
+  "lat": 50.29393,
+  "lon": 18.26354
  },
  "73": {
   "name": "Włocławek",
   "admin": "Kuyavian-Pomeranian Voivodeship",
   "country": "Poland",
-  "lat": 52.71033846,
-  "lon": 18.96877637
+  "lat": 52.69885,
+  "lon": 18.96842
  },
  "74": {
-  "name": "Wola Rzędzińska",
+  "name": "Tarnów",
   "admin": "Lesser Poland Voivodeship",
   "country": "Poland",
-  "lat": 50.02850116,
-  "lon": 21.08241739
+  "lat": 50.02837,
+  "lon": 20.91686
  },
  "75": {
   "name": "Puławy",
   "admin": "Lublin Voivodeship",
   "country": "Poland",
-  "lat": 51.45655313,
-  "lon": 21.98115965
+  "lat": 51.45206,
+  "lon": 21.98293
  },
  "76": {
   "name": "Târgu Mureș",
   "admin": "",
   "country": "Romania",
-  "lat": 46.51192849,
-  "lon": 24.50109396
+  "lat": 46.51435,
+  "lon": 24.50712
  },
  "77": {
   "name": "Kavala",
   "admin": "Eastern Macedonia and Thrace",
   "country": "Greece",
-  "lat": 40.95868196,
-  "lon": 24.54419709
+  "lat": 40.95551,
+  "lon": 24.47984
  },
  "78": {
   "name": "Turnu Măgurele",
   "admin": "",
   "country": "Romania",
-  "lat": 43.76039695,
-  "lon": 24.88131257
+  "lat": 43.71889,
+  "lon": 24.89313
  },
  "79": {
-  "name": "Plant 79",
+  "name": "Dimitrovgrad",
   "admin": "Haskovo",
   "country": "Bulgaria",
-  "lat": 42.07350445,
-  "lon": 25.54863523
+  "lat": 42.04982,
+  "lon": 25.61806
  },
  "81": {
   "name": "Slobozia",
   "admin": "",
   "country": "Romania",
-  "lat": 44.5777603,
-  "lon": 27.38141358
+  "lat": 44.5358,
+  "lon": 27.38531
  },
  "82": {
   "name": "Devnya",
   "admin": "Varna",
   "country": "Bulgaria",
-  "lat": 43.22417507,
-  "lon": 27.56477726
+  "lat": 43.20067,
+  "lon": 27.65877
  },
  "96": {
   "name": "Kalol",
   "admin": "Gujarat",
   "country": "India",
-  "lat": 23.33717,
-  "lon": 72.49837
+  "lat": 23.20844,
+  "lon": 72.5259
  },
  "97": {
-  "name": "Olpad",
+  "name": "Hazira",
   "admin": "Gujarat",
   "country": "India",
-  "lat": 21.28148,
-  "lon": 72.68725
+  "lat": 21.16847,
+  "lon": 72.70584
  },
  "98": {
-  "name": "Mumbai",
+  "name": "Trombay",
   "admin": "Maharashtra",
   "country": "India",
-  "lat": 19.11269,
-  "lon": 72.88725
+  "lat": 19.04104,
+  "lon": 72.8869
  },
  "99": {
-  "name": "Alibag",
+  "name": "Thal",
   "admin": "Maharashtra",
   "country": "India",
-  "lat": 18.75536,
-  "lon": 72.88725
+  "lat": 18.70266,
+  "lon": 72.87156
  },
  "100": {
   "name": "Bharuch",
   "admin": "Gujarat",
   "country": "India",
-  "lat": 21.81885,
-  "lon": 73.02058
+  "lat": 21.74257,
+  "lon": 73.01028
  },
  "101": {
-  "name": "Ambernath",
+  "name": "Taloja",
   "admin": "Maharashtra",
   "country": "India",
-  "lat": 19.14418,
-  "lon": 73.13169
+  "lat": 19.06798,
+  "lon": 73.13429
  },
  "102": {
-  "name": "Savli",
+  "name": "Vadodara",
   "admin": "Gujarat",
   "country": "India",
-  "lat": 22.4672,
-  "lon": 73.1428
+  "lat": 22.37514,
+  "lon": 73.15332
  },
  "103": {
-  "name": "Tiswadi",
+  "name": "Zuarinagar",
   "admin": "Goa",
   "country": "India",
-  "lat": 15.46397,
-  "lon": 73.90945
+  "lat": 15.37461,
+  "lon": 73.87328
  },
  "104": {
   "name": "Talera",
@@ -602,11 +602,11 @@
   "lon": 75.86496
  },
  "105": {
-  "name": "Digod",
+  "name": "Gadepan",
   "admin": "Rajasthan",
   "country": "India",
-  "lat": 25.29122,
-  "lon": 76.22051
+  "lat": 25.1526,
+  "lon": 76.18156
  },
  "106": {
   "name": "Paravur",
@@ -616,74 +616,74 @@
   "lon": 76.25384
  },
  "107": {
-  "name": "Aluva",
+  "name": "Kochi",
   "admin": "Kerala",
   "country": "India",
-  "lat": 10.05881,
-  "lon": 76.36495
+  "lat": 10.07117,
+  "lon": 76.29711
  },
  "109": {
-  "name": "Raghogarh",
+  "name": "Vijaipur",
   "admin": "Madhya Pradesh",
   "country": "India",
-  "lat": 24.55567,
-  "lon": 77.16493
+  "lat": 24.49849,
+  "lon": 77.15279
  },
  "110": {
   "name": "Thoothukudi",
   "admin": "Tamil Nadu",
   "country": "India",
-  "lat": 8.82031,
-  "lon": 78.08713
+  "lat": 8.73899,
+  "lon": 78.14528
  },
  "111": {
-  "name": "Gunnaur",
+  "name": "Babrala",
   "admin": "Uttar Pradesh",
   "country": "India",
-  "lat": 28.33497,
-  "lon": 78.42046
+  "lat": 28.28862,
+  "lon": 78.42392
  },
  "112": {
   "name": "Aonla",
   "admin": "Uttar Pradesh",
   "country": "India",
-  "lat": 28.34475,
-  "lon": 79.176
+  "lat": 28.22619,
+  "lon": 79.24636
  },
  "113": {
   "name": "Panruti",
   "admin": "Tamil Nadu",
   "country": "India",
-  "lat": 11.60838,
-  "lon": 79.45377
+  "lat": 11.59295,
+  "lon": 79.47362
  },
  "114": {
-  "name": "Jaipur",
+  "name": "Ramagundam",
   "admin": "Telangana",
   "country": "India",
-  "lat": 18.81847,
-  "lon": 79.50932
+  "lat": 18.7218,
+  "lon": 79.51218
  },
  "115": {
   "name": "Shahjahanpur",
   "admin": "Uttar Pradesh",
   "country": "India",
-  "lat": 27.95288,
-  "lon": 79.93154
+  "lat": 27.83239,
+  "lon": 79.82595
  },
  "116": {
-  "name": "Chennai",
+  "name": "Manali",
   "admin": "Tamil Nadu",
   "country": "India",
-  "lat": 13.12775,
-  "lon": 80.22042
+  "lat": 13.17273,
+  "lon": 80.26696
  },
  "117": {
   "name": "Kanpur",
   "admin": "Uttar Pradesh",
   "country": "India",
-  "lat": 26.56026,
-  "lon": 80.24264
+  "lat": 26.45372,
+  "lon": 80.25496
  },
  "118": {
   "name": "Chennai",
@@ -703,15 +703,15 @@
   "name": "Phulpur",
   "admin": "Uttar Pradesh",
   "country": "India",
-  "lat": 25.62228,
-  "lon": 82.08704
+  "lat": 25.54141,
+  "lon": 82.0466
  },
  "121": {
   "name": "Gorakhpur",
   "admin": "Uttar Pradesh",
   "country": "India",
-  "lat": 26.83819,
-  "lon": 83.3759
+  "lat": 26.82225,
+  "lon": 83.36295
  },
  "122": {
   "name": "Hatibari",
@@ -721,24 +721,80 @@
   "lon": 84.85365
  },
  "123": {
-  "name": "Bhagwanpur",
+  "name": "Barauni",
   "admin": "Bihar",
   "country": "India",
-  "lat": 25.54211,
-  "lon": 85.99807
+  "lat": 25.41422,
+  "lon": 86.02909
  },
  "124": {
-  "name": "Nirsa-Cum-Chirkunda",
+  "name": "Sindri",
   "admin": "Jharkhand",
   "country": "India",
-  "lat": 23.83611,
-  "lon": 86.69805
+  "lat": 23.66026,
+  "lon": 86.49489
  },
  "125": {
-  "name": "Naharkatiya",
+  "name": "Namrup",
   "admin": "Assam",
   "country": "India",
-  "lat": 27.24393,
-  "lon": 95.35341
+  "lat": 27.17985,
+  "lon": 95.35227
+ },
+ "126": {
+  "name": "Beaumont",
+  "admin": "Texas",
+  "country": "USA",
+  "lat": 30.01332,
+  "lon": -94.04352
+ },
+ "148": {
+  "name": "Ramme",
+  "admin": "Midtjylland",
+  "country": "Denmark",
+  "lat": 56.48902,
+  "lon": 8.20561
+ },
+ "149": {
+  "name": "Kohtla-Jarve",
+  "admin": "Ida-Viru County",
+  "country": "Estonia",
+  "lat": 59.40738,
+  "lon": 27.23383
+ },
+ "150": {
+  "name": "Kazincbarcika",
+  "admin": "Borsod-Abaúj-Zemplén",
+  "country": "Hungary",
+  "lat": 48.24635,
+  "lon": 20.6519
+ },
+ "151": {
+  "name": "Jonalaukis",
+  "admin": "Kaunas County",
+  "country": "Lithuania",
+  "lat": 55.0808,
+  "lon": 24.32458
+ },
+ "154": {
+  "name": "Bikaner",
+  "admin": "Rajasthan",
+  "country": "India",
+  "lat": 28.18523,
+  "lon": 73.24018
+ },
+ "155": {
+  "name": "Jagdishpur",
+  "admin": "Uttar Pradesh",
+  "country": "India",
+  "lat": 26.47965,
+  "lon": 81.5591
+ },
+ "157": {
+  "name": "Bathinda",
+  "admin": "Punjab",
+  "country": "India",
+  "lat": 30.25039,
+  "lon": 74.91636
  }
 }

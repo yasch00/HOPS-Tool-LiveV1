@@ -1,9 +1,9 @@
 {
  "plant": 81,
- "lat": 44.5777603,
- "lon": 27.38141358,
+ "lat": 44.5358,
+ "lon": 27.38531,
  "country": "Romania",
- "capacity_ktpa": 300.0,
+ "capacity_ktpa": null,
  "radius_km": 25.0,
  "setback_scenario": "p50",
  "setbacks": {
@@ -28,36 +28,36 @@
  "rho_wind_mw_km2": 5.0,
  "rho_pv_mw_km2": 50.0,
  "developable_km2": {
-  "wind": 1453.8,
-  "solar": 1713.03
+  "wind": 1446.93,
+  "solar": 1711.78
  },
  "breakdown": {
   "wind": {
-   "structures": 95.388,
-   "roads": 292.332,
-   "rails": 59.746,
-   "water": 159.943,
-   "landcover": 201.599,
+   "structures": 94.576,
+   "roads": 291.553,
+   "rails": 60.444,
+   "water": 166.236,
+   "landcover": 201.86,
    "natura": 0.0,
    "_gross_km2": 1960.343,
-   "_developable_km2": 1453.804,
-   "_excluded_km2": 506.538,
-   "_developable_frac": 0.742
+   "_developable_km2": 1446.932,
+   "_excluded_km2": 513.411,
+   "_developable_frac": 0.738
   },
   "solar": {
-   "structures": 15.003,
-   "roads": 69.906,
-   "rails": 8.966,
-   "water": 45.396,
-   "landcover": 201.599,
+   "structures": 16.318,
+   "roads": 70.166,
+   "rails": 9.076,
+   "water": 45.484,
+   "landcover": 201.86,
    "natura": 0.0,
    "_gross_km2": 1960.343,
-   "_developable_km2": 1713.032,
-   "_excluded_km2": 247.311,
-   "_developable_frac": 0.874
+   "_developable_km2": 1711.777,
+   "_excluded_km2": 248.566,
+   "_developable_frac": 0.873
   }
  },
- "max_turbines": 1304,
+ "max_turbines": 1294,
  "layouts": [
   {
    "path": "SMR",
@@ -68,8 +68,8 @@
    "wind_mw_placed": 1212.0,
    "wind_short": false,
    "pv_mw_target": 1144.3,
-   "pv_mw_placed": 1151.1,
-   "pv_km2": 23.02,
+   "pv_mw_placed": 1151.9,
+   "pv_km2": 23.04,
    "pv_short": false
   },
   {
@@ -81,8 +81,8 @@
    "wind_mw_placed": 1122.0,
    "wind_short": false,
    "pv_mw_target": 1003.7,
-   "pv_mw_placed": 1006.7,
-   "pv_km2": 20.13,
+   "pv_mw_placed": 1025.7,
+   "pv_km2": 20.51,
    "pv_short": false
   },
   {
@@ -94,8 +94,8 @@
    "wind_mw_placed": 942.0,
    "wind_short": false,
    "pv_mw_target": 873.5,
-   "pv_mw_placed": 892.9,
-   "pv_km2": 17.86,
+   "pv_mw_placed": 894.4,
+   "pv_km2": 17.89,
    "pv_short": false
   },
   {
@@ -107,8 +107,8 @@
    "wind_mw_placed": 714.0,
    "wind_short": false,
    "pv_mw_target": 793.2,
-   "pv_mw_placed": 812.7,
-   "pv_km2": 16.25,
+   "pv_mw_placed": 803.4,
+   "pv_km2": 16.07,
    "pv_short": false
   },
   {
@@ -120,8 +120,8 @@
    "wind_mw_placed": 462.0,
    "wind_short": false,
    "pv_mw_target": 736.8,
-   "pv_mw_placed": 756.1,
-   "pv_km2": 15.12,
+   "pv_mw_placed": 745.6,
+   "pv_km2": 14.91,
    "pv_short": false
   },
   {
@@ -133,8 +133,8 @@
    "wind_mw_placed": 228.0,
    "wind_short": false,
    "pv_mw_target": 664.5,
-   "pv_mw_placed": 666.9,
-   "pv_km2": 13.34,
+   "pv_mw_placed": 667.3,
+   "pv_km2": 13.35,
    "pv_short": false
   },
   {
@@ -146,8 +146,8 @@
    "wind_mw_placed": 18.0,
    "wind_short": false,
    "pv_mw_target": 573.2,
-   "pv_mw_placed": 593.2,
-   "pv_km2": 11.86,
+   "pv_mw_placed": 590.0,
+   "pv_km2": 11.8,
    "pv_short": false
   },
   {
@@ -159,8 +159,8 @@
    "wind_mw_placed": 6.0,
    "wind_short": false,
    "pv_mw_target": 248.8,
-   "pv_mw_placed": 251.0,
-   "pv_km2": 5.02,
+   "pv_mw_placed": 261.4,
+   "pv_km2": 5.23,
    "pv_short": false
   },
   {
@@ -172,8 +172,8 @@
    "wind_mw_placed": 1212.0,
    "wind_short": false,
    "pv_mw_target": 1144.3,
-   "pv_mw_placed": 1151.1,
-   "pv_km2": 23.02,
+   "pv_mw_placed": 1151.9,
+   "pv_km2": 23.04,
    "pv_short": false
   },
   {
@@ -185,8 +185,8 @@
    "wind_mw_placed": 54.0,
    "wind_short": false,
    "pv_mw_target": 2297.2,
-   "pv_mw_placed": 2305.8,
-   "pv_km2": 46.12,
+   "pv_mw_placed": 2298.7,
+   "pv_km2": 45.97,
    "pv_short": false
   },
   {
@@ -198,8 +198,8 @@
    "wind_mw_placed": 42.0,
    "wind_short": false,
    "pv_mw_target": 1961.3,
-   "pv_mw_placed": 1985.9,
-   "pv_km2": 39.72,
+   "pv_mw_placed": 1986.9,
+   "pv_km2": 39.74,
    "pv_short": false
   },
   {
@@ -211,8 +211,8 @@
    "wind_mw_placed": 30.0,
    "wind_short": false,
    "pv_mw_target": 1622.6,
-   "pv_mw_placed": 1624.3,
-   "pv_km2": 32.49,
+   "pv_mw_placed": 1654.6,
+   "pv_km2": 33.09,
    "pv_short": false
   },
   {
@@ -224,8 +224,8 @@
    "wind_mw_placed": 24.0,
    "wind_short": false,
    "pv_mw_target": 1273.4,
-   "pv_mw_placed": 1280.1,
-   "pv_km2": 25.6,
+   "pv_mw_placed": 1298.8,
+   "pv_km2": 25.98,
    "pv_short": false
   },
   {
@@ -237,8 +237,8 @@
    "wind_mw_placed": 18.0,
    "wind_short": false,
    "pv_mw_target": 922.7,
-   "pv_mw_placed": 945.2,
-   "pv_km2": 18.9,
+   "pv_mw_placed": 941.3,
+   "pv_km2": 18.83,
    "pv_short": false
   },
   {
@@ -250,8 +250,8 @@
    "wind_mw_placed": 12.0,
    "wind_short": false,
    "pv_mw_target": 581.0,
-   "pv_mw_placed": 593.2,
-   "pv_km2": 11.86,
+   "pv_mw_placed": 590.0,
+   "pv_km2": 11.8,
    "pv_short": false
   },
   {
@@ -263,8 +263,8 @@
    "wind_mw_placed": 6.0,
    "wind_short": false,
    "pv_mw_target": 248.8,
-   "pv_mw_placed": 251.0,
-   "pv_km2": 5.02,
+   "pv_mw_placed": 261.4,
+   "pv_km2": 5.23,
    "pv_short": false
   }
  ],

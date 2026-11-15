@@ -162,7 +162,7 @@ def load_plants(results: Path, plants_xlsx: Path | None, amm_xlsx: Path | None, 
         p["admin"] = n.get("admin") or ""
     return recs
 
-def convert(results: Path, out: Path, label: str, bau_label: str, plants_xlsx, amm_xlsx, names_json) -> None:
+def convert(results: Path, out: Path, label: str, bau_label: str, plants_xlsx, amm_xlsx, names_json, replace_fleet: bool = False) -> None:
     names = json.loads(Path(names_json).read_text()) if names_json and Path(names_json).exists() else {}
     plants = load_plants(results, plants_xlsx, amm_xlsx, names)
     print(f"{len(plants)} plants")
@@ -229,6 +229,10 @@ def convert(results: Path, out: Path, label: str, bau_label: str, plants_xlsx, a
         f = out / name
         try: return json.loads(f.read_text()) if f.exists() else default
         except Exception: return default
+    # --replace-fleet: this results folder IS the fleet. Fleet plants published before but absent here are taken out
+    # (plants/scenarios/bau/summary/manifest + their runs/ and siting/ folders); requested sites (idx >= 1000) stay.
+    drop = {p["idx"] for p in load("plants.json", []) if p["idx"] not in mine and p["idx"] < 1000 and not p.get("custom")} if replace_fleet else set()
+    mine = mine | drop
     old_plants = [p for p in load("plants.json", []) if p["idx"] not in mine]
     old_scn = [s for s in load("scenarios.json", []) if s["plant"] not in mine]
     old_bau = load("bau.json", {})
@@ -243,7 +247,10 @@ def convert(results: Path, out: Path, label: str, bau_label: str, plants_xlsx, a
     old_sum = [r for r in old_sum if r.get("plant") not in mine]
     old_man = load("manifest.json", {})
     man_plants = {k: v for k, v in (old_man.get("plants") or {}).items() if int(k) not in mine}; man_plants.update(manifest["plants"]); manifest["plants"] = man_plants
-    if old_man.get("label") and old_man["label"] != label: manifest["label"] = old_man["label"]; manifest["version"] = old_man.get("version", manifest["version"]); manifest["extra_labels"] = sorted(set((old_man.get("extra_labels") or []) + [label]))
+    if replace_fleet:
+        extra = sorted({s["label"] for s in old_scn if not s.get("policy")} - {label})
+        if extra: manifest["extra_labels"] = extra
+    elif old_man.get("label") and old_man["label"] != label: manifest["label"] = old_man["label"]; manifest["version"] = old_man.get("version", manifest["version"]); manifest["extra_labels"] = sorted(set((old_man.get("extra_labels") or []) + [label]))
     plants_all = sorted(old_plants + list(plants.values()), key=lambda p: p["idx"]); scenarios = old_scn + scenarios; summary = old_sum + summary
     (out / "plants.json").write_text(json.dumps(plants_all, indent=0))
     (out / "scenarios.json").write_text(json.dumps(scenarios, separators=(",", ":")))
@@ -251,6 +258,20 @@ def convert(results: Path, out: Path, label: str, bau_label: str, plants_xlsx, a
     (out / "summary.json").write_text(json.dumps(summary, separators=(",", ":")))
     manifest["n_scenarios"] = len(scenarios); manifest["n_runs"] = len(summary); manifest["n_plants"] = len(plants_all)
     (out / "manifest.json").write_text(json.dumps(manifest, indent=1))
+    if replace_fleet:
+        import shutil
+        for idx in sorted(drop):
+            for sub in ("runs", "siting"):
+                if (out / sub / f"plant{idx}").exists(): shutil.rmtree(out / sub / f"plant{idx}")
+        if drop: print(f"replace-fleet: removed {len(drop)} plants no longer in the fleet: {sorted(drop)}")
+        if any(hourly_dir.glob(f"hourly_*_{label}.parquet")):          # hourly files of CI points that no longer exist
+            n = 0
+            for idx in plants:
+                m = manifest["plants"].get(str(idx), {}); keep = {x["file"] for v in m.values() if isinstance(v, list) for x in v if x["file"]} | {m.get("BAU")}
+                for fp in (out / "runs" / f"plant{idx}").rglob("*.json.gz"):
+                    if str(fp.relative_to(out)) not in keep: fp.unlink(); n += 1
+            if n: print(f"replace-fleet: deleted {n} hourly files of CI points that are not in {label}")
+        else: print(f"replace-fleet: NOTE no hourly parquet for {label} in {hourly_dir} - old hourly files left on disk, the manifest lists none")
     kb = lambda f: f"{(out / f).stat().st_size / 1024:,.0f} KB"
     print(f"\n{len(scenarios)} scenarios, {len(summary)} runs")
     print(f"plants.json {kb('plants.json')} · scenarios.json {kb('scenarios.json')} · bau.json {kb('bau.json')} · summary.json {kb('summary.json')}")
@@ -277,8 +298,10 @@ def main() -> int:
     ap.add_argument("--plants", default="/Users/yaschue/Documents/PlantsAmmoniaGreen/plants/Plants_US_and_Europe.xlsx")
     ap.add_argument("--amm", default="/Users/yaschue/Downloads/HOPS/uploads/updated_plants_with_country.xlsx")
     ap.add_argument("--names", default=None, help="plant_names.json {idx: {name, admin}}")
+    ap.add_argument("--replace-fleet", action="store_true", help="this results folder is the whole fleet: take out fleet plants "
+                    "(idx < 1000) that are published but not in it, and stamp the manifest with this label; requested sites stay")
     a = ap.parse_args()
-    convert(Path(a.results), Path(a.out), a.label, a.bau_label, Path(a.plants), Path(a.amm), a.names)
+    convert(Path(a.results), Path(a.out), a.label, a.bau_label, Path(a.plants), Path(a.amm), a.names, a.replace_fleet)
     return 0
 
 if __name__ == "__main__":

@@ -1,9 +1,9 @@
 {
  "plant": 58,
- "lat": 51.60255904,
- "lon": 7.0304467,
+ "lat": 51.60256,
+ "lon": 7.03045,
  "country": "Germany",
- "capacity_ktpa": 280.0,
+ "capacity_ktpa": null,
  "radius_km": 25.0,
  "setback_scenario": "p50",
  "setbacks": {
@@ -33,27 +33,27 @@
  },
  "breakdown": {
   "wind": {
-   "structures": 1752.761,
+   "structures": 1752.76,
    "roads": 1507.327,
-   "rails": 270.485,
-   "water": 508.653,
-   "landcover": 1198.518,
-   "natura": 23.339,
+   "rails": 270.483,
+   "water": 508.652,
+   "landcover": 1198.517,
+   "natura": 23.341,
    "_gross_km2": 1960.343,
    "_developable_km2": 14.825,
    "_excluded_km2": 1945.518,
    "_developable_frac": 0.008
   },
   "solar": {
-   "structures": 916.209,
+   "structures": 916.208,
    "roads": 500.711,
    "rails": 54.849,
-   "water": 85.891,
-   "landcover": 1198.518,
-   "natura": 23.339,
+   "water": 85.89,
+   "landcover": 1198.517,
+   "natura": 23.341,
    "_gross_km2": 1960.343,
-   "_developable_km2": 409.123,
-   "_excluded_km2": 1551.22,
+   "_developable_km2": 409.124,
+   "_excluded_km2": 1551.219,
    "_developable_frac": 0.209
   }
  },
@@ -94,8 +94,8 @@
    "wind_mw_placed": 468.0,
    "wind_short": true,
    "pv_mw_target": 763.1,
-   "pv_mw_placed": 773.8,
-   "pv_km2": 15.48,
+   "pv_mw_placed": 763.1,
+   "pv_km2": 15.26,
    "pv_short": false
   },
   {

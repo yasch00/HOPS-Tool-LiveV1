@@ -1,9 +1,9 @@
 {
- "version": "IRR_v7-2026-09-16",
- "label": "IRR_v7",
- "bau_label": "BAU_cain",
+ "version": "IRR_v11-2026-11-14",
+ "label": "IRR_v11",
+ "bau_label": "BAU_v11",
  "pathway": "SMR_INT_ASU",
- "generated": "2026-11-06",
+ "generated": "2026-11-14",
  "policies": {
   "ETSlaw": "EU ETS (current law)",
   "ETSprop": "EU ETS (proposed)",
@@ -42,6 +42,77 @@
     }
    ],
    "BAU": "runs/plant1002/BAU/bau.json.gz"
+  },
+  "1015": {
+   "SMR": [
+    {
+     "ci": 0.0,
+     "file": "runs/plant1015/SMR/ci0.00.json.gz"
+    },
+    {
+     "ci": 0.25,
+     "file": "runs/plant1015/SMR/ci0.25.json.gz"
+    },
+    {
+     "ci": 0.5,
+     "file": "runs/plant1015/SMR/ci0.50.json.gz"
+    },
+    {
+     "ci": 0.75,
+     "file": "runs/plant1015/SMR/ci0.75.json.gz"
+    },
+    {
+     "ci": 1.0,
+     "file": "runs/plant1015/SMR/ci1.00.json.gz"
+    },
+    {
+     "ci": 1.25,
+     "file": "runs/plant1015/SMR/ci1.25.json.gz"
+    },
+    {
+     "ci": 1.5,
+     "file": "runs/plant1015/SMR/ci1.50.json.gz"
+    },
+    {
+     "ci": 1.75,
+     "file": "runs/plant1015/SMR/ci1.75.json.gz"
+    }
+   ],
+   "SMR+CCS": [
+    {
+     "ci": 0.0,
+     "file": "runs/plant1015/SMR+CCS/ci0.00.json.gz"
+    },
+    {
+     "ci": 0.25,
+     "file": "runs/plant1015/SMR+CCS/ci0.25.json.gz"
+    },
+    {
+     "ci": 0.5,
+     "file": "runs/plant1015/SMR+CCS/ci0.50.json.gz"
+    },
+    {
+     "ci": 0.75,
+     "file": "runs/plant1015/SMR+CCS/ci0.75.json.gz"
+    },
+    {
+     "ci": 1.0,
+     "file": "runs/plant1015/SMR+CCS/ci1.00.json.gz"
+    },
+    {
+     "ci": 1.25,
+     "file": "runs/plant1015/SMR+CCS/ci1.25.json.gz"
+    },
+    {
+     "ci": 1.5,
+     "file": "runs/plant1015/SMR+CCS/ci1.50.json.gz"
+    },
+    {
+     "ci": 1.75,
+     "file": "runs/plant1015/SMR+CCS/ci1.75.json.gz"
+    }
+   ],
+   "BAU": "runs/plant1015/BAU/bau.json.gz"
   },
   "0": {
    "SMR": [
@@ -153,9 +224,463 @@
     {
      "ci": 0.0,
      "file": "runs/plant1/SMR+CCS/ci0.00.json.gz"
+    },
+    {
+     "ci": 0.25,
+     "file": "runs/plant1/SMR+CCS/ci0.25.json.gz"
+    },
+    {
+     "ci": 0.5,
+     "file": "runs/plant1/SMR+CCS/ci0.50.json.gz"
+    },
+    {
+     "ci": 0.75,
+     "file": "runs/plant1/SMR+CCS/ci0.75.json.gz"
+    },
+    {
+     "ci": 1.0,
+     "file": "runs/plant1/SMR+CCS/ci1.00.json.gz"
+    },
+    {
+     "ci": 1.25,
+     "file": "runs/plant1/SMR+CCS/ci1.25.json.gz"
+    },
+    {
+     "ci": 1.5,
+     "file": "runs/plant1/SMR+CCS/ci1.50.json.gz"
+    },
+    {
+     "ci": 1.75,
+     "file": "runs/plant1/SMR+CCS/ci1.75.json.gz"
     }
    ],
    "BAU": "runs/plant1/BAU/bau.json.gz"
+  },
+  "2": {
+   "SMR": [
+    {
+     "ci": 0.0,
+     "file": "runs/plant2/SMR/ci0.00.json.gz"
+    },
+    {
+     "ci": 0.25,
+     "file": "runs/plant2/SMR/ci0.25.json.gz"
+    },
+    {
+     "ci": 0.5,
+     "file": "runs/plant2/SMR/ci0.50.json.gz"
+    },
+    {
+     "ci": 0.75,
+     "file": "runs/plant2/SMR/ci0.75.json.gz"
+    },
+    {
+     "ci": 1.0,
+     "file": "runs/plant2/SMR/ci1.00.json.gz"
+    },
+    {
+     "ci": 1.25,
+     "file": "runs/plant2/SMR/ci1.25.json.gz"
+    },
+    {
+     "ci": 1.5,
+     "file": "runs/plant2/SMR/ci1.50.json.gz"
+    },
+    {
+     "ci": 1.75,
+     "file": "runs/plant2/SMR/ci1.75.json.gz"
+    }
+   ],
+   "SMR+CCS": [
+    {
+     "ci": 0.0,
+     "file": "runs/plant2/SMR+CCS/ci0.00.json.gz"
+    },
+    {
+     "ci": 0.25,
+     "file": "runs/plant2/SMR+CCS/ci0.25.json.gz"
+    },
+    {
+     "ci": 0.5,
+     "file": "runs/plant2/SMR+CCS/ci0.50.json.gz"
+    },
+    {
+     "ci": 0.75,
+     "file": "runs/plant2/SMR+CCS/ci0.75.json.gz"
+    },
+    {
+     "ci": 1.0,
+     "file": "runs/plant2/SMR+CCS/ci1.00.json.gz"
+    },
+    {
+     "ci": 1.25,
+     "file": "runs/plant2/SMR+CCS/ci1.25.json.gz"
+    },
+    {
+     "ci": 1.5,
+     "file": "runs/plant2/SMR+CCS/ci1.50.json.gz"
+    },
+    {
+     "ci": 1.75,
+     "file": "runs/plant2/SMR+CCS/ci1.75.json.gz"
+    }
+   ],
+   "BAU": "runs/plant2/BAU/bau.json.gz"
+  },
+  "3": {
+   "SMR": [
+    {
+     "ci": 0.0,
+     "file": "runs/plant3/SMR/ci0.00.json.gz"
+    },
+    {
+     "ci": 0.25,
+     "file": "runs/plant3/SMR/ci0.25.json.gz"
+    },
+    {
+     "ci": 0.5,
+     "file": "runs/plant3/SMR/ci0.50.json.gz"
+    },
+    {
+     "ci": 0.75,
+     "file": "runs/plant3/SMR/ci0.75.json.gz"
+    },
+    {
+     "ci": 1.0,
+     "file": "runs/plant3/SMR/ci1.00.json.gz"
+    },
+    {
+     "ci": 1.25,
+     "file": "runs/plant3/SMR/ci1.25.json.gz"
+    },
+    {
+     "ci": 1.5,
+     "file": "runs/plant3/SMR/ci1.50.json.gz"
+    },
+    {
+     "ci": 1.75,
+     "file": "runs/plant3/SMR/ci1.75.json.gz"
+    }
+   ],
+   "SMR+CCS": [
+    {
+     "ci": 0.0,
+     "file": "runs/plant3/SMR+CCS/ci0.00.json.gz"
+    },
+    {
+     "ci": 0.25,
+     "file": "runs/plant3/SMR+CCS/ci0.25.json.gz"
+    },
+    {
+     "ci": 0.5,
+     "file": "runs/plant3/SMR+CCS/ci0.50.json.gz"
+    },
+    {
+     "ci": 0.75,
+     "file": "runs/plant3/SMR+CCS/ci0.75.json.gz"
+    },
+    {
+     "ci": 1.0,
+     "file": "runs/plant3/SMR+CCS/ci1.00.json.gz"
+    },
+    {
+     "ci": 1.25,
+     "file": "runs/plant3/SMR+CCS/ci1.25.json.gz"
+    },
+    {
+     "ci": 1.5,
+     "file": "runs/plant3/SMR+CCS/ci1.50.json.gz"
+    },
+    {
+     "ci": 1.75,
+     "file": "runs/plant3/SMR+CCS/ci1.75.json.gz"
+    }
+   ],
+   "BAU": "runs/plant3/BAU/bau.json.gz"
+  },
+  "4": {
+   "SMR": [
+    {
+     "ci": 0.0,
+     "file": "runs/plant4/SMR/ci0.00.json.gz"
+    },
+    {
+     "ci": 0.25,
+     "file": "runs/plant4/SMR/ci0.25.json.gz"
+    },
+    {
+     "ci": 0.5,
+     "file": "runs/plant4/SMR/ci0.50.json.gz"
+    },
+    {
+     "ci": 0.75,
+     "file": "runs/plant4/SMR/ci0.75.json.gz"
+    },
+    {
+     "ci": 1.0,
+     "file": "runs/plant4/SMR/ci1.00.json.gz"
+    },
+    {
+     "ci": 1.25,
+     "file": "runs/plant4/SMR/ci1.25.json.gz"
+    },
+    {
+     "ci": 1.5,
+     "file": "runs/plant4/SMR/ci1.50.json.gz"
+    },
+    {
+     "ci": 1.75,
+     "file": "runs/plant4/SMR/ci1.75.json.gz"
+    }
+   ],
+   "SMR+CCS": [
+    {
+     "ci": 0.0,
+     "file": "runs/plant4/SMR+CCS/ci0.00.json.gz"
+    },
+    {
+     "ci": 0.25,
+     "file": "runs/plant4/SMR+CCS/ci0.25.json.gz"
+    },
+    {
+     "ci": 0.5,
+     "file": "runs/plant4/SMR+CCS/ci0.50.json.gz"
+    },
+    {
+     "ci": 0.75,
+     "file": "runs/plant4/SMR+CCS/ci0.75.json.gz"
+    },
+    {
+     "ci": 1.0,
+     "file": "runs/plant4/SMR+CCS/ci1.00.json.gz"
+    },
+    {
+     "ci": 1.25,
+     "file": "runs/plant4/SMR+CCS/ci1.25.json.gz"
+    },
+    {
+     "ci": 1.5,
+     "file": "runs/plant4/SMR+CCS/ci1.50.json.gz"
+    },
+    {
+     "ci": 1.75,
+     "file": "runs/plant4/SMR+CCS/ci1.75.json.gz"
+    }
+   ],
+   "BAU": "runs/plant4/BAU/bau.json.gz"
+  },
+  "5": {
+   "SMR": [
+    {
+     "ci": 0.0,
+     "file": "runs/plant5/SMR/ci0.00.json.gz"
+    },
+    {
+     "ci": 0.25,
+     "file": "runs/plant5/SMR/ci0.25.json.gz"
+    },
+    {
+     "ci": 0.5,
+     "file": "runs/plant5/SMR/ci0.50.json.gz"
+    },
+    {
+     "ci": 0.75,
+     "file": "runs/plant5/SMR/ci0.75.json.gz"
+    },
+    {
+     "ci": 1.0,
+     "file": "runs/plant5/SMR/ci1.00.json.gz"
+    },
+    {
+     "ci": 1.25,
+     "file": "runs/plant5/SMR/ci1.25.json.gz"
+    },
+    {
+     "ci": 1.5,
+     "file": "runs/plant5/SMR/ci1.50.json.gz"
+    },
+    {
+     "ci": 1.75,
+     "file": "runs/plant5/SMR/ci1.75.json.gz"
+    }
+   ],
+   "SMR+CCS": [
+    {
+     "ci": 0.0,
+     "file": "runs/plant5/SMR+CCS/ci0.00.json.gz"
+    },
+    {
+     "ci": 0.25,
+     "file": "runs/plant5/SMR+CCS/ci0.25.json.gz"
+    },
+    {
+     "ci": 0.5,
+     "file": "runs/plant5/SMR+CCS/ci0.50.json.gz"
+    },
+    {
+     "ci": 0.75,
+     "file": "runs/plant5/SMR+CCS/ci0.75.json.gz"
+    },
+    {
+     "ci": 1.0,
+     "file": "runs/plant5/SMR+CCS/ci1.00.json.gz"
+    },
+    {
+     "ci": 1.25,
+     "file": "runs/plant5/SMR+CCS/ci1.25.json.gz"
+    },
+    {
+     "ci": 1.5,
+     "file": "runs/plant5/SMR+CCS/ci1.50.json.gz"
+    },
+    {
+     "ci": 1.75,
+     "file": "runs/plant5/SMR+CCS/ci1.75.json.gz"
+    }
+   ],
+   "BAU": "runs/plant5/BAU/bau.json.gz"
+  },
+  "6": {
+   "SMR": [
+    {
+     "ci": 0.0,
+     "file": "runs/plant6/SMR/ci0.00.json.gz"
+    },
+    {
+     "ci": 0.25,
+     "file": "runs/plant6/SMR/ci0.25.json.gz"
+    },
+    {
+     "ci": 0.5,
+     "file": "runs/plant6/SMR/ci0.50.json.gz"
+    },
+    {
+     "ci": 0.75,
+     "file": "runs/plant6/SMR/ci0.75.json.gz"
+    },
+    {
+     "ci": 1.0,
+     "file": "runs/plant6/SMR/ci1.00.json.gz"
+    },
+    {
+     "ci": 1.25,
+     "file": "runs/plant6/SMR/ci1.25.json.gz"
+    },
+    {
+     "ci": 1.5,
+     "file": "runs/plant6/SMR/ci1.50.json.gz"
+    },
+    {
+     "ci": 1.75,
+     "file": "runs/plant6/SMR/ci1.75.json.gz"
+    }
+   ],
+   "SMR+CCS": [
+    {
+     "ci": 0.0,
+     "file": "runs/plant6/SMR+CCS/ci0.00.json.gz"
+    },
+    {
+     "ci": 0.25,
+     "file": "runs/plant6/SMR+CCS/ci0.25.json.gz"
+    },
+    {
+     "ci": 0.5,
+     "file": "runs/plant6/SMR+CCS/ci0.50.json.gz"
+    },
+    {
+     "ci": 0.75,
+     "file": "runs/plant6/SMR+CCS/ci0.75.json.gz"
+    },
+    {
+     "ci": 1.0,
+     "file": "runs/plant6/SMR+CCS/ci1.00.json.gz"
+    },
+    {
+     "ci": 1.25,
+     "file": "runs/plant6/SMR+CCS/ci1.25.json.gz"
+    },
+    {
+     "ci": 1.5,
+     "file": "runs/plant6/SMR+CCS/ci1.50.json.gz"
+    },
+    {
+     "ci": 1.75,
+     "file": "runs/plant6/SMR+CCS/ci1.75.json.gz"
+    }
+   ],
+   "BAU": "runs/plant6/BAU/bau.json.gz"
+  },
+  "7": {
+   "SMR": [
+    {
+     "ci": 0.0,
+     "file": "runs/plant7/SMR/ci0.00.json.gz"
+    },
+    {
+     "ci": 0.25,
+     "file": "runs/plant7/SMR/ci0.25.json.gz"
+    },
+    {
+     "ci": 0.5,
+     "file": "runs/plant7/SMR/ci0.50.json.gz"
+    },
+    {
+     "ci": 0.75,
+     "file": "runs/plant7/SMR/ci0.75.json.gz"
+    },
+    {
+     "ci": 1.0,
+     "file": "runs/plant7/SMR/ci1.00.json.gz"
+    },
+    {
+     "ci": 1.25,
+     "file": "runs/plant7/SMR/ci1.25.json.gz"
+    },
+    {
+     "ci": 1.5,
+     "file": "runs/plant7/SMR/ci1.50.json.gz"
+    },
+    {
+     "ci": 1.75,
+     "file": "runs/plant7/SMR/ci1.75.json.gz"
+    }
+   ],
+   "SMR+CCS": [
+    {
+     "ci": 0.0,
+     "file": "runs/plant7/SMR+CCS/ci0.00.json.gz"
+    },
+    {
+     "ci": 0.25,
+     "file": "runs/plant7/SMR+CCS/ci0.25.json.gz"
+    },
+    {
+     "ci": 0.5,
+     "file": "runs/plant7/SMR+CCS/ci0.50.json.gz"
+    },
+    {
+     "ci": 0.75,
+     "file": "runs/plant7/SMR+CCS/ci0.75.json.gz"
+    },
+    {
+     "ci": 1.0,
+     "file": "runs/plant7/SMR+CCS/ci1.00.json.gz"
+    },
+    {
+     "ci": 1.25,
+     "file": "runs/plant7/SMR+CCS/ci1.25.json.gz"
+    },
+    {
+     "ci": 1.5,
+     "file": "runs/plant7/SMR+CCS/ci1.50.json.gz"
+    },
+    {
+     "ci": 1.75,
+     "file": "runs/plant7/SMR+CCS/ci1.75.json.gz"
+    }
+   ],
+   "BAU": "runs/plant7/BAU/bau.json.gz"
   },
   "8": {
    "SMR": [
@@ -227,6 +752,77 @@
     }
    ],
    "BAU": "runs/plant8/BAU/bau.json.gz"
+  },
+  "9": {
+   "SMR": [
+    {
+     "ci": 0.0,
+     "file": "runs/plant9/SMR/ci0.00.json.gz"
+    },
+    {
+     "ci": 0.25,
+     "file": "runs/plant9/SMR/ci0.25.json.gz"
+    },
+    {
+     "ci": 0.5,
+     "file": "runs/plant9/SMR/ci0.50.json.gz"
+    },
+    {
+     "ci": 0.75,
+     "file": "runs/plant9/SMR/ci0.75.json.gz"
+    },
+    {
+     "ci": 1.0,
+     "file": "runs/plant9/SMR/ci1.00.json.gz"
+    },
+    {
+     "ci": 1.25,
+     "file": "runs/plant9/SMR/ci1.25.json.gz"
+    },
+    {
+     "ci": 1.5,
+     "file": "runs/plant9/SMR/ci1.50.json.gz"
+    },
+    {
+     "ci": 1.75,
+     "file": "runs/plant9/SMR/ci1.75.json.gz"
+    }
+   ],
+   "SMR+CCS": [
+    {
+     "ci": 0.0,
+     "file": "runs/plant9/SMR+CCS/ci0.00.json.gz"
+    },
+    {
+     "ci": 0.25,
+     "file": "runs/plant9/SMR+CCS/ci0.25.json.gz"
+    },
+    {
+     "ci": 0.5,
+     "file": "runs/plant9/SMR+CCS/ci0.50.json.gz"
+    },
+    {
+     "ci": 0.75,
+     "file": "runs/plant9/SMR+CCS/ci0.75.json.gz"
+    },
+    {
+     "ci": 1.0,
+     "file": "runs/plant9/SMR+CCS/ci1.00.json.gz"
+    },
+    {
+     "ci": 1.25,
+     "file": "runs/plant9/SMR+CCS/ci1.25.json.gz"
+    },
+    {
+     "ci": 1.5,
+     "file": "runs/plant9/SMR+CCS/ci1.50.json.gz"
+    },
+    {
+     "ci": 1.75,
+     "file": "runs/plant9/SMR+CCS/ci1.75.json.gz"
+    }
+   ],
+   "BAU": "runs/plant9/BAU/bau.json.gz"
   },
   "10": {
    "SMR": [
@@ -482,6 +1078,10 @@
      "file": "runs/plant13/SMR+CCS/ci0.00.json.gz"
     },
     {
+     "ci": 0.25,
+     "file": "runs/plant13/SMR+CCS/ci0.25.json.gz"
+    },
+    {
      "ci": 0.5,
      "file": "runs/plant13/SMR+CCS/ci0.50.json.gz"
     },
@@ -507,6 +1107,77 @@
     }
    ],
    "BAU": "runs/plant13/BAU/bau.json.gz"
+  },
+  "14": {
+   "SMR": [
+    {
+     "ci": 0.0,
+     "file": "runs/plant14/SMR/ci0.00.json.gz"
+    },
+    {
+     "ci": 0.25,
+     "file": "runs/plant14/SMR/ci0.25.json.gz"
+    },
+    {
+     "ci": 0.5,
+     "file": "runs/plant14/SMR/ci0.50.json.gz"
+    },
+    {
+     "ci": 0.75,
+     "file": "runs/plant14/SMR/ci0.75.json.gz"
+    },
+    {
+     "ci": 1.0,
+     "file": "runs/plant14/SMR/ci1.00.json.gz"
+    },
+    {
+     "ci": 1.25,
+     "file": "runs/plant14/SMR/ci1.25.json.gz"
+    },
+    {
+     "ci": 1.5,
+     "file": "runs/plant14/SMR/ci1.50.json.gz"
+    },
+    {
+     "ci": 1.75,
+     "file": "runs/plant14/SMR/ci1.75.json.gz"
+    }
+   ],
+   "SMR+CCS": [
+    {
+     "ci": 0.0,
+     "file": "runs/plant14/SMR+CCS/ci0.00.json.gz"
+    },
+    {
+     "ci": 0.25,
+     "file": "runs/plant14/SMR+CCS/ci0.25.json.gz"
+    },
+    {
+     "ci": 0.5,
+     "file": "runs/plant14/SMR+CCS/ci0.50.json.gz"
+    },
+    {
+     "ci": 0.75,
+     "file": "runs/plant14/SMR+CCS/ci0.75.json.gz"
+    },
+    {
+     "ci": 1.0,
+     "file": "runs/plant14/SMR+CCS/ci1.00.json.gz"
+    },
+    {
+     "ci": 1.25,
+     "file": "runs/plant14/SMR+CCS/ci1.25.json.gz"
+    },
+    {
+     "ci": 1.5,
+     "file": "runs/plant14/SMR+CCS/ci1.50.json.gz"
+    },
+    {
+     "ci": 1.75,
+     "file": "runs/plant14/SMR+CCS/ci1.75.json.gz"
+    }
+   ],
+   "BAU": "runs/plant14/BAU/bau.json.gz"
   },
   "15": {
    "SMR": [
@@ -1756,6 +2427,10 @@
      "file": "runs/plant32/SMR+CCS/ci0.00.json.gz"
     },
     {
+     "ci": 0.25,
+     "file": "runs/plant32/SMR+CCS/ci0.25.json.gz"
+    },
+    {
      "ci": 0.5,
      "file": "runs/plant32/SMR+CCS/ci0.50.json.gz"
     },
@@ -1807,6 +2482,10 @@
     {
      "ci": 1.25,
      "file": "runs/plant33/SMR/ci1.25.json.gz"
+    },
+    {
+     "ci": 1.5,
+     "file": "runs/plant33/SMR/ci1.50.json.gz"
     },
     {
      "ci": 1.75,
@@ -2417,69 +3096,6 @@
    ],
    "BAU": "runs/plant42/BAU/bau.json.gz"
   },
-  "45": {
-   "SMR": [
-    {
-     "ci": 0.0,
-     "file": "runs/plant45/SMR/ci0.00.json.gz"
-    },
-    {
-     "ci": 0.75,
-     "file": "runs/plant45/SMR/ci0.75.json.gz"
-    },
-    {
-     "ci": 1.0,
-     "file": "runs/plant45/SMR/ci1.00.json.gz"
-    },
-    {
-     "ci": 1.25,
-     "file": "runs/plant45/SMR/ci1.25.json.gz"
-    },
-    {
-     "ci": 1.5,
-     "file": "runs/plant45/SMR/ci1.50.json.gz"
-    },
-    {
-     "ci": 1.75,
-     "file": "runs/plant45/SMR/ci1.75.json.gz"
-    }
-   ],
-   "SMR+CCS": [
-    {
-     "ci": 0.0,
-     "file": "runs/plant45/SMR+CCS/ci0.00.json.gz"
-    },
-    {
-     "ci": 0.25,
-     "file": "runs/plant45/SMR+CCS/ci0.25.json.gz"
-    },
-    {
-     "ci": 0.5,
-     "file": "runs/plant45/SMR+CCS/ci0.50.json.gz"
-    },
-    {
-     "ci": 0.75,
-     "file": "runs/plant45/SMR+CCS/ci0.75.json.gz"
-    },
-    {
-     "ci": 1.0,
-     "file": "runs/plant45/SMR+CCS/ci1.00.json.gz"
-    },
-    {
-     "ci": 1.25,
-     "file": "runs/plant45/SMR+CCS/ci1.25.json.gz"
-    },
-    {
-     "ci": 1.5,
-     "file": "runs/plant45/SMR+CCS/ci1.50.json.gz"
-    },
-    {
-     "ci": 1.75,
-     "file": "runs/plant45/SMR+CCS/ci1.75.json.gz"
-    }
-   ],
-   "BAU": "runs/plant45/BAU/bau.json.gz"
-  },
   "46": {
    "SMR": [
     {
@@ -2764,77 +3380,6 @@
    ],
    "BAU": "runs/plant50/BAU/bau.json.gz"
   },
-  "51": {
-   "SMR": [
-    {
-     "ci": 0.0,
-     "file": "runs/plant51/SMR/ci0.00.json.gz"
-    },
-    {
-     "ci": 0.25,
-     "file": "runs/plant51/SMR/ci0.25.json.gz"
-    },
-    {
-     "ci": 0.5,
-     "file": "runs/plant51/SMR/ci0.50.json.gz"
-    },
-    {
-     "ci": 0.75,
-     "file": "runs/plant51/SMR/ci0.75.json.gz"
-    },
-    {
-     "ci": 1.0,
-     "file": "runs/plant51/SMR/ci1.00.json.gz"
-    },
-    {
-     "ci": 1.25,
-     "file": "runs/plant51/SMR/ci1.25.json.gz"
-    },
-    {
-     "ci": 1.5,
-     "file": "runs/plant51/SMR/ci1.50.json.gz"
-    },
-    {
-     "ci": 1.75,
-     "file": "runs/plant51/SMR/ci1.75.json.gz"
-    }
-   ],
-   "SMR+CCS": [
-    {
-     "ci": 0.0,
-     "file": "runs/plant51/SMR+CCS/ci0.00.json.gz"
-    },
-    {
-     "ci": 0.25,
-     "file": "runs/plant51/SMR+CCS/ci0.25.json.gz"
-    },
-    {
-     "ci": 0.5,
-     "file": "runs/plant51/SMR+CCS/ci0.50.json.gz"
-    },
-    {
-     "ci": 0.75,
-     "file": "runs/plant51/SMR+CCS/ci0.75.json.gz"
-    },
-    {
-     "ci": 1.0,
-     "file": "runs/plant51/SMR+CCS/ci1.00.json.gz"
-    },
-    {
-     "ci": 1.25,
-     "file": "runs/plant51/SMR+CCS/ci1.25.json.gz"
-    },
-    {
-     "ci": 1.5,
-     "file": "runs/plant51/SMR+CCS/ci1.50.json.gz"
-    },
-    {
-     "ci": 1.75,
-     "file": "runs/plant51/SMR+CCS/ci1.75.json.gz"
-    }
-   ],
-   "BAU": "runs/plant51/BAU/bau.json.gz"
-  },
   "52": {
    "SMR": [
     {
@@ -3047,73 +3592,6 @@
     }
    ],
    "BAU": "runs/plant54/BAU/bau.json.gz"
-  },
-  "55": {
-   "SMR": [
-    {
-     "ci": 0.0,
-     "file": "runs/plant55/SMR/ci0.00.json.gz"
-    },
-    {
-     "ci": 0.25,
-     "file": "runs/plant55/SMR/ci0.25.json.gz"
-    },
-    {
-     "ci": 0.5,
-     "file": "runs/plant55/SMR/ci0.50.json.gz"
-    },
-    {
-     "ci": 0.75,
-     "file": "runs/plant55/SMR/ci0.75.json.gz"
-    },
-    {
-     "ci": 1.0,
-     "file": "runs/plant55/SMR/ci1.00.json.gz"
-    },
-    {
-     "ci": 1.25,
-     "file": "runs/plant55/SMR/ci1.25.json.gz"
-    },
-    {
-     "ci": 1.5,
-     "file": "runs/plant55/SMR/ci1.50.json.gz"
-    }
-   ],
-   "SMR+CCS": [
-    {
-     "ci": 0.0,
-     "file": "runs/plant55/SMR+CCS/ci0.00.json.gz"
-    },
-    {
-     "ci": 0.25,
-     "file": "runs/plant55/SMR+CCS/ci0.25.json.gz"
-    },
-    {
-     "ci": 0.5,
-     "file": "runs/plant55/SMR+CCS/ci0.50.json.gz"
-    },
-    {
-     "ci": 0.75,
-     "file": "runs/plant55/SMR+CCS/ci0.75.json.gz"
-    },
-    {
-     "ci": 1.0,
-     "file": "runs/plant55/SMR+CCS/ci1.00.json.gz"
-    },
-    {
-     "ci": 1.25,
-     "file": "runs/plant55/SMR+CCS/ci1.25.json.gz"
-    },
-    {
-     "ci": 1.5,
-     "file": "runs/plant55/SMR+CCS/ci1.50.json.gz"
-    },
-    {
-     "ci": 1.75,
-     "file": "runs/plant55/SMR+CCS/ci1.75.json.gz"
-    }
-   ],
-   "BAU": "runs/plant55/BAU/bau.json.gz"
   },
   "56": {
    "SMR": [
@@ -3580,6 +4058,10 @@
     {
      "ci": 0.0,
      "file": "runs/plant63/SMR+CCS/ci0.00.json.gz"
+    },
+    {
+     "ci": 0.25,
+     "file": "runs/plant63/SMR+CCS/ci0.25.json.gz"
     },
     {
      "ci": 0.5,
@@ -4886,645 +5368,6 @@
    ],
    "BAU": "runs/plant82/BAU/bau.json.gz"
   },
-  "1015": {
-   "SMR": [
-    {
-     "ci": 0.0,
-     "file": "runs/plant1015/SMR/ci0.00.json.gz"
-    },
-    {
-     "ci": 0.25,
-     "file": "runs/plant1015/SMR/ci0.25.json.gz"
-    },
-    {
-     "ci": 0.5,
-     "file": "runs/plant1015/SMR/ci0.50.json.gz"
-    },
-    {
-     "ci": 0.75,
-     "file": "runs/plant1015/SMR/ci0.75.json.gz"
-    },
-    {
-     "ci": 1.0,
-     "file": "runs/plant1015/SMR/ci1.00.json.gz"
-    },
-    {
-     "ci": 1.25,
-     "file": "runs/plant1015/SMR/ci1.25.json.gz"
-    },
-    {
-     "ci": 1.5,
-     "file": "runs/plant1015/SMR/ci1.50.json.gz"
-    },
-    {
-     "ci": 1.75,
-     "file": "runs/plant1015/SMR/ci1.75.json.gz"
-    }
-   ],
-   "SMR+CCS": [
-    {
-     "ci": 0.0,
-     "file": "runs/plant1015/SMR+CCS/ci0.00.json.gz"
-    },
-    {
-     "ci": 0.25,
-     "file": "runs/plant1015/SMR+CCS/ci0.25.json.gz"
-    },
-    {
-     "ci": 0.5,
-     "file": "runs/plant1015/SMR+CCS/ci0.50.json.gz"
-    },
-    {
-     "ci": 0.75,
-     "file": "runs/plant1015/SMR+CCS/ci0.75.json.gz"
-    },
-    {
-     "ci": 1.0,
-     "file": "runs/plant1015/SMR+CCS/ci1.00.json.gz"
-    },
-    {
-     "ci": 1.25,
-     "file": "runs/plant1015/SMR+CCS/ci1.25.json.gz"
-    },
-    {
-     "ci": 1.5,
-     "file": "runs/plant1015/SMR+CCS/ci1.50.json.gz"
-    },
-    {
-     "ci": 1.75,
-     "file": "runs/plant1015/SMR+CCS/ci1.75.json.gz"
-    }
-   ],
-   "BAU": "runs/plant1015/BAU/bau.json.gz"
-  },
-  "2": {
-   "SMR": [
-    {
-     "ci": 0.0,
-     "file": "runs/plant2/SMR/ci0.00.json.gz"
-    },
-    {
-     "ci": 0.25,
-     "file": "runs/plant2/SMR/ci0.25.json.gz"
-    },
-    {
-     "ci": 0.5,
-     "file": "runs/plant2/SMR/ci0.50.json.gz"
-    },
-    {
-     "ci": 0.75,
-     "file": "runs/plant2/SMR/ci0.75.json.gz"
-    },
-    {
-     "ci": 1.0,
-     "file": "runs/plant2/SMR/ci1.00.json.gz"
-    },
-    {
-     "ci": 1.25,
-     "file": "runs/plant2/SMR/ci1.25.json.gz"
-    },
-    {
-     "ci": 1.5,
-     "file": "runs/plant2/SMR/ci1.50.json.gz"
-    },
-    {
-     "ci": 1.75,
-     "file": "runs/plant2/SMR/ci1.75.json.gz"
-    }
-   ],
-   "SMR+CCS": [
-    {
-     "ci": 0.0,
-     "file": "runs/plant2/SMR+CCS/ci0.00.json.gz"
-    },
-    {
-     "ci": 0.25,
-     "file": "runs/plant2/SMR+CCS/ci0.25.json.gz"
-    },
-    {
-     "ci": 0.5,
-     "file": "runs/plant2/SMR+CCS/ci0.50.json.gz"
-    },
-    {
-     "ci": 0.75,
-     "file": "runs/plant2/SMR+CCS/ci0.75.json.gz"
-    },
-    {
-     "ci": 1.0,
-     "file": "runs/plant2/SMR+CCS/ci1.00.json.gz"
-    },
-    {
-     "ci": 1.25,
-     "file": "runs/plant2/SMR+CCS/ci1.25.json.gz"
-    },
-    {
-     "ci": 1.5,
-     "file": "runs/plant2/SMR+CCS/ci1.50.json.gz"
-    },
-    {
-     "ci": 1.75,
-     "file": "runs/plant2/SMR+CCS/ci1.75.json.gz"
-    }
-   ],
-   "BAU": "runs/plant2/BAU/bau.json.gz"
-  },
-  "3": {
-   "SMR": [
-    {
-     "ci": 0.0,
-     "file": "runs/plant3/SMR/ci0.00.json.gz"
-    },
-    {
-     "ci": 0.25,
-     "file": "runs/plant3/SMR/ci0.25.json.gz"
-    },
-    {
-     "ci": 0.5,
-     "file": "runs/plant3/SMR/ci0.50.json.gz"
-    },
-    {
-     "ci": 0.75,
-     "file": "runs/plant3/SMR/ci0.75.json.gz"
-    },
-    {
-     "ci": 1.0,
-     "file": "runs/plant3/SMR/ci1.00.json.gz"
-    },
-    {
-     "ci": 1.25,
-     "file": "runs/plant3/SMR/ci1.25.json.gz"
-    },
-    {
-     "ci": 1.5,
-     "file": "runs/plant3/SMR/ci1.50.json.gz"
-    },
-    {
-     "ci": 1.75,
-     "file": "runs/plant3/SMR/ci1.75.json.gz"
-    }
-   ],
-   "SMR+CCS": [
-    {
-     "ci": 0.0,
-     "file": "runs/plant3/SMR+CCS/ci0.00.json.gz"
-    },
-    {
-     "ci": 0.25,
-     "file": "runs/plant3/SMR+CCS/ci0.25.json.gz"
-    },
-    {
-     "ci": 0.5,
-     "file": "runs/plant3/SMR+CCS/ci0.50.json.gz"
-    },
-    {
-     "ci": 0.75,
-     "file": "runs/plant3/SMR+CCS/ci0.75.json.gz"
-    },
-    {
-     "ci": 1.0,
-     "file": "runs/plant3/SMR+CCS/ci1.00.json.gz"
-    },
-    {
-     "ci": 1.25,
-     "file": "runs/plant3/SMR+CCS/ci1.25.json.gz"
-    },
-    {
-     "ci": 1.5,
-     "file": "runs/plant3/SMR+CCS/ci1.50.json.gz"
-    },
-    {
-     "ci": 1.75,
-     "file": "runs/plant3/SMR+CCS/ci1.75.json.gz"
-    }
-   ],
-   "BAU": "runs/plant3/BAU/bau.json.gz"
-  },
-  "4": {
-   "SMR": [
-    {
-     "ci": 0.0,
-     "file": "runs/plant4/SMR/ci0.00.json.gz"
-    },
-    {
-     "ci": 0.25,
-     "file": "runs/plant4/SMR/ci0.25.json.gz"
-    },
-    {
-     "ci": 0.5,
-     "file": "runs/plant4/SMR/ci0.50.json.gz"
-    },
-    {
-     "ci": 0.75,
-     "file": "runs/plant4/SMR/ci0.75.json.gz"
-    },
-    {
-     "ci": 1.0,
-     "file": "runs/plant4/SMR/ci1.00.json.gz"
-    },
-    {
-     "ci": 1.25,
-     "file": "runs/plant4/SMR/ci1.25.json.gz"
-    },
-    {
-     "ci": 1.5,
-     "file": "runs/plant4/SMR/ci1.50.json.gz"
-    },
-    {
-     "ci": 1.75,
-     "file": "runs/plant4/SMR/ci1.75.json.gz"
-    }
-   ],
-   "SMR+CCS": [
-    {
-     "ci": 0.0,
-     "file": "runs/plant4/SMR+CCS/ci0.00.json.gz"
-    },
-    {
-     "ci": 0.25,
-     "file": "runs/plant4/SMR+CCS/ci0.25.json.gz"
-    },
-    {
-     "ci": 0.5,
-     "file": "runs/plant4/SMR+CCS/ci0.50.json.gz"
-    },
-    {
-     "ci": 0.75,
-     "file": "runs/plant4/SMR+CCS/ci0.75.json.gz"
-    },
-    {
-     "ci": 1.0,
-     "file": "runs/plant4/SMR+CCS/ci1.00.json.gz"
-    },
-    {
-     "ci": 1.25,
-     "file": "runs/plant4/SMR+CCS/ci1.25.json.gz"
-    },
-    {
-     "ci": 1.5,
-     "file": "runs/plant4/SMR+CCS/ci1.50.json.gz"
-    },
-    {
-     "ci": 1.75,
-     "file": "runs/plant4/SMR+CCS/ci1.75.json.gz"
-    }
-   ],
-   "BAU": "runs/plant4/BAU/bau.json.gz"
-  },
-  "5": {
-   "SMR": [
-    {
-     "ci": 0.0,
-     "file": "runs/plant5/SMR/ci0.00.json.gz"
-    },
-    {
-     "ci": 0.25,
-     "file": "runs/plant5/SMR/ci0.25.json.gz"
-    },
-    {
-     "ci": 0.5,
-     "file": "runs/plant5/SMR/ci0.50.json.gz"
-    },
-    {
-     "ci": 0.75,
-     "file": "runs/plant5/SMR/ci0.75.json.gz"
-    },
-    {
-     "ci": 1.0,
-     "file": "runs/plant5/SMR/ci1.00.json.gz"
-    },
-    {
-     "ci": 1.25,
-     "file": "runs/plant5/SMR/ci1.25.json.gz"
-    },
-    {
-     "ci": 1.5,
-     "file": "runs/plant5/SMR/ci1.50.json.gz"
-    },
-    {
-     "ci": 1.75,
-     "file": "runs/plant5/SMR/ci1.75.json.gz"
-    }
-   ],
-   "SMR+CCS": [
-    {
-     "ci": 0.0,
-     "file": "runs/plant5/SMR+CCS/ci0.00.json.gz"
-    },
-    {
-     "ci": 0.25,
-     "file": "runs/plant5/SMR+CCS/ci0.25.json.gz"
-    },
-    {
-     "ci": 0.5,
-     "file": "runs/plant5/SMR+CCS/ci0.50.json.gz"
-    },
-    {
-     "ci": 0.75,
-     "file": "runs/plant5/SMR+CCS/ci0.75.json.gz"
-    },
-    {
-     "ci": 1.0,
-     "file": "runs/plant5/SMR+CCS/ci1.00.json.gz"
-    },
-    {
-     "ci": 1.25,
-     "file": "runs/plant5/SMR+CCS/ci1.25.json.gz"
-    },
-    {
-     "ci": 1.5,
-     "file": "runs/plant5/SMR+CCS/ci1.50.json.gz"
-    },
-    {
-     "ci": 1.75,
-     "file": "runs/plant5/SMR+CCS/ci1.75.json.gz"
-    }
-   ],
-   "BAU": "runs/plant5/BAU/bau.json.gz"
-  },
-  "6": {
-   "SMR": [
-    {
-     "ci": 0.0,
-     "file": "runs/plant6/SMR/ci0.00.json.gz"
-    },
-    {
-     "ci": 0.25,
-     "file": "runs/plant6/SMR/ci0.25.json.gz"
-    },
-    {
-     "ci": 0.5,
-     "file": "runs/plant6/SMR/ci0.50.json.gz"
-    },
-    {
-     "ci": 0.75,
-     "file": "runs/plant6/SMR/ci0.75.json.gz"
-    },
-    {
-     "ci": 1.0,
-     "file": "runs/plant6/SMR/ci1.00.json.gz"
-    },
-    {
-     "ci": 1.25,
-     "file": "runs/plant6/SMR/ci1.25.json.gz"
-    },
-    {
-     "ci": 1.5,
-     "file": "runs/plant6/SMR/ci1.50.json.gz"
-    },
-    {
-     "ci": 1.75,
-     "file": "runs/plant6/SMR/ci1.75.json.gz"
-    }
-   ],
-   "SMR+CCS": [
-    {
-     "ci": 0.0,
-     "file": "runs/plant6/SMR+CCS/ci0.00.json.gz"
-    },
-    {
-     "ci": 0.25,
-     "file": "runs/plant6/SMR+CCS/ci0.25.json.gz"
-    },
-    {
-     "ci": 0.5,
-     "file": "runs/plant6/SMR+CCS/ci0.50.json.gz"
-    },
-    {
-     "ci": 0.75,
-     "file": "runs/plant6/SMR+CCS/ci0.75.json.gz"
-    },
-    {
-     "ci": 1.0,
-     "file": "runs/plant6/SMR+CCS/ci1.00.json.gz"
-    },
-    {
-     "ci": 1.25,
-     "file": "runs/plant6/SMR+CCS/ci1.25.json.gz"
-    },
-    {
-     "ci": 1.5,
-     "file": "runs/plant6/SMR+CCS/ci1.50.json.gz"
-    },
-    {
-     "ci": 1.75,
-     "file": "runs/plant6/SMR+CCS/ci1.75.json.gz"
-    }
-   ],
-   "BAU": "runs/plant6/BAU/bau.json.gz"
-  },
-  "7": {
-   "SMR": [
-    {
-     "ci": 0.0,
-     "file": "runs/plant7/SMR/ci0.00.json.gz"
-    },
-    {
-     "ci": 0.25,
-     "file": "runs/plant7/SMR/ci0.25.json.gz"
-    },
-    {
-     "ci": 0.5,
-     "file": "runs/plant7/SMR/ci0.50.json.gz"
-    },
-    {
-     "ci": 0.75,
-     "file": "runs/plant7/SMR/ci0.75.json.gz"
-    },
-    {
-     "ci": 1.0,
-     "file": "runs/plant7/SMR/ci1.00.json.gz"
-    },
-    {
-     "ci": 1.25,
-     "file": "runs/plant7/SMR/ci1.25.json.gz"
-    },
-    {
-     "ci": 1.5,
-     "file": "runs/plant7/SMR/ci1.50.json.gz"
-    },
-    {
-     "ci": 1.75,
-     "file": "runs/plant7/SMR/ci1.75.json.gz"
-    }
-   ],
-   "SMR+CCS": [
-    {
-     "ci": 0.0,
-     "file": "runs/plant7/SMR+CCS/ci0.00.json.gz"
-    },
-    {
-     "ci": 0.25,
-     "file": "runs/plant7/SMR+CCS/ci0.25.json.gz"
-    },
-    {
-     "ci": 0.5,
-     "file": "runs/plant7/SMR+CCS/ci0.50.json.gz"
-    },
-    {
-     "ci": 0.75,
-     "file": "runs/plant7/SMR+CCS/ci0.75.json.gz"
-    },
-    {
-     "ci": 1.0,
-     "file": "runs/plant7/SMR+CCS/ci1.00.json.gz"
-    },
-    {
-     "ci": 1.25,
-     "file": "runs/plant7/SMR+CCS/ci1.25.json.gz"
-    },
-    {
-     "ci": 1.5,
-     "file": "runs/plant7/SMR+CCS/ci1.50.json.gz"
-    },
-    {
-     "ci": 1.75,
-     "file": "runs/plant7/SMR+CCS/ci1.75.json.gz"
-    }
-   ],
-   "BAU": "runs/plant7/BAU/bau.json.gz"
-  },
-  "9": {
-   "SMR": [
-    {
-     "ci": 0.0,
-     "file": "runs/plant9/SMR/ci0.00.json.gz"
-    },
-    {
-     "ci": 0.25,
-     "file": "runs/plant9/SMR/ci0.25.json.gz"
-    },
-    {
-     "ci": 0.5,
-     "file": "runs/plant9/SMR/ci0.50.json.gz"
-    },
-    {
-     "ci": 0.75,
-     "file": "runs/plant9/SMR/ci0.75.json.gz"
-    },
-    {
-     "ci": 1.0,
-     "file": "runs/plant9/SMR/ci1.00.json.gz"
-    },
-    {
-     "ci": 1.25,
-     "file": "runs/plant9/SMR/ci1.25.json.gz"
-    },
-    {
-     "ci": 1.5,
-     "file": "runs/plant9/SMR/ci1.50.json.gz"
-    },
-    {
-     "ci": 1.75,
-     "file": "runs/plant9/SMR/ci1.75.json.gz"
-    }
-   ],
-   "SMR+CCS": [
-    {
-     "ci": 0.0,
-     "file": "runs/plant9/SMR+CCS/ci0.00.json.gz"
-    },
-    {
-     "ci": 0.25,
-     "file": "runs/plant9/SMR+CCS/ci0.25.json.gz"
-    },
-    {
-     "ci": 0.5,
-     "file": "runs/plant9/SMR+CCS/ci0.50.json.gz"
-    },
-    {
-     "ci": 0.75,
-     "file": "runs/plant9/SMR+CCS/ci0.75.json.gz"
-    },
-    {
-     "ci": 1.0,
-     "file": "runs/plant9/SMR+CCS/ci1.00.json.gz"
-    },
-    {
-     "ci": 1.25,
-     "file": "runs/plant9/SMR+CCS/ci1.25.json.gz"
-    },
-    {
-     "ci": 1.5,
-     "file": "runs/plant9/SMR+CCS/ci1.50.json.gz"
-    },
-    {
-     "ci": 1.75,
-     "file": "runs/plant9/SMR+CCS/ci1.75.json.gz"
-    }
-   ],
-   "BAU": "runs/plant9/BAU/bau.json.gz"
-  },
-  "14": {
-   "SMR": [
-    {
-     "ci": 0.0,
-     "file": "runs/plant14/SMR/ci0.00.json.gz"
-    },
-    {
-     "ci": 0.25,
-     "file": "runs/plant14/SMR/ci0.25.json.gz"
-    },
-    {
-     "ci": 0.5,
-     "file": "runs/plant14/SMR/ci0.50.json.gz"
-    },
-    {
-     "ci": 0.75,
-     "file": "runs/plant14/SMR/ci0.75.json.gz"
-    },
-    {
-     "ci": 1.0,
-     "file": "runs/plant14/SMR/ci1.00.json.gz"
-    },
-    {
-     "ci": 1.25,
-     "file": "runs/plant14/SMR/ci1.25.json.gz"
-    },
-    {
-     "ci": 1.5,
-     "file": "runs/plant14/SMR/ci1.50.json.gz"
-    },
-    {
-     "ci": 1.75,
-     "file": "runs/plant14/SMR/ci1.75.json.gz"
-    }
-   ],
-   "SMR+CCS": [
-    {
-     "ci": 0.0,
-     "file": "runs/plant14/SMR+CCS/ci0.00.json.gz"
-    },
-    {
-     "ci": 0.25,
-     "file": "runs/plant14/SMR+CCS/ci0.25.json.gz"
-    },
-    {
-     "ci": 0.5,
-     "file": "runs/plant14/SMR+CCS/ci0.50.json.gz"
-    },
-    {
-     "ci": 0.75,
-     "file": "runs/plant14/SMR+CCS/ci0.75.json.gz"
-    },
-    {
-     "ci": 1.0,
-     "file": "runs/plant14/SMR+CCS/ci1.00.json.gz"
-    },
-    {
-     "ci": 1.25,
-     "file": "runs/plant14/SMR+CCS/ci1.25.json.gz"
-    },
-    {
-     "ci": 1.5,
-     "file": "runs/plant14/SMR+CCS/ci1.50.json.gz"
-    },
-    {
-     "ci": 1.75,
-     "file": "runs/plant14/SMR+CCS/ci1.75.json.gz"
-    }
-   ],
-   "BAU": "runs/plant14/BAU/bau.json.gz"
-  },
   "96": {
    "SMR": [
     {
@@ -6093,77 +5936,6 @@
    ],
    "BAU": "runs/plant103/BAU/bau.json.gz"
   },
-  "104": {
-   "SMR": [
-    {
-     "ci": 0.0,
-     "file": "runs/plant104/SMR/ci0.00.json.gz"
-    },
-    {
-     "ci": 0.25,
-     "file": "runs/plant104/SMR/ci0.25.json.gz"
-    },
-    {
-     "ci": 0.5,
-     "file": "runs/plant104/SMR/ci0.50.json.gz"
-    },
-    {
-     "ci": 0.75,
-     "file": "runs/plant104/SMR/ci0.75.json.gz"
-    },
-    {
-     "ci": 1.0,
-     "file": "runs/plant104/SMR/ci1.00.json.gz"
-    },
-    {
-     "ci": 1.25,
-     "file": "runs/plant104/SMR/ci1.25.json.gz"
-    },
-    {
-     "ci": 1.5,
-     "file": "runs/plant104/SMR/ci1.50.json.gz"
-    },
-    {
-     "ci": 1.75,
-     "file": "runs/plant104/SMR/ci1.75.json.gz"
-    }
-   ],
-   "SMR+CCS": [
-    {
-     "ci": 0.0,
-     "file": "runs/plant104/SMR+CCS/ci0.00.json.gz"
-    },
-    {
-     "ci": 0.25,
-     "file": "runs/plant104/SMR+CCS/ci0.25.json.gz"
-    },
-    {
-     "ci": 0.5,
-     "file": "runs/plant104/SMR+CCS/ci0.50.json.gz"
-    },
-    {
-     "ci": 0.75,
-     "file": "runs/plant104/SMR+CCS/ci0.75.json.gz"
-    },
-    {
-     "ci": 1.0,
-     "file": "runs/plant104/SMR+CCS/ci1.00.json.gz"
-    },
-    {
-     "ci": 1.25,
-     "file": "runs/plant104/SMR+CCS/ci1.25.json.gz"
-    },
-    {
-     "ci": 1.5,
-     "file": "runs/plant104/SMR+CCS/ci1.50.json.gz"
-    },
-    {
-     "ci": 1.75,
-     "file": "runs/plant104/SMR+CCS/ci1.75.json.gz"
-    }
-   ],
-   "BAU": "runs/plant104/BAU/bau.json.gz"
-  },
   "105": {
    "SMR": [
     {
@@ -6234,77 +6006,6 @@
     }
    ],
    "BAU": "runs/plant105/BAU/bau.json.gz"
-  },
-  "106": {
-   "SMR": [
-    {
-     "ci": 0.0,
-     "file": "runs/plant106/SMR/ci0.00.json.gz"
-    },
-    {
-     "ci": 0.25,
-     "file": "runs/plant106/SMR/ci0.25.json.gz"
-    },
-    {
-     "ci": 0.5,
-     "file": "runs/plant106/SMR/ci0.50.json.gz"
-    },
-    {
-     "ci": 0.75,
-     "file": "runs/plant106/SMR/ci0.75.json.gz"
-    },
-    {
-     "ci": 1.0,
-     "file": "runs/plant106/SMR/ci1.00.json.gz"
-    },
-    {
-     "ci": 1.25,
-     "file": "runs/plant106/SMR/ci1.25.json.gz"
-    },
-    {
-     "ci": 1.5,
-     "file": "runs/plant106/SMR/ci1.50.json.gz"
-    },
-    {
-     "ci": 1.75,
-     "file": "runs/plant106/SMR/ci1.75.json.gz"
-    }
-   ],
-   "SMR+CCS": [
-    {
-     "ci": 0.0,
-     "file": "runs/plant106/SMR+CCS/ci0.00.json.gz"
-    },
-    {
-     "ci": 0.25,
-     "file": "runs/plant106/SMR+CCS/ci0.25.json.gz"
-    },
-    {
-     "ci": 0.5,
-     "file": "runs/plant106/SMR+CCS/ci0.50.json.gz"
-    },
-    {
-     "ci": 0.75,
-     "file": "runs/plant106/SMR+CCS/ci0.75.json.gz"
-    },
-    {
-     "ci": 1.0,
-     "file": "runs/plant106/SMR+CCS/ci1.00.json.gz"
-    },
-    {
-     "ci": 1.25,
-     "file": "runs/plant106/SMR+CCS/ci1.25.json.gz"
-    },
-    {
-     "ci": 1.5,
-     "file": "runs/plant106/SMR+CCS/ci1.50.json.gz"
-    },
-    {
-     "ci": 1.75,
-     "file": "runs/plant106/SMR+CCS/ci1.75.json.gz"
-    }
-   ],
-   "BAU": "runs/plant106/BAU/bau.json.gz"
   },
   "107": {
    "SMR": [
@@ -7016,148 +6717,6 @@
    ],
    "BAU": "runs/plant117/BAU/bau.json.gz"
   },
-  "118": {
-   "SMR": [
-    {
-     "ci": 0.0,
-     "file": "runs/plant118/SMR/ci0.00.json.gz"
-    },
-    {
-     "ci": 0.25,
-     "file": "runs/plant118/SMR/ci0.25.json.gz"
-    },
-    {
-     "ci": 0.5,
-     "file": "runs/plant118/SMR/ci0.50.json.gz"
-    },
-    {
-     "ci": 0.75,
-     "file": "runs/plant118/SMR/ci0.75.json.gz"
-    },
-    {
-     "ci": 1.0,
-     "file": "runs/plant118/SMR/ci1.00.json.gz"
-    },
-    {
-     "ci": 1.25,
-     "file": "runs/plant118/SMR/ci1.25.json.gz"
-    },
-    {
-     "ci": 1.5,
-     "file": "runs/plant118/SMR/ci1.50.json.gz"
-    },
-    {
-     "ci": 1.75,
-     "file": "runs/plant118/SMR/ci1.75.json.gz"
-    }
-   ],
-   "SMR+CCS": [
-    {
-     "ci": 0.0,
-     "file": "runs/plant118/SMR+CCS/ci0.00.json.gz"
-    },
-    {
-     "ci": 0.25,
-     "file": "runs/plant118/SMR+CCS/ci0.25.json.gz"
-    },
-    {
-     "ci": 0.5,
-     "file": "runs/plant118/SMR+CCS/ci0.50.json.gz"
-    },
-    {
-     "ci": 0.75,
-     "file": "runs/plant118/SMR+CCS/ci0.75.json.gz"
-    },
-    {
-     "ci": 1.0,
-     "file": "runs/plant118/SMR+CCS/ci1.00.json.gz"
-    },
-    {
-     "ci": 1.25,
-     "file": "runs/plant118/SMR+CCS/ci1.25.json.gz"
-    },
-    {
-     "ci": 1.5,
-     "file": "runs/plant118/SMR+CCS/ci1.50.json.gz"
-    },
-    {
-     "ci": 1.75,
-     "file": "runs/plant118/SMR+CCS/ci1.75.json.gz"
-    }
-   ],
-   "BAU": "runs/plant118/BAU/bau.json.gz"
-  },
-  "119": {
-   "SMR": [
-    {
-     "ci": 0.0,
-     "file": "runs/plant119/SMR/ci0.00.json.gz"
-    },
-    {
-     "ci": 0.25,
-     "file": "runs/plant119/SMR/ci0.25.json.gz"
-    },
-    {
-     "ci": 0.5,
-     "file": "runs/plant119/SMR/ci0.50.json.gz"
-    },
-    {
-     "ci": 0.75,
-     "file": "runs/plant119/SMR/ci0.75.json.gz"
-    },
-    {
-     "ci": 1.0,
-     "file": "runs/plant119/SMR/ci1.00.json.gz"
-    },
-    {
-     "ci": 1.25,
-     "file": "runs/plant119/SMR/ci1.25.json.gz"
-    },
-    {
-     "ci": 1.5,
-     "file": "runs/plant119/SMR/ci1.50.json.gz"
-    },
-    {
-     "ci": 1.75,
-     "file": "runs/plant119/SMR/ci1.75.json.gz"
-    }
-   ],
-   "SMR+CCS": [
-    {
-     "ci": 0.0,
-     "file": "runs/plant119/SMR+CCS/ci0.00.json.gz"
-    },
-    {
-     "ci": 0.25,
-     "file": "runs/plant119/SMR+CCS/ci0.25.json.gz"
-    },
-    {
-     "ci": 0.5,
-     "file": "runs/plant119/SMR+CCS/ci0.50.json.gz"
-    },
-    {
-     "ci": 0.75,
-     "file": "runs/plant119/SMR+CCS/ci0.75.json.gz"
-    },
-    {
-     "ci": 1.0,
-     "file": "runs/plant119/SMR+CCS/ci1.00.json.gz"
-    },
-    {
-     "ci": 1.25,
-     "file": "runs/plant119/SMR+CCS/ci1.25.json.gz"
-    },
-    {
-     "ci": 1.5,
-     "file": "runs/plant119/SMR+CCS/ci1.50.json.gz"
-    },
-    {
-     "ci": 1.75,
-     "file": "runs/plant119/SMR+CCS/ci1.75.json.gz"
-    }
-   ],
-   "BAU": "runs/plant119/BAU/bau.json.gz"
-  },
   "120": {
    "SMR": [
     {
@@ -7299,77 +6858,6 @@
     }
    ],
    "BAU": "runs/plant121/BAU/bau.json.gz"
-  },
-  "122": {
-   "SMR": [
-    {
-     "ci": 0.0,
-     "file": "runs/plant122/SMR/ci0.00.json.gz"
-    },
-    {
-     "ci": 0.25,
-     "file": "runs/plant122/SMR/ci0.25.json.gz"
-    },
-    {
-     "ci": 0.5,
-     "file": "runs/plant122/SMR/ci0.50.json.gz"
-    },
-    {
-     "ci": 0.75,
-     "file": "runs/plant122/SMR/ci0.75.json.gz"
-    },
-    {
-     "ci": 1.0,
-     "file": "runs/plant122/SMR/ci1.00.json.gz"
-    },
-    {
-     "ci": 1.25,
-     "file": "runs/plant122/SMR/ci1.25.json.gz"
-    },
-    {
-     "ci": 1.5,
-     "file": "runs/plant122/SMR/ci1.50.json.gz"
-    },
-    {
-     "ci": 1.75,
-     "file": "runs/plant122/SMR/ci1.75.json.gz"
-    }
-   ],
-   "SMR+CCS": [
-    {
-     "ci": 0.0,
-     "file": "runs/plant122/SMR+CCS/ci0.00.json.gz"
-    },
-    {
-     "ci": 0.25,
-     "file": "runs/plant122/SMR+CCS/ci0.25.json.gz"
-    },
-    {
-     "ci": 0.5,
-     "file": "runs/plant122/SMR+CCS/ci0.50.json.gz"
-    },
-    {
-     "ci": 0.75,
-     "file": "runs/plant122/SMR+CCS/ci0.75.json.gz"
-    },
-    {
-     "ci": 1.0,
-     "file": "runs/plant122/SMR+CCS/ci1.00.json.gz"
-    },
-    {
-     "ci": 1.25,
-     "file": "runs/plant122/SMR+CCS/ci1.25.json.gz"
-    },
-    {
-     "ci": 1.5,
-     "file": "runs/plant122/SMR+CCS/ci1.50.json.gz"
-    },
-    {
-     "ci": 1.75,
-     "file": "runs/plant122/SMR+CCS/ci1.75.json.gz"
-    }
-   ],
-   "BAU": "runs/plant122/BAU/bau.json.gz"
   },
   "123": {
    "SMR": [
@@ -7583,13 +7071,580 @@
     }
    ],
    "BAU": "runs/plant125/BAU/bau.json.gz"
+  },
+  "126": {
+   "SMR": [
+    {
+     "ci": 0.0,
+     "file": "runs/plant126/SMR/ci0.00.json.gz"
+    },
+    {
+     "ci": 0.25,
+     "file": "runs/plant126/SMR/ci0.25.json.gz"
+    },
+    {
+     "ci": 0.5,
+     "file": "runs/plant126/SMR/ci0.50.json.gz"
+    },
+    {
+     "ci": 0.75,
+     "file": "runs/plant126/SMR/ci0.75.json.gz"
+    },
+    {
+     "ci": 1.0,
+     "file": "runs/plant126/SMR/ci1.00.json.gz"
+    },
+    {
+     "ci": 1.25,
+     "file": "runs/plant126/SMR/ci1.25.json.gz"
+    },
+    {
+     "ci": 1.5,
+     "file": "runs/plant126/SMR/ci1.50.json.gz"
+    },
+    {
+     "ci": 1.75,
+     "file": "runs/plant126/SMR/ci1.75.json.gz"
+    }
+   ],
+   "SMR+CCS": [
+    {
+     "ci": 0.0,
+     "file": "runs/plant126/SMR+CCS/ci0.00.json.gz"
+    },
+    {
+     "ci": 0.25,
+     "file": "runs/plant126/SMR+CCS/ci0.25.json.gz"
+    },
+    {
+     "ci": 0.5,
+     "file": "runs/plant126/SMR+CCS/ci0.50.json.gz"
+    },
+    {
+     "ci": 0.75,
+     "file": "runs/plant126/SMR+CCS/ci0.75.json.gz"
+    },
+    {
+     "ci": 1.0,
+     "file": "runs/plant126/SMR+CCS/ci1.00.json.gz"
+    },
+    {
+     "ci": 1.25,
+     "file": "runs/plant126/SMR+CCS/ci1.25.json.gz"
+    },
+    {
+     "ci": 1.5,
+     "file": "runs/plant126/SMR+CCS/ci1.50.json.gz"
+    },
+    {
+     "ci": 1.75,
+     "file": "runs/plant126/SMR+CCS/ci1.75.json.gz"
+    }
+   ],
+   "BAU": "runs/plant126/BAU/bau.json.gz"
+  },
+  "148": {
+   "SMR": [
+    {
+     "ci": 0.0,
+     "file": "runs/plant148/SMR/ci0.00.json.gz"
+    },
+    {
+     "ci": 0.25,
+     "file": "runs/plant148/SMR/ci0.25.json.gz"
+    },
+    {
+     "ci": 0.5,
+     "file": "runs/plant148/SMR/ci0.50.json.gz"
+    },
+    {
+     "ci": 0.75,
+     "file": "runs/plant148/SMR/ci0.75.json.gz"
+    },
+    {
+     "ci": 1.0,
+     "file": "runs/plant148/SMR/ci1.00.json.gz"
+    },
+    {
+     "ci": 1.25,
+     "file": "runs/plant148/SMR/ci1.25.json.gz"
+    },
+    {
+     "ci": 1.5,
+     "file": "runs/plant148/SMR/ci1.50.json.gz"
+    },
+    {
+     "ci": 1.75,
+     "file": "runs/plant148/SMR/ci1.75.json.gz"
+    }
+   ],
+   "SMR+CCS": [
+    {
+     "ci": 0.0,
+     "file": "runs/plant148/SMR+CCS/ci0.00.json.gz"
+    },
+    {
+     "ci": 0.25,
+     "file": "runs/plant148/SMR+CCS/ci0.25.json.gz"
+    },
+    {
+     "ci": 0.5,
+     "file": "runs/plant148/SMR+CCS/ci0.50.json.gz"
+    },
+    {
+     "ci": 0.75,
+     "file": "runs/plant148/SMR+CCS/ci0.75.json.gz"
+    },
+    {
+     "ci": 1.0,
+     "file": "runs/plant148/SMR+CCS/ci1.00.json.gz"
+    },
+    {
+     "ci": 1.25,
+     "file": "runs/plant148/SMR+CCS/ci1.25.json.gz"
+    },
+    {
+     "ci": 1.5,
+     "file": "runs/plant148/SMR+CCS/ci1.50.json.gz"
+    },
+    {
+     "ci": 1.75,
+     "file": "runs/plant148/SMR+CCS/ci1.75.json.gz"
+    }
+   ],
+   "BAU": "runs/plant148/BAU/bau.json.gz"
+  },
+  "149": {
+   "SMR": [
+    {
+     "ci": 0.0,
+     "file": "runs/plant149/SMR/ci0.00.json.gz"
+    },
+    {
+     "ci": 0.25,
+     "file": "runs/plant149/SMR/ci0.25.json.gz"
+    },
+    {
+     "ci": 0.5,
+     "file": "runs/plant149/SMR/ci0.50.json.gz"
+    },
+    {
+     "ci": 0.75,
+     "file": "runs/plant149/SMR/ci0.75.json.gz"
+    },
+    {
+     "ci": 1.0,
+     "file": "runs/plant149/SMR/ci1.00.json.gz"
+    },
+    {
+     "ci": 1.25,
+     "file": "runs/plant149/SMR/ci1.25.json.gz"
+    },
+    {
+     "ci": 1.5,
+     "file": "runs/plant149/SMR/ci1.50.json.gz"
+    },
+    {
+     "ci": 1.75,
+     "file": "runs/plant149/SMR/ci1.75.json.gz"
+    }
+   ],
+   "SMR+CCS": [
+    {
+     "ci": 0.0,
+     "file": "runs/plant149/SMR+CCS/ci0.00.json.gz"
+    },
+    {
+     "ci": 0.25,
+     "file": "runs/plant149/SMR+CCS/ci0.25.json.gz"
+    },
+    {
+     "ci": 0.5,
+     "file": "runs/plant149/SMR+CCS/ci0.50.json.gz"
+    },
+    {
+     "ci": 0.75,
+     "file": "runs/plant149/SMR+CCS/ci0.75.json.gz"
+    },
+    {
+     "ci": 1.0,
+     "file": "runs/plant149/SMR+CCS/ci1.00.json.gz"
+    },
+    {
+     "ci": 1.25,
+     "file": "runs/plant149/SMR+CCS/ci1.25.json.gz"
+    },
+    {
+     "ci": 1.5,
+     "file": "runs/plant149/SMR+CCS/ci1.50.json.gz"
+    },
+    {
+     "ci": 1.75,
+     "file": "runs/plant149/SMR+CCS/ci1.75.json.gz"
+    }
+   ],
+   "BAU": "runs/plant149/BAU/bau.json.gz"
+  },
+  "150": {
+   "SMR": [
+    {
+     "ci": 0.0,
+     "file": "runs/plant150/SMR/ci0.00.json.gz"
+    },
+    {
+     "ci": 0.25,
+     "file": "runs/plant150/SMR/ci0.25.json.gz"
+    },
+    {
+     "ci": 0.5,
+     "file": "runs/plant150/SMR/ci0.50.json.gz"
+    },
+    {
+     "ci": 0.75,
+     "file": "runs/plant150/SMR/ci0.75.json.gz"
+    },
+    {
+     "ci": 1.0,
+     "file": "runs/plant150/SMR/ci1.00.json.gz"
+    },
+    {
+     "ci": 1.25,
+     "file": "runs/plant150/SMR/ci1.25.json.gz"
+    },
+    {
+     "ci": 1.5,
+     "file": "runs/plant150/SMR/ci1.50.json.gz"
+    },
+    {
+     "ci": 1.75,
+     "file": "runs/plant150/SMR/ci1.75.json.gz"
+    }
+   ],
+   "SMR+CCS": [
+    {
+     "ci": 0.0,
+     "file": "runs/plant150/SMR+CCS/ci0.00.json.gz"
+    },
+    {
+     "ci": 0.25,
+     "file": "runs/plant150/SMR+CCS/ci0.25.json.gz"
+    },
+    {
+     "ci": 0.5,
+     "file": "runs/plant150/SMR+CCS/ci0.50.json.gz"
+    },
+    {
+     "ci": 0.75,
+     "file": "runs/plant150/SMR+CCS/ci0.75.json.gz"
+    },
+    {
+     "ci": 1.0,
+     "file": "runs/plant150/SMR+CCS/ci1.00.json.gz"
+    },
+    {
+     "ci": 1.25,
+     "file": "runs/plant150/SMR+CCS/ci1.25.json.gz"
+    },
+    {
+     "ci": 1.5,
+     "file": "runs/plant150/SMR+CCS/ci1.50.json.gz"
+    },
+    {
+     "ci": 1.75,
+     "file": "runs/plant150/SMR+CCS/ci1.75.json.gz"
+    }
+   ],
+   "BAU": "runs/plant150/BAU/bau.json.gz"
+  },
+  "151": {
+   "SMR": [
+    {
+     "ci": 0.0,
+     "file": "runs/plant151/SMR/ci0.00.json.gz"
+    },
+    {
+     "ci": 0.25,
+     "file": "runs/plant151/SMR/ci0.25.json.gz"
+    },
+    {
+     "ci": 0.5,
+     "file": "runs/plant151/SMR/ci0.50.json.gz"
+    },
+    {
+     "ci": 0.75,
+     "file": "runs/plant151/SMR/ci0.75.json.gz"
+    },
+    {
+     "ci": 1.0,
+     "file": "runs/plant151/SMR/ci1.00.json.gz"
+    },
+    {
+     "ci": 1.25,
+     "file": "runs/plant151/SMR/ci1.25.json.gz"
+    },
+    {
+     "ci": 1.5,
+     "file": "runs/plant151/SMR/ci1.50.json.gz"
+    },
+    {
+     "ci": 1.75,
+     "file": "runs/plant151/SMR/ci1.75.json.gz"
+    }
+   ],
+   "SMR+CCS": [
+    {
+     "ci": 0.0,
+     "file": "runs/plant151/SMR+CCS/ci0.00.json.gz"
+    },
+    {
+     "ci": 0.25,
+     "file": "runs/plant151/SMR+CCS/ci0.25.json.gz"
+    },
+    {
+     "ci": 0.5,
+     "file": "runs/plant151/SMR+CCS/ci0.50.json.gz"
+    },
+    {
+     "ci": 0.75,
+     "file": "runs/plant151/SMR+CCS/ci0.75.json.gz"
+    },
+    {
+     "ci": 1.0,
+     "file": "runs/plant151/SMR+CCS/ci1.00.json.gz"
+    },
+    {
+     "ci": 1.25,
+     "file": "runs/plant151/SMR+CCS/ci1.25.json.gz"
+    },
+    {
+     "ci": 1.5,
+     "file": "runs/plant151/SMR+CCS/ci1.50.json.gz"
+    },
+    {
+     "ci": 1.75,
+     "file": "runs/plant151/SMR+CCS/ci1.75.json.gz"
+    }
+   ],
+   "BAU": "runs/plant151/BAU/bau.json.gz"
+  },
+  "154": {
+   "SMR": [
+    {
+     "ci": 0.0,
+     "file": "runs/plant154/SMR/ci0.00.json.gz"
+    },
+    {
+     "ci": 0.25,
+     "file": "runs/plant154/SMR/ci0.25.json.gz"
+    },
+    {
+     "ci": 0.5,
+     "file": "runs/plant154/SMR/ci0.50.json.gz"
+    },
+    {
+     "ci": 0.75,
+     "file": "runs/plant154/SMR/ci0.75.json.gz"
+    },
+    {
+     "ci": 1.0,
+     "file": "runs/plant154/SMR/ci1.00.json.gz"
+    },
+    {
+     "ci": 1.25,
+     "file": "runs/plant154/SMR/ci1.25.json.gz"
+    },
+    {
+     "ci": 1.5,
+     "file": "runs/plant154/SMR/ci1.50.json.gz"
+    },
+    {
+     "ci": 1.75,
+     "file": "runs/plant154/SMR/ci1.75.json.gz"
+    }
+   ],
+   "SMR+CCS": [
+    {
+     "ci": 0.0,
+     "file": "runs/plant154/SMR+CCS/ci0.00.json.gz"
+    },
+    {
+     "ci": 0.25,
+     "file": "runs/plant154/SMR+CCS/ci0.25.json.gz"
+    },
+    {
+     "ci": 0.5,
+     "file": "runs/plant154/SMR+CCS/ci0.50.json.gz"
+    },
+    {
+     "ci": 0.75,
+     "file": "runs/plant154/SMR+CCS/ci0.75.json.gz"
+    },
+    {
+     "ci": 1.0,
+     "file": "runs/plant154/SMR+CCS/ci1.00.json.gz"
+    },
+    {
+     "ci": 1.25,
+     "file": "runs/plant154/SMR+CCS/ci1.25.json.gz"
+    },
+    {
+     "ci": 1.5,
+     "file": "runs/plant154/SMR+CCS/ci1.50.json.gz"
+    },
+    {
+     "ci": 1.75,
+     "file": "runs/plant154/SMR+CCS/ci1.75.json.gz"
+    }
+   ],
+   "BAU": "runs/plant154/BAU/bau.json.gz"
+  },
+  "155": {
+   "SMR": [
+    {
+     "ci": 0.0,
+     "file": "runs/plant155/SMR/ci0.00.json.gz"
+    },
+    {
+     "ci": 0.25,
+     "file": "runs/plant155/SMR/ci0.25.json.gz"
+    },
+    {
+     "ci": 0.5,
+     "file": "runs/plant155/SMR/ci0.50.json.gz"
+    },
+    {
+     "ci": 0.75,
+     "file": "runs/plant155/SMR/ci0.75.json.gz"
+    },
+    {
+     "ci": 1.0,
+     "file": "runs/plant155/SMR/ci1.00.json.gz"
+    },
+    {
+     "ci": 1.25,
+     "file": "runs/plant155/SMR/ci1.25.json.gz"
+    },
+    {
+     "ci": 1.5,
+     "file": "runs/plant155/SMR/ci1.50.json.gz"
+    },
+    {
+     "ci": 1.75,
+     "file": "runs/plant155/SMR/ci1.75.json.gz"
+    }
+   ],
+   "SMR+CCS": [
+    {
+     "ci": 0.0,
+     "file": "runs/plant155/SMR+CCS/ci0.00.json.gz"
+    },
+    {
+     "ci": 0.25,
+     "file": "runs/plant155/SMR+CCS/ci0.25.json.gz"
+    },
+    {
+     "ci": 0.5,
+     "file": "runs/plant155/SMR+CCS/ci0.50.json.gz"
+    },
+    {
+     "ci": 0.75,
+     "file": "runs/plant155/SMR+CCS/ci0.75.json.gz"
+    },
+    {
+     "ci": 1.0,
+     "file": "runs/plant155/SMR+CCS/ci1.00.json.gz"
+    },
+    {
+     "ci": 1.25,
+     "file": "runs/plant155/SMR+CCS/ci1.25.json.gz"
+    },
+    {
+     "ci": 1.5,
+     "file": "runs/plant155/SMR+CCS/ci1.50.json.gz"
+    },
+    {
+     "ci": 1.75,
+     "file": "runs/plant155/SMR+CCS/ci1.75.json.gz"
+    }
+   ],
+   "BAU": "runs/plant155/BAU/bau.json.gz"
+  },
+  "157": {
+   "SMR": [
+    {
+     "ci": 0.0,
+     "file": "runs/plant157/SMR/ci0.00.json.gz"
+    },
+    {
+     "ci": 0.25,
+     "file": "runs/plant157/SMR/ci0.25.json.gz"
+    },
+    {
+     "ci": 0.5,
+     "file": "runs/plant157/SMR/ci0.50.json.gz"
+    },
+    {
+     "ci": 0.75,
+     "file": "runs/plant157/SMR/ci0.75.json.gz"
+    },
+    {
+     "ci": 1.0,
+     "file": "runs/plant157/SMR/ci1.00.json.gz"
+    },
+    {
+     "ci": 1.25,
+     "file": "runs/plant157/SMR/ci1.25.json.gz"
+    },
+    {
+     "ci": 1.5,
+     "file": "runs/plant157/SMR/ci1.50.json.gz"
+    },
+    {
+     "ci": 1.75,
+     "file": "runs/plant157/SMR/ci1.75.json.gz"
+    }
+   ],
+   "SMR+CCS": [
+    {
+     "ci": 0.0,
+     "file": "runs/plant157/SMR+CCS/ci0.00.json.gz"
+    },
+    {
+     "ci": 0.25,
+     "file": "runs/plant157/SMR+CCS/ci0.25.json.gz"
+    },
+    {
+     "ci": 0.5,
+     "file": "runs/plant157/SMR+CCS/ci0.50.json.gz"
+    },
+    {
+     "ci": 0.75,
+     "file": "runs/plant157/SMR+CCS/ci0.75.json.gz"
+    },
+    {
+     "ci": 1.0,
+     "file": "runs/plant157/SMR+CCS/ci1.00.json.gz"
+    },
+    {
+     "ci": 1.25,
+     "file": "runs/plant157/SMR+CCS/ci1.25.json.gz"
+    },
+    {
+     "ci": 1.5,
+     "file": "runs/plant157/SMR+CCS/ci1.50.json.gz"
+    },
+    {
+     "ci": 1.75,
+     "file": "runs/plant157/SMR+CCS/ci1.75.json.gz"
+    }
+   ],
+   "BAU": "runs/plant157/BAU/bau.json.gz"
   }
  },
  "extra_labels": [
-  "IRR_cain",
   "site_v1"
  ],
- "n_scenarios": 432,
- "n_runs": 3422,
+ "n_scenarios": 438,
+ "n_runs": 3502,
  "n_plants": 108
 }
