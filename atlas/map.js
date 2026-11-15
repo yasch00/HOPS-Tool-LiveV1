@@ -10,7 +10,7 @@ const MAP_SOURCES = {
   sat: { type: 'raster', tiles: ['https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}'],
          tileSize: 256, maxzoom: 19, attribution: 'Imagery © Esri, Maxar, Earthstar Geographics, and the GIS User Community' },
   dem: { type: 'raster-dem', tiles: ['https://s3.amazonaws.com/elevation-tiles-prod/terrarium/{z}/{x}/{y}.png'],
-         encoding: 'terrarium', tileSize: 256, maxzoom: 15, attribution: 'Terrain: Mapzen Terrain Tiles (AWS)' },
+         encoding: 'terrarium', tileSize: 256, maxzoom: 12, attribution: 'Terrain: Mapzen Terrain Tiles (AWS)' },   // one elevation dataset from zoom 12 up (~30 m, the resolution of the global source): the ground no longer changes shape at every zoom step in the site view, and the plant's pad keeps its height
   ofm: { type: 'vector', url: 'https://tiles.openfreemap.org/planet', attribution: 'Buildings © OpenStreetMap contributors · OpenFreeMap' }
 };
 const SITE_ZOOM = 15.2, GLOBE_ZOOM = 1.7;          // arrive on the plant itself; the catchment is one zoom-out away
