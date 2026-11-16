@@ -63,11 +63,11 @@
    "path": "SMR",
    "ci": 0.0,
    "file": "layouts/SMR_ci0.00.geojson",
-   "turbines": 1,
-   "wind_mw_target": 5.8,
-   "wind_mw_placed": 6.0,
+   "turbines": 0,
+   "wind_mw_target": 0.0,
+   "wind_mw_placed": 0.0,
    "wind_short": false,
-   "pv_mw_target": 93.3,
+   "pv_mw_target": 94.6,
    "pv_mw_placed": 104.0,
    "pv_km2": 2.08,
    "pv_short": false
@@ -119,9 +119,9 @@
    "wind_mw_target": 0.0,
    "wind_mw_placed": 0.0,
    "wind_short": false,
-   "pv_mw_target": 44.8,
-   "pv_mw_placed": 45.0,
-   "pv_km2": 0.9,
+   "pv_mw_target": 46.9,
+   "pv_mw_placed": 69.5,
+   "pv_km2": 1.39,
    "pv_short": false
   },
   {
@@ -132,9 +132,9 @@
    "wind_mw_target": 0.0,
    "wind_mw_placed": 0.0,
    "wind_short": false,
-   "pv_mw_target": 25.1,
-   "pv_mw_placed": 26.1,
-   "pv_km2": 0.52,
+   "pv_mw_target": 34.0,
+   "pv_mw_placed": 45.0,
+   "pv_km2": 0.9,
    "pv_short": false
   },
   {
@@ -145,7 +145,7 @@
    "wind_mw_target": 0.0,
    "wind_mw_placed": 0.0,
    "wind_short": false,
-   "pv_mw_target": 14.1,
+   "pv_mw_target": 16.3,
    "pv_mw_placed": 26.1,
    "pv_km2": 0.52,
    "pv_short": false
@@ -158,7 +158,7 @@
    "wind_mw_target": 0.0,
    "wind_mw_placed": 0.0,
    "wind_short": false,
-   "pv_mw_target": 0.3,
+   "pv_mw_target": 1.5,
    "pv_mw_placed": 13.5,
    "pv_km2": 0.27,
    "pv_short": false
@@ -167,11 +167,11 @@
    "path": "SMR+CCS",
    "ci": 0.0,
    "file": "layouts/SMR+CCS_ci0.00.geojson",
-   "turbines": 1,
-   "wind_mw_target": 5.8,
-   "wind_mw_placed": 6.0,
+   "turbines": 0,
+   "wind_mw_target": 0.0,
+   "wind_mw_placed": 0.0,
    "wind_short": false,
-   "pv_mw_target": 93.3,
+   "pv_mw_target": 94.6,
    "pv_mw_placed": 104.0,
    "pv_km2": 2.08,
    "pv_short": false
@@ -184,7 +184,7 @@
    "wind_mw_target": 0.0,
    "wind_mw_placed": 0.0,
    "wind_short": false,
-   "pv_mw_target": 18.6,
+   "pv_mw_target": 24.4,
    "pv_mw_placed": 26.1,
    "pv_km2": 0.52,
    "pv_short": false
@@ -197,7 +197,7 @@
    "wind_mw_target": 0.0,
    "wind_mw_placed": 0.0,
    "wind_short": false,
-   "pv_mw_target": 13.8,
+   "pv_mw_target": 16.8,
    "pv_mw_placed": 26.1,
    "pv_km2": 0.52,
    "pv_short": false
@@ -210,7 +210,7 @@
    "wind_mw_target": 0.0,
    "wind_mw_placed": 0.0,
    "wind_short": false,
-   "pv_mw_target": 11.1,
+   "pv_mw_target": 13.4,
    "pv_mw_placed": 13.5,
    "pv_km2": 0.27,
    "pv_short": false
@@ -223,7 +223,7 @@
    "wind_mw_target": 0.0,
    "wind_mw_placed": 0.0,
    "wind_short": false,
-   "pv_mw_target": 2.9,
+   "pv_mw_target": 11.4,
    "pv_mw_placed": 13.5,
    "pv_km2": 0.27,
    "pv_short": false
@@ -236,7 +236,7 @@
    "wind_mw_target": 0.0,
    "wind_mw_placed": 0.0,
    "wind_short": false,
-   "pv_mw_target": 0.8,
+   "pv_mw_target": 9.6,
    "pv_mw_placed": 13.5,
    "pv_km2": 0.27,
    "pv_short": false
@@ -249,7 +249,7 @@
    "wind_mw_target": 0.0,
    "wind_mw_placed": 0.0,
    "wind_short": false,
-   "pv_mw_target": 0.4,
+   "pv_mw_target": 0.5,
    "pv_mw_placed": 13.5,
    "pv_km2": 0.27,
    "pv_short": false
