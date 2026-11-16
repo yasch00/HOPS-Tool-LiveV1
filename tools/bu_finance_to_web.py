@@ -44,6 +44,13 @@ plants = plants if isinstance(plants, list) else plants.get("plants", plants)
 want = {int(x) for x in a.plants.split(",") if x.strip()}
 plants = [p for p in plants if p["idx"] < 1000 and (not want or p["idx"] in want)]
 
+# The page (finance/engine.js) knows the seven business units RES, BAT, HB, EL, H2ST, NH3, OPR. Since 2026-11-16
+# build_bu_finance.py also has an ASU unit (its electricity split out of the NH3 unit). Until the page supports
+# it, the converter folds ASU back into NH3 (E_NH3plant += E_ASU; checked equal to the earlier build to 3e-8) and
+# writes the frozen seven-unit model tables from tools/finance_model_web.json instead of the script's.
+WEB_MODEL = (json.loads((ROOT / "tools" / "finance_model_web.json").read_text())
+             if "ASU" in getattr(bu, "UNITS", []) and (ROOT / "tools" / "finance_model_web.json").exists() else None)
+
 # keys the page needs (everything the cash flow, the panels and the detail window read)
 DROP = {"_h1", "_h2", "_h3", "_h4", "_h5", "_h6"}
 KEYS = ["CI"] + [k for k, _, _ in bu.DATA_ROWS if k not in DROP]
@@ -92,9 +99,16 @@ for n, p in enumerate(sorted(plants, key=lambda q: q["idx"])):
             e = e_ccs.get(d["CI"], 0.0)
             if e > 0:
                 d["E_NH3plant"] += e; d["E_curt"] = max(0.0, d["E_curt"] - e)
+        if "E_ASU" in pts[0] and WEB_MODEL is not None:      # page has no ASU unit: its electricity stays with NH3
+            for d in pts:
+                d["E_NH3plant"] += d["E_ASU"]
         cases[ccs] = [{k: clean(d[k]) for k in KEYS} for d in pts]
     if not cases:
         skipped.append(p["idx"]); continue
+    # Plants that are already green (electrolytic hydrogen) have only a CI 0 design and no fossil baseline, so
+    # there is no business case against an existing plant: left out of the Project Finance page (2026-11-16).
+    if sum(len(v) for v in cases.values()) < 2:
+        skipped.append(p["idx"]); print(f"  plant {p['idx']}: only one design point (already green) -> left out"); continue
     # Fossil reference on the page = today's plant WITHOUT CCS, for both cases (as the atlas does). The workbook
     # compares the CCS case with a BAU that has CCS; that file is not staged for the web.
     if "No" in cases and "Yes" in cases:
@@ -111,7 +125,7 @@ if not want:
     fin = {u: bu.FIN[u] for u in bu.UNITS}
     (out / "index.json").write_text(json.dumps({
         "generated": datetime.date.today().isoformat(), "label": a.label, "bau_label": a.bau_label, "plants": index,
-        "model": {"units": bu.UNITS, "unit_names": bu.UNIT_NAMES, "fin": fin, "ncon": bu.NCON, "nops": bu.NOPS, "spend": list(bu.SPEND),
+        "model": WEB_MODEL or {"units": bu.UNITS, "unit_names": bu.UNIT_NAMES, "fin": fin, "ncon": bu.NCON, "nops": bu.NOPS, "spend": list(bu.SPEND),
                   "esc_rev": bu.ESC_REV, "esc_cost": bu.ESC_COST, "opr_margin": bu.OPR_MARGIN, "grid_opex_pct": bu.GRID_OPEX_PCT,
                   "curt_paid": bu.CURTAIL_PAID, "run_export_discount": bu.RUN_EXPORT_DISCOUNT,
                   "rates": [list(r) for r in bu.RATES], "lines": bu.LINES, "capex": bu.CAPEX, "opex": bu.OPEX,
