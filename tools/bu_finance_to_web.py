@@ -12,7 +12,7 @@ arithmetic is done in the browser (finance/engine.js, a port of the script's Pyt
     python3 tools/bu_finance_to_web.py --reference 61:No:1.0 # also print the Python results for one point (tie-out)
 
 Reads   <results>/CI_Range_…_{label}.csv, BAU_AllPlants_…_{bau}.csv, hourly/*.parquet
-        (default: the staged v11 folder, where the 1,000 $/t fill points carry the IRR_v11 name)
+        (default: the staged v13 folder, where the 1,000 $/t fill points carry the IRR_v13 name)
 Writes  data/finance/plant<idx>.json   {idx, name, …, units, cases: {"No": [point, …], "Yes": […]}}
         data/finance/index.json        {generated, label, plants: [{idx, name, admin, country, region, lat, lon, ktpa, ccs:[…]}]}
 """
@@ -23,10 +23,12 @@ import pandas as pd
 ROOT = Path(__file__).resolve().parent.parent
 HOPS = ROOT.parent.parent / "HOPS"
 ap = argparse.ArgumentParser()
-ap.add_argument("--results", default=str(HOPS / "results" / "web_stage_v11" / "results"))
+ap.add_argument("--results", default=str(HOPS / "results" / "web_stage_v13" / "results"))
 ap.add_argument("--script-dir", default=str(HOPS / "ProjectFinance"), help="folder of build_bu_finance.py")
-ap.add_argument("--label", default="IRR_v11")
-ap.add_argument("--bau-label", default="BAU_v11")
+ap.add_argument("--label", default="IRR_v13")
+ap.add_argument("--bau-label", default="BAU_v13")
+ap.add_argument("--run-haircut", type=float, default=1.0,
+                help="export price factor the runs were solved with: 1.0 for v13 (full wholesale), 0.90 for v11")
 ap.add_argument("--plants", default="", help="comma-separated plant numbers (default: every plant in data/plants.json)")
 ap.add_argument("--reference", default="", help="plant:ccs:ci — print the Python cash-flow results for this point as JSON")
 ap.add_argument("-o", "--out", default=str(ROOT / "data" / "finance"))
@@ -35,6 +37,7 @@ a = ap.parse_args()
 sys.path.insert(0, a.script_dir)
 bu = importlib.import_module("build_bu_finance")
 bu.RESULTS_DIR = a.results
+bu.RUN_EXPORT_DISCOUNT = a.run_haircut   # build_bu_finance.py still carries the v11 value 0.90
 
 plants = json.loads((ROOT / "data" / "plants.json").read_text())
 plants = plants if isinstance(plants, list) else plants.get("plants", plants)
