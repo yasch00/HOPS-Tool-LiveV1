@@ -138,6 +138,13 @@ body.build-mode .brand h1,body.build-mode .brand .sub,body.build-mode .globe-foo
 .filter-panel{width:248px;padding:18px 18px 14px;max-height:calc(100vh - 52px);max-height:calc(100dvh - 52px);overflow-y:auto;touch-action:pan-y;overscroll-behavior:contain;-webkit-overflow-scrolling:touch}
 .fp-h{font-size:10.5px;letter-spacing:.22em;text-transform:uppercase;color:var(--mut);font-weight:600;margin:0 0 11px}
 .fp-section{margin-bottom:18px}
+.fp-drop{margin-bottom:0}
+.fp-drop>summary{display:flex;align-items:center;justify-content:space-between;gap:10px;cursor:pointer;list-style:none;margin:0;user-select:none}
+.fp-drop>summary::-webkit-details-marker{display:none}
+.fp-drop>summary::after{content:"";width:6px;height:6px;border-right:1.5px solid currentColor;border-bottom:1.5px solid currentColor;transform:rotate(45deg);margin:-3px 3px 0 0;transition:transform .15s}
+.fp-drop[open]>summary{margin-bottom:11px}
+.fp-drop[open]>summary::after{transform:rotate(-135deg);margin-top:3px}
+.fp-drop>summary:hover{color:var(--ink2)}
 .legend-row{display:flex;align-items:center;gap:9px;font-size:12.5px;color:var(--ink2);padding:3px 0}
 .dot{width:9px;height:9px;border-radius:50%;flex:0 0 auto;box-shadow:0 0 0 2px rgba(255,255,255,.6)}
 .dot.amm{width:11px;height:11px;background:var(--accent);box-shadow:0 0 0 3px rgba(27,58,92,.18)}
@@ -301,10 +308,10 @@ h1,h2,h3,.disp,.site-panel h2,.site-kpis .v,.kpi .v,.card-h h3,.section-t,.crumb
         <div class="legend-row"><span class="dot" style="background:#F0E442;border:1px solid #15181B"></span> <span id="legendPending">Under construction</span></div>
         <button class="btn sm" style="margin-top:10px;width:100%" onclick="enterBuild()">Build a plant →</button>
       </div>
-      <div class="fp-section">
-        <div class="fp-h">Industry layers</div>
+      <details class="fp-section fp-drop">
+        <summary class="fp-h">Industry layers</summary>
         <div id="layerList"></div>
-      </div>
+      </details>
     </div>
   </div>
   <div id="facilityBar" class="panel facility-bar" hidden></div>
@@ -464,14 +471,14 @@ function buildLayerList(){
   });
 }
 </script>
-<script src="lib/market.js?v=20261114181125"></script>
-<script src="lib/storagelab.js?v=20261114181125"></script>
-<script src="lib/griddata.js?v=20261114181125"></script>
-<script src="map.js?v=20261114181125"></script>
-<script src="finance.js?v=20261114181125"></script>
-<script src="policy.js?v=20261114181125"></script>
-<script src="build.js?v=20261114181125"></script>
-<script src="facility.js?v=20261114181125"></script>
+<script src="lib/market.js?v=20261117084059"></script>
+<script src="lib/storagelab.js?v=20261117084059"></script>
+<script src="lib/griddata.js?v=20261117084059"></script>
+<script src="map.js?v=20261117084059"></script>
+<script src="finance.js?v=20261117084059"></script>
+<script src="policy.js?v=20261117084059"></script>
+<script src="build.js?v=20261117084059"></script>
+<script src="facility.js?v=20261117084059"></script>
 <script>
 /* ============ NAVIGATION ============ */
 let curScn=null, curPlantIdx=null, curCItarget=null;
