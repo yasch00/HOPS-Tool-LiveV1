@@ -1,7 +1,7 @@
 {
  "version": "IRR_v13-2026-11-17",
  "label": "IRR_v13",
- "bau_label": "site_v1",
+ "bau_label": "site_v13",
  "pathway": "SMR_INT_ASU",
  "generated": "2026-11-18",
  "policies": {
@@ -7799,7 +7799,8 @@
   }
  },
  "extra_labels": [
-  "site_v1"
+  "site_v1",
+  "site_v13"
  ],
  "n_scenarios": 447,
  "n_runs": 3519,
