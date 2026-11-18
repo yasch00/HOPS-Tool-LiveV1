@@ -13,11 +13,12 @@ const REPO_ISSUES = 'https://github.com/yasch00/HOPS-Tool-LiveV1/issues/new';
 /* Optional request endpoint (tools/request_worker/worker.js on Cloudflare): the page POSTs the spec, the worker opens the issue with
    a token that never reaches the browser, and the construction view opens at once — no GitHub account needed. Set in index.html. */
 const REQUEST_ENDPOINT = (typeof window !== 'undefined' && window.HOPS_REQUEST_ENDPOINT) || '';
-/* the optimizer's inputs (keys = tools/hops_site_run.py OVERRIDES). Defaults are hops_core.py's; `us`/`eu` where the model's default
-   depends on the sales region. Field: [key, label, unit, min, max, step, default, decimals] */
+/* the optimizer's inputs (keys = hops_site_run_v13.py OVERRIDES). Defaults = the v13c fleet runs (run_fleet_v13c.script), so a built
+   site is comparable with the fleet (2026-11-18). Per sales region where the fleet differs: us / eu / ca (Canada sells at the US
+   benchmark) / in (India import parity). Field: [key, label, unit, min, max, step, default, decimals] */
 const TECH_FIELDS = [
   ['Economic', [
-    ['nh3_price_usd_per_t', 'NH₃ price (objective)', '$/t', 200, 1500, 5, { us: 450, eu: 660 }, 0],
+    ['nh3_price_usd_per_t', 'NH₃ price (objective)', '$/t', 200, 1500, 5, { us: 450, eu: 660, ca: 450, in: 500 }, 0],
     ['gas_price_mult', 'Gas price × local 2025 series', '×', 0.3, 3, 0.05, 1, 2],
     ['grid_price_mult', 'Grid price × local 2025 series', '×', 0.3, 3, 0.05, 1, 2],
     ['interest_rate', 'Interest rate (annuity)', '%', 0.03, 0.15, 0.005, 0.08, 1],
@@ -26,7 +27,7 @@ const TECH_FIELDS = [
     ['el_capex_usd_per_kw', 'Electrolyzer', '$/kW', 300, 2500, 10, 1100, 0],
     ['pv_capex_mult', 'Solar PV × regional (Berkeley Lab / IRENA 2024)', '×', 0.4, 2, 0.05, 1, 2],
     ['wt_capex_mult', 'Wind × regional', '×', 0.4, 2, 0.05, 1, 2],
-    ['battery_capex_usd_per_mwh', 'Battery', '$/MWh', 100000, 600000, 5000, { us: 300000, eu: 215000 }, 0],
+    ['battery_capex_usd_per_mwh', 'Battery', '$/MWh', 100000, 600000, 5000, 215000, 0],   // fleet: 215 $/kWh in every region (user decision, v11 onwards)
     ['smr_capex_mult', 'Reformer (SMR) ×', '×', 0.5, 2, 0.05, 1, 2],
     ['ccs_capex_mult', 'CO₂ capture ×', '×', 0.5, 3, 0.05, 1, 2],
     ['hb_capex_usd_per_mwh', 'Heat battery', '$/MWh', 20000, 150000, 1000, 53750, 0]]],
@@ -36,10 +37,11 @@ const TECH_FIELDS = [
     ['nh3_minload', 'Haber-Bosch minimum load', '%', 0.5, 1, 0.05, 0.95, 0],
     ['asu_minload', 'ASU minimum load', '%', 0.3, 1, 0.05, 0.7, 0],
     ['hb_hours', 'Heat battery hours', 'h', 0, 24, 1, 5, 0],
-    ['ccs_capture_process', 'CO₂ capture — process stream', '%', 0.5, 1, 0.01, 0.99, 0],
+    ['ccs_capture_process', 'CO₂ capture — process stream', '%', 0.5, 1, 0.01, 0.9, 0],   // v13c caps the process stream at 90 %
     ['ccs_capture_flue', 'CO₂ capture — flue gas', '%', 0.5, 1, 0.01, 0.9, 0]]]
 ];
-function techDefault(f){ const d = f[6]; if (d && typeof d === 'object') { const us = BUILD.near[0] && BUILD.near[0].p.region === 'US'; return us ? d.us : d.eu; } return d; }
+function techDefault(f){ const d = f[6]; if (d && typeof d === 'object') { const r = BUILD.near[0] && BUILD.near[0].p.region;
+  const k = r === 'US' ? 'us' : r === 'Canada' ? 'ca' : r === 'India' ? 'in' : 'eu'; return d[k] != null ? d[k] : d.eu; } return d; }
 function techValue(k){ const f = TECH_FIELDS.flatMap(g => g[1]).find(f => f[0] === k); return BUILD.T[k] != null ? BUILD.T[k] : techDefault(f); }
 
 function haversine(a, b, c, d){ const R = 6371, p = Math.PI / 180, x = Math.sin((c - a) * p / 2) ** 2 + Math.cos(a * p) * Math.cos(c * p) * Math.sin((d - b) * p / 2) ** 2; return 2 * R * Math.asin(Math.sqrt(x)); }

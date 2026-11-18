@@ -51,7 +51,7 @@ jobs:
   solve:
     needs: check
     runs-on: ubuntu-latest
-    timeout-minutes: 120
+    timeout-minutes: 330    # v13c: one CI point can take 1.5-2 h on a 4-CPU runner (4 solves of the IRR loop); GitHub's limit is 360
     strategy:
       fail-fast: false
       max-parallel: ${{ fromJSON(vars.SOLVE_PARALLEL || '4') }}
@@ -97,6 +97,7 @@ jobs:
         run: |
           echo '${{ needs.check.outputs.spec }}' | base64 -d > spec.json
           export GRB_LICENSE_FILE="$HOME/gurobi.lic"
+          export HOPS_THREADS=$(nproc)          # 4 on a standard runner; the model would otherwise ask Gurobi for 8
           if [ "${{ matrix.ci }}" = "BAU" ]; then
             python3 model/hops_site_run_v13.py --spec spec.json --out site_runs --label $LABEL --site-id ${{ needs.check.outputs.site }} --bau --bau-label $LABEL
           else
@@ -109,6 +110,8 @@ jobs:
           retention-days: 30
   publish:
     needs: [check, solve]
+    # publish what was solved even if a CI point failed or timed out (it is then missing, like a skipped point)
+    if: ${{ !cancelled() && needs.check.result == 'success' }}
     runs-on: ubuntu-latest
     concurrency:
       group: publish-data
