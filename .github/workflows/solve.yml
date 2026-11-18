@@ -21,8 +21,8 @@ concurrency:
   cancel-in-progress: false
 env:
   MODEL_REPO: yasch00/HOPS-model
-  DATA_TAG: data-v1
-  LABEL: site_v1
+  DATA_TAG: data-v2       # v13c inputs (Sherlock ~/HOPS/data, 2026-11); data-v1 = the 2026-09 inputs
+  LABEL: site_v13         # v13c model (model/hops_site_run_v13.py); sites solved before carry site_v1
 jobs:
   check:
     runs-on: ubuntu-latest
@@ -98,9 +98,9 @@ jobs:
           echo '${{ needs.check.outputs.spec }}' | base64 -d > spec.json
           export GRB_LICENSE_FILE="$HOME/gurobi.lic"
           if [ "${{ matrix.ci }}" = "BAU" ]; then
-            python3 model/hops_site_run.py --spec spec.json --out site_runs --label $LABEL --site-id ${{ needs.check.outputs.site }} --bau --bau-label $LABEL
+            python3 model/hops_site_run_v13.py --spec spec.json --out site_runs --label $LABEL --site-id ${{ needs.check.outputs.site }} --bau --bau-label $LABEL
           else
-            python3 model/hops_site_run.py --spec spec.json --out site_runs --label $LABEL --site-id ${{ needs.check.outputs.site }} --only-ccs ${{ matrix.ccs }} --ci ${{ matrix.ci }}
+            python3 model/hops_site_run_v13.py --spec spec.json --out site_runs --label $LABEL --site-id ${{ needs.check.outputs.site }} --only-ccs ${{ matrix.ccs }} --ci ${{ matrix.ci }}
           fi
       - uses: actions/upload-artifact@v4
         with:
@@ -159,10 +159,10 @@ jobs:
         env:
           HOPS_DATA_DIR: ${{ github.workspace }}/hops_data_unused
         run: |
-          cd model
-          python3 ets_policy_cases.py --results-dir ../site_runs --label $LABEL --bau-label $LABEL --ccs both || echo "ETS re-pricing skipped/failed (not an EU site?)"
-          python3 us_credit_cases.py  --results-dir ../site_runs --label $LABEL --bau-label $LABEL --ccs both || echo "US credit re-pricing skipped/failed (not a US site?)"
-          ls ../site_runs
+          cd model/v13
+          python3 ets_policy_cases.py --results-dir ../../site_runs --label $LABEL --bau-label $LABEL --ccs both || echo "ETS re-pricing skipped/failed (not an EU site?)"
+          python3 us_credit_cases.py  --results-dir ../../site_runs --label $LABEL --bau-label $LABEL --ccs both || echo "US credit re-pricing skipped/failed (not a US site?)"
+          ls ../../site_runs
       - name: Convert into data/ (merged with the fleet)
         run: |
           git pull --rebase
@@ -172,7 +172,7 @@ jobs:
         # build_bu_finance.py comes from the private model repo (checked out in model/); a failure here does not stop
         # the atlas publication, the site then only misses its finance page
         run: |
-          python3 tools/bu_finance_to_web.py --script-dir model --site-results site_runs --site-label $LABEL \
+          python3 tools/bu_finance_to_web.py --script-dir model --site-results site_runs --site-label $LABEL --run-haircut 1.0 \
             --plants ${{ needs.check.outputs.site }} --merge-index -o data/finance \
             || echo "::warning::Project Finance conversion failed for site ${{ needs.check.outputs.site }} (atlas still published)"
       - name: Commit and push
