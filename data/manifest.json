@@ -1,9 +1,9 @@
 {
- "version": "IRR_v13-2026-11-16",
+ "version": "IRR_v13-2026-11-17",
  "label": "IRR_v13",
  "bau_label": "BAU_v13",
  "pathway": "SMR_INT_ASU",
- "generated": "2026-11-16",
+ "generated": "2026-11-17",
  "policies": {
   "ETSlaw": "EU ETS (current law)",
   "ETSprop": "EU ETS (proposed)",

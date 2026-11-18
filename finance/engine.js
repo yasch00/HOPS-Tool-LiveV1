@@ -1,9 +1,11 @@
 /* Project Finance engine — browser port of the Python mirror in ProjectFinance/build_bu_finance.py
-   (unit_lines, unit_capex_opex, run_cashflow, solve_min_rate, solve_system_breakeven, default_rates).
+   (unit_lines, unit_capex_opex, run_cashflow, solve_min_rate, solve_system_breakeven, default_rates), eight units
+   RES BAT HB EL H2ST ASU NH3 OPR plus the reference plant BAU (pseudo unit, not in the sums).
    Same arithmetic, same iteration counts, so the page ties to the workbook. One deliberate difference, in the
-   STARTING rates only: the operator's electricity tariff covers grid imports too (see defaultRates). The model tables (LINES, CAPEX, OPEX,
-   RATES, financing defaults) are not repeated here: they come from data/finance/index.json → "model", which
-   tools/bu_finance_to_web.py writes from the script itself. */
+   STARTING rates of the cost-reflective cascade only: the operator's electricity tariff covers grid imports too.
+   New on the page (version 6): negotiate() — the rate sets where every party clears a minimum equity return and the
+   ammonia plant produces below the fossil reference: the operator's optimum and the Nash bargaining solution.
+   The model tables (LINES, CAPEX, OPEX, BOOK, RATES, financing) come from data/finance/index.json → "model". */
 (function () {
   'use strict';
   let M = null;                                   // model tables from index.json
@@ -24,13 +26,17 @@
       let v, q = null;
       if (ln.kind === 'fixed') v = num(d[ln.vol]);
       else if (ln.kind === 'scaled') v = num(d[ln.vol]) * inp.exp_real / (num(d.EXPORT_DISC) || 1);
+      else if (ln.kind === 'ngadj') v = (num(rates.p_NG) - (inp.p_NG_built != null ? inp.p_NG_built : num(rates.p_NG))) * num(d[ln.vol]);
       else { q = volume(d, ln.vol, inp); v = num(rates[ln.rate]) * q; }
       return { label: ln.label, sign: ln.sign, value: v, rate: ln.rate || null, vol: ln.vol, kind: ln.kind, volume: q, primary: !!ln.primary };
     });
   }
 
+  function bookKeys(u, inp) { return u === M.ref ? (inp.retro ? ['BAU_CAPEX'] : []) : (M.book[u] || []); }
   function unitCapexOpex(u, d, inp) {
-    const capex = M.capex[u].reduce((s, k) => s + num(d[k]), 0);
+    let capex = M.capex[u].reduce((s, k) => s + num(d[k]), 0);
+    const bs = inp.book_share != null ? inp.book_share : 1;
+    capex -= (1 - bs) * bookKeys(u, inp).reduce((s, k) => s + num(d[k]), 0);
     let opex = M.opex[u].reduce((s, k) => s + num(d[k]), 0);
     if (u === 'OPR') opex += inp.grid_opex_pct * capex;
     return [capex, opex];
@@ -104,11 +110,12 @@
     return cf;
   }
 
-  function primaryRate(u) { const ln = M.lines[u].find(l => l.primary); return ln ? ln.rate : null; }
+  function primaryLine(u) { return M.lines[u].find(l => l.primary) || null; }
+  function primaryRate(u) { const ln = primaryLine(u); return ln ? ln.rate : null; }
 
   /* Primary rate at which unit NPV (project at disc / equity at hurdle) = 0. NaN if volume is zero. */
   function solveMinRate(u, d, rates, inp, basis, fin, sh) {
-    const ln = M.lines[u].find(l => l.primary);
+    const ln = primaryLine(u);
     if (!ln) return NaN;
     if (volume(d, ln.vol, inp) <= NOISE) return NaN;          // the script tests <= 0; solver noise (1e-9 MWh) is not a volume
     const which = basis === 'equity' ? 'npv_equity' : 'npv_project';
@@ -131,30 +138,38 @@
     return 0.5 * (lo + hi);
   }
 
-  /* Cost-reflective cascade: every supplier exactly at its project hurdle, operator at cost + margin. */
-  function defaultRates(d, inp, fins, sh, marketPrice) {
+  /* Operator's average cost of the electricity it procures (renewables at the PPA rate, grid imports at their hourly
+     cost plus demand and network charges). */
+  function avgElecCost(d, inp, rRes) {
+    const eRes = volume(d, 'E_RES_paid', inp), eImp = num(d.E_imp), gridCost = num(d.IMP_COST) + num(d.DEMAND_CH) + num(d.NET_CH);
+    return eRes + eImp > NOISE ? (rRes * eRes + gridCost) / (eRes + eImp) : rRes;
+  }
+  const ELEC_IN = ['r_B_in', 'r_HB_in', 'r_EL_in', 'r_ST_e', 'r_ASU_e'];
+  function h2PassThrough(d, r) {
+    const kg = num(d.H2_green_NH3_kg);
+    return kg > 0 ? (r.r_H2_EL * num(d.H2_EL_kg) + r.r_ST_out * num(d.H2_ST_out_kg) - r.r_ST_in * num(d.H2_ST_in_kg)) / kg : r.r_H2_EL;
+  }
+
+  /* Cost-reflective cascade: every supplier exactly at its project hurdle, operator at cost + margin, the ammonia
+     plant carries the result. As default_rates() of the script, with the web's tariff (covers grid imports). */
+  function defaultRates(d, inp, fins, sh, marketPrice, margin) {
     const r = {}; M.rates.forEach(x => { r[x[0]] = 0; });
     const mr = u => solveMinRate(u, d, r, inp, 'project', fins[u], sh);
     r.p_NG = num(d.NG_PRICE);
     r.p_NH3 = marketPrice != null ? marketPrice : (num(d.NH3_PRICE_RUN) || 660);
     r.r_RES = mr('RES'); if (isNaN(r.r_RES)) r.r_RES = num(d.LCOE_RES);
-    // Operator tariff. The script uses r_RES + margin, which is cost-reflective only while grid imports are negligible
-    // (plant 61). Fleet-wide many plants import most of their electricity, some build no renewables at all; there the
-    // tariff must cover what the operator pays for imports. So: average cost of the electricity the operator procures
-    // (renewables at the PPA rate, grid imports at their hourly cost plus demand and network charges) + margin.
-    const eRes = volume(d, 'E_RES_paid', inp), eImp = num(d.E_imp), gridCost = num(d.IMP_COST) + num(d.DEMAND_CH) + num(d.NET_CH);
-    const avgCost = eRes + eImp > NOISE ? (r.r_RES * eRes + gridCost) / (eRes + eImp) : r.r_RES;
-    const tariff = Math.round((avgCost + M.opr_margin) * 10) / 10;
-    ['r_B_in', 'r_HB_in', 'r_EL_in', 'r_ST_e', 'r_NH3_e', 'r_SMRgen'].forEach(k => { r[k] = tariff; });
+    const tariff = Math.round((avgElecCost(d, inp, r.r_RES) + (margin != null ? margin : M.opr_margin)) * 10) / 10;
+    ELEC_IN.concat(['r_NH3_e']).forEach(k => { r[k] = tariff; });
     r.r_B_cap = 0;
     let v = mr('BAT'); r.r_B_out = isNaN(v) ? tariff + 50 : v;
     v = mr('HB'); r.r_heat = isNaN(v) ? tariff / 0.95 : v;
     v = mr('EL'); r.r_H2_EL = isNaN(v) ? 4.0 : v;
     r.r_ST_in = r.r_H2_EL;
     v = mr('H2ST'); r.r_ST_out = isNaN(v) ? r.r_ST_in + 1.0 : v;
-    const h2cost = r.r_H2_EL * num(d.H2_EL_kg) + r.r_ST_out * num(d.H2_ST_out_kg) - r.r_ST_in * num(d.H2_ST_in_kg);
-    r.r_H2_NH3 = num(d.H2_green_NH3_kg) > 0 ? h2cost / d.H2_green_NH3_kg : r.r_H2_EL;
+    r.r_H2_NH3 = h2PassThrough(d, r);
     r.r_heat_NH3 = r.r_heat;
+    v = mr('ASU'); r.r_N2 = isNaN(v) ? 25.0 : v;
+    r.r_N2 = r.r_N2_NH3 = pyRound(r.r_N2, 1);
     for (const k in r) if (k.startsWith('r_') && k !== 'r_B_cap') r[k] = pyRound(r[k], (k.includes('H2') || k.includes('ST_')) ? 2 : 1);
     r.p_NG = pyRound(r.p_NG, 2);
     return r;
@@ -162,8 +177,153 @@
   /* Python round(): correctly rounded decimal, ties to even on the binary value → toFixed is the closest match */
   function pyRound(x, n) { return Number(x.toFixed(n)); }
 
-  /* Everything the page shows for one design point. */
-  function evaluate(d, rates, inp, fins, sh) {
+  /* ------------------------------------------------------------------ negotiation
+     Parties: every built unit. Walk-away point of a supplier and of the operator: its equity NPV at the minimum
+     equity return (hmin) = 0, i.e. equity IRR = hmin. Walk-away point of the ammonia plant: producing at the cost of
+     the fossil reference (the HOPS BAU plant on the same financing: new fossil plant for greenfield, the existing
+     plant carrying on for retrofit). Its gain = its equity NPV at hmin when ammonia is valued at that cost.
+     Every party's gain is a $ NPV at hmin, so they can be compared and multiplied.
+     Rates: each supplier is paid through its selling rate (it buys electricity at the operator's tariff, held fixed:
+     its average procurement cost + margin); the ammonia plant pays pass-through costs × (1 + m), one markup m on
+     electricity, hydrogen, heat and nitrogen. Each of these numbers moves money between one party and the operator
+     only, so the problem separates into one bilateral deal per party with the operator. */
+  const SELL = { RES: 'r_RES', BAT: 'r_B_out', HB: 'r_heat', EL: 'r_H2_EL', H2ST: 'r_ST_out', ASU: 'r_N2' };
+  const NH3_BUY = { r_NH3_e: 'e', r_H2_NH3: 'h2', r_heat_NH3: 'heat', r_N2_NH3: 'n2' };
+
+  function bisect(f, lo, hi, it) {                 // f(lo) < 0 < f(hi) (or the other way round); returns the root
+    let flo = f(lo);
+    for (let i = 0; i < (it || 80); i++) { const mid = 0.5 * (lo + hi), fm = f(mid); if ((fm < 0) === (flo < 0)) { lo = mid; flo = fm; } else hi = mid; }
+    return 0.5 * (lo + hi);
+  }
+  /* x where g(x) = target, g monotone; search outward from x0. NaN if no sign change within the range. */
+  function solveFor(g, target, x0, scale) {
+    const f = x => g(x) - target;
+    let a = x0, b = x0, fa = f(a), step = Math.max(Math.abs(scale || 1), 1e-3);
+    if (fa === 0) return a;
+    for (let i = 0; i < 60; i++) {
+      a = x0 - step; b = x0 + step;
+      const fA = f(a), fB = f(b);
+      if ((fA < 0) !== (fa < 0)) return bisect(f, a, x0);
+      if ((fB < 0) !== (fa < 0)) return bisect(f, x0, b);
+      step *= 2;
+    }
+    return NaN;
+  }
+
+  function negotiate(d, inp, fins, sh, opt) {
+    const hmin = opt.hmin, margin = opt.margin != null ? opt.margin : M.opr_margin;
+    const F = {}; M.units.concat([M.ref]).forEach(u => { F[u] = Object.assign({}, fins[u], { hurdle: hmin }); });
+    const r = defaultRates(d, inp, fins, sh, opt.market, margin);      // starting point; the sell rates are re-solved below
+    const pNH3 = r.p_NH3;
+    // fossil reference at the same financing: the ammonia price at which the reference plant earns hmin on equity
+    const hasRef = num(d.BAU_CASH) !== 0 || num(d.BAU_CAPEX) !== 0;
+    const pRef = hasRef ? solveMinRate(M.ref, d, r, inp, 'equity', F[M.ref], sh) : NaN;
+    const pWalk = isFinite(pRef) ? pRef : pNH3;
+    const surplus = (u, rr) => {
+      if (u === 'NH3') { const q = Object.assign({}, rr, { p_NH3: pWalk }); return unitCf('NH3', d, q, inp, F.NH3, sh, true).npv_equity; }
+      return unitCf(u, d, rr, inp, F[u], sh, true).npv_equity;
+    };
+    const built = u => {
+      const [cap] = unitCapexOpex(u, d, inp);
+      const ln = primaryLine(u);
+      return cap > 1000 || (ln && volume(d, ln.vol, inp) > NOISE && u !== 'NH3' && u !== 'OPR');
+    };
+    const parties = M.units.filter(u => u === 'NH3' || u === 'OPR' || (SELL[u] && built(u) && volume(d, primaryLine(u).vol, inp) > NOISE));
+    const notes = [];
+    M.units.forEach(u => { if (SELL[u] && built(u) && !parties.includes(u)) notes.push(u + ' has capital but no sales: it cannot be paid through a rate'); });
+
+    // 1. walk-away sell rates (each supplier exactly at hmin), with the tariff from the walk-away PPA rate
+    const rr = Object.assign({}, r);
+    const walk = {};
+    const solveSell = (u, target) => {
+      const k = SELL[u], g = x => { rr[k] = x; return surplus(u, rr); };
+      const x = solveFor(g, target, num(rr[k]) || 1, Math.max(1, Math.abs(num(rr[k])) * 0.5));
+      rr[k] = isFinite(x) ? x : rr[k];
+      return x;
+    };
+    if (parties.includes('RES')) walk.RES = solveSell('RES', 0);
+    const tariff = avgElecCost(d, inp, rr.r_RES) + margin;
+    ELEC_IN.forEach(k => { rr[k] = tariff; });
+    rr.r_B_cap = 0;
+    ['BAT', 'HB', 'EL'].forEach(u => { if (parties.includes(u)) walk[u] = solveSell(u, 0); });
+    rr.r_ST_in = rr.r_H2_EL;                                        // the store buys hydrogen at the electrolyzer's price
+    ['H2ST', 'ASU'].forEach(u => { if (parties.includes(u)) walk[u] = solveSell(u, 0); });
+    // pass-through costs of the ammonia plant's inputs, fixed from here (so each deal stays bilateral)
+    const cost = { e: tariff, h2: h2PassThrough(d, rr), heat: rr.r_heat, n2: rr.r_N2 };
+    const setM = (q, m) => { for (const k in NH3_BUY) q[k] = cost[NH3_BUY[k]] * (1 + m); };
+    const nh3Spend = cost.e * num(d.E_NH3plant) + cost.h2 * num(d.H2_green_NH3_kg) + cost.heat * num(d.H_HB_out) + cost.n2 * num(d.N2_ASU_t);
+    let mWalk;
+    if (nh3Spend > 1000) { mWalk = solveFor(m => { setM(rr, m); return -surplus('NH3', rr); }, 0, 0, 0.5); }
+    else mWalk = 0;
+    if (!isFinite(mWalk)) mWalk = 0;
+    setM(rr, mWalk);
+    const opWalk = Object.assign({}, rr);
+    const total = surplus('OPR', opWalk);                            // what is left for the operator when every other party is at its walk-away point
+    const res = { hmin, pRef, pWalk, hasRef, tariff, cost, parties, notes, walk: Object.assign({ m: mWalk }, walk), total, nh3Spend };
+    const sOf = q => { const s = {}; parties.forEach(u => { s[u] = surplus(u, q); }); return s; };
+    res.operator = { rates: opWalk, m: mWalk, s: sOf(opWalk) };
+    res.feasible = total >= 0;
+    if (!res.feasible) {
+      // how much higher the ammonia plant's walk-away would have to be for a deal to exist ($/t): the gap to close
+      const opAt = dp => { const q = Object.assign({}, opWalk); const pw = pWalk + dp;
+        const g = m => { setM(q, m); return unitCf('NH3', d, Object.assign({}, q, { p_NH3: pw }), inp, F.NH3, sh, true).npv_equity; };
+        const m = nh3Spend > 1000 ? solveFor(g, 0, mWalk, 0.5) : 0; setM(q, isFinite(m) ? m : mWalk); return surplus('OPR', q); };
+      res.gap = opAt(0) < 0 && opAt(5000) > 0 ? bisect(opAt, 0, 5000, 60) : NaN;
+      res.nash = null;
+      return res;
+    }
+    // 2. Nash bargaining: maximise the weighted sum of log gains. Weights = bargaining power: equal (the symmetric
+    //    Nash solution) or the equity each party puts in (every party then earns about the same return above hmin).
+    //    Start from the split in proportion to the weights, then coordinate ascent.
+    const eq = {}; parties.forEach(u => { const cf = unitCf(u, d, opWalk, inp, F[u], sh, false); eq[u] = Math.max(0, cf.equity); });
+    // a retrofitted plant brings its existing units even when they are written off: count them at the equity share of
+    // their replacement value, so an old plant does not bargain with no power at all
+    if (eq.NH3 != null) eq.NH3 = Math.max(eq.NH3, (1 - F.NH3.gearing) * num(d.REPL_VAL));
+    const eqMax = Math.max.apply(null, parties.map(u => eq[u])) || 1;
+    const w = {}; parties.forEach(u => { w[u] = opt.power === 'equity' ? Math.max(eq[u], 0.01 * eqMax) : 1; });
+    const wSum = parties.reduce((s, u) => s + w[u], 0);
+    res.weights = w; res.equity = eq;
+    const q = Object.assign({}, opWalk);
+    const vars = parties.filter(u => u !== 'OPR').map(u => u === 'NH3' ? { u, k: 'm' } : { u, k: SELL[u] });
+    const getV = v => (v.k === 'm' ? q.__m : q[v.k]);
+    const setV = (v, x) => { if (v.k === 'm') { q.__m = x; setM(q, x); } else q[v.k] = x; };
+    q.__m = mWalk;
+    vars.forEach(v => {                                                // equal split as the starting point
+      const g = x => { setV(v, x); return surplus(v.u, q); };
+      const x0 = v.k === 'm' ? mWalk : walk[v.u];
+      const x = solveFor(g, total * w[v.u] / wSum, x0, v.k === 'm' ? 0.2 : Math.max(0.5, Math.abs(x0) * 0.2));
+      setV(v, isFinite(x) ? x : x0);
+    });
+    const LOG = (a, b, wa) => (a > 0 && b > 0 ? wa * Math.log(a) + w.OPR * Math.log(b) : -Infinity);
+    for (let sweep = 0; sweep < 25; sweep++) {
+      let moved = 0;
+      vars.forEach(v => {
+        const x0 = getV(v), lo0 = v.k === 'm' ? mWalk : walk[v.u];
+        // bracket between the party's walk-away and the operator's walk-away (given the other deals)
+        const gOp = x => { setV(v, x); return surplus('OPR', q); };
+        const hiX = solveFor(gOp, 0, x0, v.k === 'm' ? 0.2 : Math.max(0.5, Math.abs(x0) * 0.2));
+        if (!isFinite(hiX)) { setV(v, x0); return; }
+        let a = Math.min(lo0, hiX), b = Math.max(lo0, hiX);
+        const fobj = x => { setV(v, x); return LOG(surplus(v.u, q), surplus('OPR', q), w[v.u]); };
+        const gr = (Math.sqrt(5) - 1) / 2;
+        let c = b - gr * (b - a), e = a + gr * (b - a), fc = fobj(c), fe = fobj(e);
+        for (let i = 0; i < 60; i++) {
+          if (fc > fe) { b = e; e = c; fe = fc; c = b - gr * (b - a); fc = fobj(c); }
+          else { a = c; c = e; fc = fe; e = a + gr * (b - a); fe = fobj(e); }
+        }
+        const x = 0.5 * (a + b);
+        setV(v, fobj(x) >= fobj(x0) ? x : x0);
+        moved = Math.max(moved, Math.abs(getV(v) - x0) / Math.max(1e-6, Math.abs(x0) + 1e-3));
+      });
+      if (moved < 1e-7) break;
+    }
+    const nr = Object.assign({}, q); delete nr.__m;
+    res.nash = { rates: nr, m: q.__m, s: sOf(nr) };
+    return res;
+  }
+
+  /* Everything the page shows for one design point. hmin: minimum equity return used for the ammonia cost. */
+  function evaluate(d, rates, inp, fins, sh, hmin) {
     const units = {};
     let ebitda = 0, capex = 0, npvP = 0, npvE = 0;
     for (const u of M.units) {
@@ -177,16 +337,23 @@
     const expRev = num(d.EXP_REV) * inp.exp_real / (num(d.EXPORT_DISC) || 1);
     const integrated = rates.p_NH3 * num(d.NH3_t) + expRev - num(d.IMP_COST) - rates.p_NG * num(d.NG_MWh) - num(d.CARBON) - num(d.ETS)
       - num(d.DEMAND_CH) - num(d.NET_CH) - allOpex - inp.grid_opex_pct * (num(d.CAPEX_GRID_EXP) + num(d.CAPEX_GRID_LOAD));
-    const be = units.NH3.min_p;
+    const h = hmin != null ? hmin : fins.NH3.hurdle;
+    const fH = Object.assign({}, fins.NH3, { hurdle: h }), fR = Object.assign({}, fins[M.ref], { hurdle: h });
+    const nh3Cost = solveMinRate('NH3', d, rates, inp, 'equity', fH, sh);               // ammonia price the plant needs at hmin on equity
+    const hasRef = num(d.BAU_CASH) !== 0 || num(d.BAU_CAPEX) !== 0;
+    const refCost = hasRef ? solveMinRate(M.ref, d, rates, inp, 'equity', fR, sh) : NaN;
+    const refCf = hasRef ? unitCf(M.ref, d, rates, inp, fins[M.ref], sh, false) : null;
     return {
       units, sum: { ebitda, capex, npv_project: npvP, npv_equity: npvE },
       tieout: ebitda - integrated, integrated,
-      breakeven: be, breakeven_equity: units.NH3.min_e, gap: be - rates.p_NH3,
+      breakeven: units.NH3.min_p, breakeven_equity: units.NH3.min_e,
+      nh3_cost: nh3Cost, ref_cost: refCost, saving: refCost - nh3Cost, ref: refCf,
       system: solveSystemBreakeven(d, rates, inp, fins, sh),
-      mac: (num(d.BAU_CI) - num(d.CI_ACT)) > 1e-9 ? (be - num(d.BAU_LCOA_A)) / (num(d.BAU_CI) - num(d.CI_ACT)) : NaN,
+      mac: (num(d.BAU_CI) - num(d.CI_ACT)) > 1e-9 && isFinite(refCost) ? (nh3Cost - refCost) / (num(d.BAU_CI) - num(d.CI_ACT)) : NaN,
       export_rev: expRev
     };
   }
 
-  window.BUFin = { setModel, unitLines, unitCapexOpex, runCashflow, unitCf, solveMinRate, solveSystemBreakeven, defaultRates, evaluate, primaryRate, volume, npv, irr };
+  window.BUFin = { setModel, unitLines, unitCapexOpex, runCashflow, unitCf, solveMinRate, solveSystemBreakeven, defaultRates, evaluate,
+    negotiate, primaryRate, volume, npv, irr, avgElecCost, h2PassThrough, SELL, NH3_BUY };
 })();
