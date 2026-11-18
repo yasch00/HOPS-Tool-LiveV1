@@ -160,8 +160,8 @@ function buildFinance(){
     const v = A[k], isPct = u.startsWith('%'), shown = isPct ? (v * 100).toFixed(dec) : (+v).toFixed(dec);
     return `<label class="fin-f"><span class="fin-l">${n}<small>${u}</small></span><input type="range" min="${lo}" max="${hi}" step="${st}" value="${v}" oninput="finSet('${k}',this.value)"><input type="number" class="fin-n" step="${isPct ? st * 100 : st}" value="${shown}" onchange="finSet('${k}',${isPct ? 'this.value/100' : 'this.value'})"></label>`;
   };
-  // link to the business-unit finance page (finance/): same plant, CCS case, policy and target; fleet plants only
-  const bu = curPlantIdx < 1000 ? `../finance/#plant=${curPlantIdx}&build=GF&policy=${s.policy || ''}&ccs=${s.ccs ? 'Yes' : 'No'}&ci=${(+r.target).toFixed(2)}` : null;
+  // link to the business-unit finance page (finance/): same plant, CCS case, policy and target (fleet plants and built sites)
+  const bu = curPlantIdx != null ? `../finance/#plant=${curPlantIdx}&build=GF&policy=${s.policy || ''}&ccs=${s.ccs ? 'Yes' : 'No'}&ci=${(+r.target).toFixed(2)}` : null;
   let h = (bu ? `<div class="card" style="display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:12px;padding:12px 16px"><div><b>Business-unit finance</b><div class="section-d" style="margin:2px 0 0">This plant split into eight business units around the operator: the rates every party can agree on (Nash bargaining), greenfield or retrofit, with policies.</div></div><a class="btn sm" href="${bu}">Open Project Finance →</a></div>` : '') +
     `<div class="fin-grid"><aside class="card fin-side"><div class="card-h"><h3>Assumptions</h3><button class="btn ghost sm" onclick="finReset()">Reset</button></div>
     <p class="section-d" style="margin:0 0 10px">Everything below is editable. The plant design and the optimizer's cost lines stay fixed — this is a financing sensitivity on the selected run, not a re-optimisation.</p>

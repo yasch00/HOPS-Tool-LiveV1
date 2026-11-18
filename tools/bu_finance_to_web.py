@@ -39,6 +39,11 @@ ap.add_argument("--plants", default="", help="comma-separated plant numbers (def
 ap.add_argument("--reference", default="", help="plant:GF|RETRO:ccs:ci — print the Python cash-flow results for this point")
 ap.add_argument("-o", "--out", default=str(ROOT / "data" / "finance"))
 ap.add_argument("--index-only", action="store_true", help="only (re)write index.json from the plant files already in --out")
+# requested sites (solve.yml): one greenfield site from the cloud solve folder, merged into the published index
+ap.add_argument("--site-results", default="", help="folder of a site solve (solve.yml: site_runs); converts --plants as greenfield sites")
+ap.add_argument("--site-label", default="site_v1", help="label of the site solve files")
+ap.add_argument("--run-haircut", type=float, default=None, help="EXPORT_DISCOUNT the runs were solved with (v13 fleet 1.0; site model 0.90)")
+ap.add_argument("--merge-index", action="store_true", help="add/replace the converted plants in the existing index.json instead of rewriting it")
 a = ap.parse_args()
 
 sys.path.insert(0, a.script_dir)
@@ -51,6 +56,12 @@ BUILDS = {
     "RETRO": dict(dir="results_retrofit", label="RETRO50_LCOA_v13", bau="BAU_RETRO_v13", gf="IRR_v13", bau_gf="BAU_v13",
                   name="Retrofit: the existing plant converted"),
 }
+if a.site_results:                       # a requested site: greenfield only (no existing plant), its own BAU reference
+    BUILDS = {"GF": dict(dir=str(Path(a.site_results).resolve()), label=a.site_label, bau=a.site_label, gf=None, bau_gf=None,
+                         name="Greenfield: new hybrid plant at the site")}
+    bu.RUN_EXPORT_DISCOUNT = 0.90 if a.run_haircut is None else a.run_haircut   # the site model (hops_core 2026-09) credits exports at 0.90
+elif a.run_haircut is not None:
+    bu.RUN_EXPORT_DISCOUNT = a.run_haircut
 POLICIES = {"ETSlaw": "EU ETS, current law", "ETSprop": "EU ETS, proposal", "USCred": "US credits 45V / 45Q"}
 
 # keys the page needs: every Model Data row plus the retrofit rows (text rows kept as text)
@@ -134,7 +145,7 @@ def diff(base, pol):
 plants = json.loads((ROOT / "data" / "plants.json").read_text())
 plants = plants if isinstance(plants, list) else plants.get("plants", plants)
 want = {int(x) for x in a.plants.split(",") if x.strip()}
-plants = [p for p in plants if p["idx"] < 1000 and (not want or p["idx"] in want)]
+plants = [p for p in plants if (p["idx"] < 1000 or a.site_results) and (not want or p["idx"] in want)]
 
 out = Path(a.out); out.mkdir(parents=True, exist_ok=True)
 index, skipped = [], []
@@ -199,7 +210,14 @@ for n, p in enumerate(sorted(plants, key=lambda q: q["idx"])):
           + " · ".join(f"{bk}: " + ",".join(f"{c}{len(x)}" for c, x in v["cases"].items()) + (" +" + "/".join(v["policies"]) if v["policies"] else "")
                        for bk, v in builds.items()), flush=True)
 
-if not want or a.index_only:
+if a.merge_index and (out / "index.json").exists():
+    ixf = json.loads((out / "index.json").read_text())
+    done = {e["idx"] for e in index}
+    ixf["plants"] = sorted([e for e in ixf["plants"] if e["idx"] not in done] + index, key=lambda e: e["idx"])
+    ixf["generated"] = datetime.date.today().isoformat()
+    (out / "index.json").write_text(json.dumps(ixf, separators=(",", ":"), ensure_ascii=False))
+    print(f"index.json: {len(index)} plant(s) added or replaced, {len(ixf['plants'])} in total")
+elif not want or a.index_only:
     fin = {u: bu.FIN[u] for u in bu.UNITS + [bu.REF]}
     book = dict(bu.BOOK)
     (out / "index.json").write_text(json.dumps({

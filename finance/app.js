@@ -9,7 +9,7 @@
   const num = v => (typeof v === 'number' && isFinite(v) ? v : 0);
   const MARKET = { US: 450, Canada: 450, India: 500, Europe: 660 };          // same starting prices as the atlas finance tab
   const REGION_ORDER = ['Europe', 'US', 'Canada', 'India'];
-  const PAGE_VERSION = 6;      // shown in the footer: tells at a glance which version of the page a browser is running
+  const PAGE_VERSION = 7;      // shown in the footer: tells at a glance which version of the page a browser is running
   const EXP_REAL = 1.0;        // exports valued at the full wholesale price (user decision 2026-11-14)
   const HMIN = 0.12;           // every party at least 12 % on equity (user, 2026-11-17)
   const NOISE = 1e-3;
@@ -109,6 +109,8 @@
     const m = pick('mode', 'nashEq'); S.mode = MODE_TXT[m] ? m : 'nashEq';
     S.baseMode = MODE_TXT[last.baseMode] && last.baseMode !== 'custom' ? last.baseMode : (S.mode === 'custom' ? 'nashEq' : S.mode);
     if (isFinite(parseFloat(q.get('hmin')))) S.hmin = parseFloat(q.get('hmin')) / 100;
+    if (isFinite(want) && !fromUrl) S.notice = (want >= 1000 ? 'Site ' + want + ' has' : 'Plant ' + want + ' has') + ' no finance data yet' +
+      (want >= 1000 ? ': built sites appear here a few minutes after their solve has finished (sites solved before 2026-11-17 need a new run).' : '.') + ' Showing ' + (first.name || 'plant ' + first.idx) + ' instead.';
     selectPlant(first.idx, false, true);
   }).catch(e => { $('pfStatus').textContent = 'The finance data could not be loaded (' + e.message + ').'; });
 
@@ -185,6 +187,7 @@
 
   /* ------------------------------------------------------------ selection */
   function selectPlant(idx, fly, boot) {
+    if (!boot) S.notice = null;
     $('pfStatus').hidden = false; $('pfStatus').textContent = 'Loading plant…';
     fetch(DATA + 'plant' + idx + '.json', { cache: 'no-cache' }).then(r => { if (!r.ok) throw new Error(r.status); return r.json(); }).then(p => {
       S.plant = p; S.neg = {};
@@ -368,7 +371,7 @@
     }
     if (d._policyMissing) sub += ' (The policy case has no result at this target: shown without policy.)';
     const kc = (lab, v, unit, s, c) => '<div class="k' + (c ? ' ' + c : '') + '"><div class="lab">' + esc(lab) + '</div><div class="v">' + v + ' <small>' + esc(unit) + '</small></div><div class="s">' + s + '</div></div>';
-    $('pfDeal').innerHTML = '<div class="msg ' + cls + '"><b class="t">' + esc(title) + '</b><span>' + esc(sub) + '</span></div>' +
+    $('pfDeal').innerHTML = (S.notice ? '<div class="msg" style="grid-column:1/-1"><span>' + esc(S.notice) + '</span></div>' : '') + '<div class="msg ' + cls + '"><b class="t">' + esc(title) + '</b><span>' + esc(sub) + '</span></div>' +
       kc('Ammonia cost at these rates', f0(R.nh3_cost), '$/t', 'what the ammonia plant needs to earn ' + pct(h, 0) + ' on equity · market ' + f0(S.market) + ' $/t') +
       kc('vs fossil plant', (R.saving >= 0 ? '−' : '+') + f0(Math.abs(R.saving)), '$/t', 'fossil reference ' + f0(R.ref_cost) + ' $/t on the same financing · ' + (S.build === 'RETRO' ? 'the existing plant carrying on' : 'a new fossil plant here') +
         ' · ' + money(R.saving * num(d.NH3_t)) + '/yr', R.saving >= 0 ? 'good' : 'poor') +

@@ -168,6 +168,13 @@ jobs:
           git pull --rebase
           python3 tools/hops_to_web.py --results site_runs --label $LABEL --bau-label $LABEL --names tools/plant_names.json -o data
           gzip -kf6 data/summary.json && rm -f data/summary.json
+      - name: Project Finance data for the site (eight business units, Nash / operator deal on /finance)
+        # build_bu_finance.py comes from the private model repo (checked out in model/); a failure here does not stop
+        # the atlas publication, the site then only misses its finance page
+        run: |
+          python3 tools/bu_finance_to_web.py --script-dir model --site-results site_runs --site-label $LABEL \
+            --plants ${{ needs.check.outputs.site }} --merge-index -o data/finance \
+            || echo "::warning::Project Finance conversion failed for site ${{ needs.check.outputs.site }} (atlas still published)"
       - name: Commit and push
         run: |
           git config user.name hops-cloud; git config user.email hops-cloud@users.noreply.github.com
