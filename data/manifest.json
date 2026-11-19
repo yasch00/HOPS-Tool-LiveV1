@@ -3,7 +3,7 @@
  "label": "IRR_v13",
  "bau_label": "site_v13",
  "pathway": "SMR_INT_ASU",
- "generated": "2026-11-18",
+ "generated": "2026-11-19",
  "policies": {
   "ETSlaw": "EU ETS (current law)",
   "ETSprop": "EU ETS (proposed)",
@@ -7737,13 +7737,84 @@
     }
    ],
    "BAU": "runs/plant422/BAU/bau.json.gz"
+  },
+  "1032": {
+   "SMR": [
+    {
+     "ci": 0.0,
+     "file": "runs/plant1032/SMR/ci0.00.json.gz"
+    },
+    {
+     "ci": 0.25,
+     "file": "runs/plant1032/SMR/ci0.25.json.gz"
+    },
+    {
+     "ci": 0.5,
+     "file": "runs/plant1032/SMR/ci0.50.json.gz"
+    },
+    {
+     "ci": 0.75,
+     "file": "runs/plant1032/SMR/ci0.75.json.gz"
+    },
+    {
+     "ci": 1.0,
+     "file": "runs/plant1032/SMR/ci1.00.json.gz"
+    },
+    {
+     "ci": 1.25,
+     "file": "runs/plant1032/SMR/ci1.25.json.gz"
+    },
+    {
+     "ci": 1.5,
+     "file": "runs/plant1032/SMR/ci1.50.json.gz"
+    },
+    {
+     "ci": 1.75,
+     "file": "runs/plant1032/SMR/ci1.75.json.gz"
+    }
+   ],
+   "SMR+CCS": [
+    {
+     "ci": 0.0,
+     "file": "runs/plant1032/SMR+CCS/ci0.00.json.gz"
+    },
+    {
+     "ci": 0.25,
+     "file": "runs/plant1032/SMR+CCS/ci0.25.json.gz"
+    },
+    {
+     "ci": 0.5,
+     "file": "runs/plant1032/SMR+CCS/ci0.50.json.gz"
+    },
+    {
+     "ci": 0.75,
+     "file": "runs/plant1032/SMR+CCS/ci0.75.json.gz"
+    },
+    {
+     "ci": 1.0,
+     "file": "runs/plant1032/SMR+CCS/ci1.00.json.gz"
+    },
+    {
+     "ci": 1.25,
+     "file": "runs/plant1032/SMR+CCS/ci1.25.json.gz"
+    },
+    {
+     "ci": 1.5,
+     "file": "runs/plant1032/SMR+CCS/ci1.50.json.gz"
+    },
+    {
+     "ci": 1.75,
+     "file": "runs/plant1032/SMR+CCS/ci1.75.json.gz"
+    }
+   ],
+   "BAU": "runs/plant1032/BAU/bau.json.gz"
   }
  },
  "extra_labels": [
   "site_v1",
   "site_v13"
  ],
- "n_scenarios": 443,
- "n_runs": 3519,
- "n_plants": 112
+ "n_scenarios": 449,
+ "n_runs": 3541,
+ "n_plants": 113
 }
