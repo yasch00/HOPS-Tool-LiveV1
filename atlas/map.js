@@ -81,8 +81,10 @@ function showTip(e, modelled){
 }
 function hideTip(){ document.getElementById('tip').style.opacity = 0; map.getCanvas().style.cursor = ''; }
 
-/* ---------------------------------------------------------------- industry layers (lazy: assets/layers.json on first toggle) */
-function loadLayers(){ return window.__layersP || (window.__layersP = fetch('assets/layers.json').then(r => r.json()).then(j => { window.LAYERS = j; }).catch(() => { window.LAYERS = {}; })); }
+/* ---------------------------------------------------------------- industry layers (lazy: assets/layers.json on first toggle;
+   if that cannot be loaded, the 700-point subsample in assets/layers_fallback.json, formerly part of static.json) */
+function loadLayers(){ return window.__layersP || (window.__layersP = fetch('assets/layers.json').then(r => r.json()).then(j => { window.LAYERS = j; })
+  .catch(() => fetch('assets/layers_fallback.json').then(r => r.json()).then(j => { window.LAYERS = j; }).catch(() => { window.LAYERS = {}; }))); }
 function toggleLayer(k, on){
   if (!mapLoaded) return;
   const m = LAYER_META[k];

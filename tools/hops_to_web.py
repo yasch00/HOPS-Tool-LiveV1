@@ -258,6 +258,10 @@ def convert(results: Path, out: Path, label: str, bau_label: str, plants_xlsx, a
     (out / "summary.json").write_text(json.dumps(summary, separators=(",", ":")))
     manifest["n_scenarios"] = len(scenarios); manifest["n_runs"] = len(summary); manifest["n_plants"] = len(plants_all)
     (out / "manifest.json").write_text(json.dumps(manifest, indent=1))
+    try:                                                    # compact form the pages load (scnpack.js); never leave a stale one behind
+        sys.path.insert(0, str(Path(__file__).resolve().parent)); from pack_scenarios import write_pack; write_pack(out)
+    except BaseException as e:
+        (out / "scenarios.pack.json").unlink(missing_ok=True); print(f"WARNING: scenarios.pack.json not rebuilt ({e}); the pages fall back to scenarios.json")
     if replace_fleet:
         import shutil
         for idx in sorted(drop):
