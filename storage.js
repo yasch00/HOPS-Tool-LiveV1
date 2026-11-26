@@ -10,7 +10,9 @@ const OKABE = { d1: '#0072B2', d2: '#D55E00', d3: '#009E73', d4: '#CC79A7', d5: 
 
 /* ---------------------------------------------------------------- data */
 async function loadData(){
-  const [plants, scn] = await Promise.all([fetch(DATA + 'plants.json', { cache: 'no-cache' }).then(r => r.json()), fetch(DATA + 'scenarios.json', { cache: 'no-cache' }).then(r => r.json())]);
+  const man = await fetch(DATA + 'manifest.json', { cache: 'no-cache' }).then(r => r.ok ? r.json() : null).catch(() => null);
+  const [plants, scn] = await Promise.all([fetch(DATA + 'plants.json', { cache: 'no-cache' }).then(r => r.json()),
+    window.HOPS_SCN ? HOPS_SCN.load(DATA, man) : fetch(DATA + 'scenarios.json', { cache: 'no-cache' }).then(r => r.json())]);   // scnpack.js: compact form of scenarios.json
   ST.plants = plants.filter(p => !p.custom).sort((a, b) => a.name.localeCompare(b.name)); ST.plantMap = {}; plants.forEach(p => { ST.plantMap[p.idx] = p; });
   ST.scn = scn.filter(s => s.hb && !s.policy);
 }

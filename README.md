@@ -10,12 +10,31 @@ tokens.css components.css site.js      design system (see docs/RATIONALE.md, doc
 atlas/                                 the interactive tool (globe + plant dashboards)
 data/                                  everything the tool and the site read — no code in here
   plants.json  scenarios.json  bau.json  manifest.json  summary.json.gz
+  scenarios.pack.json                  lossless compact form of scenarios.json; what the atlas and the storage page load (see below)
   runs/plant{idx}/{SMR|SMR+CCS}/ci{x}.json.gz     hourly dispatch, fetched on demand
   runs/plant{idx}/BAU/bau.json.gz
   parameters.json  watch.json          parameter registry (data page) and news feed (watch page)
 tools/                                 scripts that build data/ and atlas/
 docs/                                  design + pipeline notes from the Design export
 ```
+
+## Load size: what the pages download (2026-11-24)
+
+* `data/scenarios.pack.json` is `scenarios.json` with each column list stored once and each policy case stored as its
+  differences from its base case: 386 kB instead of 605 kB compressed, identical content after unpacking (`scnpack.js`).
+  `tools/hops_to_web.py` and `tools/remove_site.py` rebuild it whenever they write `scenarios.json` (and delete it if the
+  rebuild fails). After editing `scenarios.json` by hand: `python3 tools/pack_scenarios.py`; `--check` tells whether the
+  pack is current. The pages fall back to `scenarios.json` when the pack is missing or its scenario count / version
+  differ from `manifest.json`. `scenarios.json` stays published for downloads and `tools/export_siting.py`.
+* The atlas draws the globe as soon as plants, baseline, manifest and `assets/static.json` are in; the scenario rows load
+  in the background. Functions that open a plant (`openSite`, `openDashboard`, `openStorageLab`, `applyURLState`) are
+  wrapped in `whenScn()` and run when the rows have arrived. A new entry point that reads `SCN` needs the same wrapper.
+* The 700-point-per-layer subsample that was in `assets/static.json` moved to `assets/layers_fallback.json`; it is only
+  read if `assets/layers.json` cannot be loaded. `static.json` keeps an empty `layers` object.
+* Home page: `img/globe-fleet.webp` is the lossless WebP of `img/globe-fleet.png` (same pixels, one third smaller); the
+  PNG stays as fallback inside `<picture>`. Replace both when the picture changes.
+* Not done, measured: the two polygon layers per plant (`exclusions.geojson`, `developable.geojson`, 297 MB in total)
+  shrink by 38 % compressed with delta-coded integer coordinates, without loss (all coordinates have 5 decimals).
 
 ## Updating results
 

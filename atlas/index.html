@@ -395,12 +395,23 @@ async function fetchGz(url){
   if(u[0]===0x1f&&u[1]===0x8b){ const txt=await new Response(new Blob([buf]).stream().pipeThrough(new DecompressionStream('gzip'))).text(); return JSON.parse(txt); }
   return JSON.parse(new TextDecoder().decode(buf));   // server already un-gzipped it
 }
+/* The globe needs plants, baseline and the static layers; the scenario rows (the largest file) arrive in the background
+   through scnpack.js. Everything that opens a plant goes through whenScn() and waits for them. */
+let SCN_LOADED=false, SCN_READY=Promise.resolve();
+function whenScn(fn){ return function(){ const a=arguments, t=this; return SCN_LOADED ? fn.apply(t,a) : SCN_READY.then(()=>fn.apply(t,a)); }; }
+function dataUnavailable(e){ console.error(e); document.body.insertAdjacentHTML('beforeend',`<div class="panel" style="position:fixed;left:50%;top:50%;transform:translate(-50%,-50%);z-index:400;padding:18px 22px;max-width:420px"><b>Data unavailable</b><br><span class="sub">${e.message}</span></div>`); }
 async function loadData(){
-  const [st,scn,bau,plants,man]=await Promise.all([fetchJSON('assets/static.json'),fetchJSON(DATA_BASE+'scenarios.json'),
+  const [st,bau,plants,man]=await Promise.all([fetchJSON('assets/static.json'),
     fetchJSON(DATA_BASE+'bau.json'),fetchJSON(DATA_BASE+'plants.json'),fetchJSON(DATA_BASE+'manifest.json')]);
-  DATA={...st,scenarios:scn,bau,plants,manifest:man,hourlyByCI:{}};
-  SCN=scn; AMM=st.ammonia; BAU=bau; GEO=st.geo; PLANTS=plants; MANIFEST=man; PLANT={}; plants.forEach(p=>PLANT[p.idx]=p);
-  postProcessRows(); applyLcoaBasis();
+  SCN_LOADED=false;
+  DATA={...st,scenarios:SCN,bau,plants,manifest:man,hourlyByCI:{}};
+  AMM=st.ammonia; BAU=bau; GEO=st.geo; PLANTS=plants; MANIFEST=man; PLANT={}; plants.forEach(p=>PLANT[p.idx]=p);
+  applyLcoaBasis();
+  SCN_READY=HOPS_SCN.load(DATA_BASE,man).then(scn=>{
+    SCN=scn; DATA.scenarios=scn; postProcessRows(); applyLcoaBasis(); SCN_LOADED=true;
+    if(typeof BUILD!=='undefined' && BUILD.on && typeof renderBuildPanel==='function') renderBuildPanel();   // the proxy estimate needs the rows
+  });
+  SCN_READY.catch(dataUnavailable);
   const nC=plants.filter(p=>p.custom).length, lg=document.getElementById('legendModeled'); if(lg) { const short={US:'US',Canada:'Canada',Europe:'EU',India:'India'}, regs=['US','Canada','Europe','India'].filter(r=>plants.some(p=>!p.custom&&p.region===r)).map(r=>short[r]); lg.textContent=`Modelled (${plants.length-nC} plants · ${regs.join(', ')})`; }
   const lc=document.getElementById('legendCustom'); if(lc) lc.textContent=`Requested sites, solved (${nC})`;
   if(mapLoaded && map.getSource('hops')) map.getSource('hops').setData(plantsGeo(PLANTS, p => ({ idx: p.idx, name: p.name, admin: p.admin || '', country: p.country, ktpa: p.ktpa || 0, region: p.region, custom: !!p.custom })));
@@ -472,14 +483,15 @@ function buildLayerList(){
   });
 }
 </script>
-<script src="lib/market.js?v=20261118112147"></script>
-<script src="lib/storagelab.js?v=20261118112147"></script>
-<script src="lib/griddata.js?v=20261118112147"></script>
-<script src="map.js?v=20261118112147"></script>
-<script src="finance.js?v=20261118112147"></script>
-<script src="policy.js?v=20261118112147"></script>
-<script src="build.js?v=20261118112147"></script>
-<script src="facility.js?v=20261118112147"></script>
+<script src="../scnpack.js?v=1"></script>
+<script src="lib/market.js?v=20261124220527"></script>
+<script src="lib/storagelab.js?v=20261124220527"></script>
+<script src="lib/griddata.js?v=20261124220527"></script>
+<script src="map.js?v=20261124220527"></script>
+<script src="finance.js?v=20261124220527"></script>
+<script src="policy.js?v=20261124220527"></script>
+<script src="build.js?v=20261124220527"></script>
+<script src="facility.js?v=20261124220527"></script>
 <script>
 /* ============ NAVIGATION ============ */
 let curScn=null, curPlantIdx=null, curCItarget=null;
@@ -1221,9 +1233,12 @@ function applyURLState(){
   }
 }
 window.addEventListener('hashchange',()=>{ if(location.hash.length>1 && PLANTS.length) applyURLState(); });
+/* entry points that read scenario rows: run at once when the rows are in, otherwise as soon as they arrive */
+openSite=whenScn(openSite); openDashboard=whenScn(openDashboard); applyURLState=whenScn(applyURLState);
+if(typeof openStorageLab==='function') openStorageLab=whenScn(openStorageLab);
 window.addEventListener('load',async()=>{
   try{ await loadData(); }
-  catch(e){ console.error(e); document.body.insertAdjacentHTML('beforeend',`<div class="panel" style="position:fixed;left:50%;top:50%;transform:translate(-50%,-50%);z-index:400;padding:18px 22px;max-width:420px"><b>Data unavailable</b><br><span class="sub">${e.message}</span></div>`); return; }
+  catch(e){ dataUnavailable(e); return; }
   initGlobe();
   applyURLState();
 });

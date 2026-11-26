@@ -16,6 +16,10 @@ if (D / "summary.json.gz").exists():
     summ = [r for r in json.loads(gzip.open(D / "summary.json.gz", "rt").read()) if r.get("plant") != i]
     with gzip.open(D / "summary.json.gz", "wt") as f: f.write(json.dumps(summ, separators=(",", ":")))
 man = json.loads((D / "manifest.json").read_text()); man["plants"].pop(str(i), None); man["n_scenarios"] = len(scn); man["n_plants"] = len(plants); (D / "manifest.json").write_text(json.dumps(man, indent=1))
+try:                                                        # compact form the pages load (scnpack.js); never leave a stale one behind
+    import sys; sys.path.insert(0, str(ROOT / "tools")); from pack_scenarios import write_pack; write_pack(D)
+except BaseException as e:
+    (D / "scenarios.pack.json").unlink(missing_ok=True); print(f"WARNING: scenarios.pack.json not rebuilt ({e}); the pages fall back to scenarios.json")
 for sub in ("runs", "siting"):
     p = D / sub / f"plant{i}"
     if p.exists(): shutil.rmtree(p); print(f"deleted {p.relative_to(ROOT)}")
